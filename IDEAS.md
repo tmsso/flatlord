@@ -16,7 +16,6 @@ Loose ideas, deliberately not committed to any phase. Pick up opportunistically 
 - **Tenant onboarding checklist**: house-rules acknowledgement, key handover, address registration, meter baselines — one guided flow at tenancy start.
 - **Move-out wizard**: notice → showing appointments (short-notice permission is contractual) → final readings → deposit settlement calculation → handover protocol → permission revocations.
 - **Utility-rate review nudge**: alert when unit rates haven't been reviewed for 12 months (history shows correction lag) or when computed cost persistently under/overshoots actual provider bills.
-- **Read-only "family viewer" role**: co-owner sees dashboards, no edits.
 - **Photo archive timeline** per property: handovers, damages, repairs — chronological gallery.
 - **Multi-currency support** activation (schema already carries currency) if ever needed for a non-HUF property.
 - **Tenant FAQ / knowledge page** per property: house rules, appliance manuals, building policies, emergency contacts.

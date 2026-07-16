@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#f4f2ee;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --card-foreground:oklch(0.25 0.012 75);
+  --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --secondary:oklch(0.93 0.008 85); --secondary-foreground:oklch(0.30 0.012 75);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px;
+  --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-accent="blue"]{--primary:oklch(0.47 0.13 252); --ring:oklch(0.55 0.13 252);}
+.fl[data-accent="indigo"]{--primary:oklch(0.46 0.10 278); --ring:oklch(0.54 0.10 278);}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --card-foreground:oklch(0.928 0.006 85);
+  --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --secondary:oklch(0.33 0.011 75); --secondary-foreground:oklch(0.90 0.008 85);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+.fl[data-theme="dark"][data-accent="blue"]{--primary:oklch(0.75 0.11 252); --primary-foreground:oklch(0.21 0.04 252); --ring:oklch(0.75 0.11 252);}
+.fl[data-theme="dark"][data-accent="indigo"]{--primary:oklch(0.75 0.10 278); --primary-foreground:oklch(0.21 0.04 278); --ring:oklch(0.75 0.10 278);}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" data-accent="{{ accent }}" style="min-height:100vh;background:var(--background);color:var(--foreground);font-size:14px;line-height:1.5;">
+<div style="position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);">
+  <div style="max-width:1240px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:28px;height:28px;border-radius:6px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="21" height="21" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div>
+        <div style="font-weight:600;font-size:15px;">Flatlord — design tokens &amp; components</div>
+        <div style="font-size:12px;color:var(--muted-foreground);">shadcn/ui-compatible · light + dark · hu/en</div>
+      </div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <span style="font-size:12px;color:var(--muted-foreground);margin-right:2px;">Accent</span>
+      <button onClick="{{ setTeal }}" style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ tealSel }}">A · Deep teal</button>
+      <button onClick="{{ setBlue }}" style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ blueSel }}">B · MS blue</button>
+      <button onClick="{{ setIndigo }}" style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ indigoSel }}">C · Slate-indigo</button>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <span style="font-size:12px;color:var(--muted-foreground);margin-right:2px;">Theme</span>
+      <button onClick="{{ setLight }}" style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ lightSel }}">Light</button>
+      <button onClick="{{ setDark }}" style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ darkSel }}">Dark</button>
+    </div>
+  </div>
+</div>
+<div style="max-width:1240px;margin:0 auto;padding:32px 24px 80px;">
+
+  <div style="margin-bottom:8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">1 · ACCENT OPTIONS</div>
+  <h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">One confident accent — recommendation: A, deep teal</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;position:relative;">
+      <div style="position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">
+        <svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Recommended</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.47 0.085 205);border:1px solid var(--border);"></div>
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.76 0.095 197);border:1px solid var(--border);"></div>
+      </div>
+      <div style="font-weight:600;">A — Deep teal</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted-foreground);margin:2px 0 10px;">oklch(0.47 0.085 205) · dark oklch(0.76 0.095 197)</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">Calm, trustworthy, and clearly not the default enterprise blue. Sits naturally on the warm-grey neutrals and stays distinct from the semantic info blue. AA on white and on dark card.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.47 0.13 252);border:1px solid var(--border);"></div>
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.75 0.11 252);border:1px solid var(--border);"></div>
+      </div>
+      <div style="font-weight:600;">B — Classic MS blue</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted-foreground);margin:2px 0 10px;">oklch(0.47 0.13 252) · dark oklch(0.75 0.11 252)</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">The most literal Office-2010 homage. Reads instantly "productivity", but collides with the semantic info blue — info would need to shift cyan.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.46 0.10 278);border:1px solid var(--border);"></div>
+        <div style="width:44px;height:44px;border-radius:6px;background:oklch(0.75 0.10 278);border:1px solid var(--border);"></div>
+      </div>
+      <div style="font-weight:600;">C — Warm slate-indigo</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted-foreground);margin:2px 0 10px;">oklch(0.46 0.10 278) · dark oklch(0.75 0.10 278)</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">Softer and more contemporary, but drifts toward the trendy SaaS look the brief pushes against, and is also close to info blue.</p>
+    </div>
+  </div>
+  <div style="margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px 18px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+    <span style="font-size:12px;color:var(--muted-foreground);">Live preview with selected accent:</span>
+    <button style="height:36px;padding:0 16px;border-radius:6px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;" style-hover="filter:brightness(0.94);">Statement kiállítása</button>
+    <a href="#tokens">View statement history →</a>
+    <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--primary);color:var(--primary);">Selected accent chip</span>
+    <input value="72" readOnly style="height:36px;width:90px;padding:0 10px;border-radius:6px;border:1px solid var(--ring);outline:2px solid var(--ring);outline-offset:2px;background:var(--card);color:var(--foreground);font:inherit;" />
+  </div>
+
+  <div id="tokens" style="margin:44px 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">2 · COLOUR TOKENS</div>
+  <h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">Colour — light &amp; dark, shadcn names</h2>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;">
+    <div style="display:grid;grid-template-columns:210px 1fr 1fr 1.4fr;gap:0;padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted-foreground);background:var(--muted);">
+      <div>Token</div><div>Light</div><div>Dark</div><div>Usage</div>
+    </div>
+    <sc-for list="{{ colorTokens }}" as="t" hint-placeholder-count="8">
+      <div style="display:grid;grid-template-columns:210px 1fr 1fr 1.4fr;align-items:center;padding:7px 16px;border-bottom:1px solid var(--border);font-size:13px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ t.name }}</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:{{ t.light }};"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);">{{ t.light }}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:{{ t.dark }};"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);">{{ t.dark }}</span></div>
+        <div style="color:var(--muted-foreground);">{{ t.usage }}</div>
+      </div>
+    </sc-for>
+    <div style="padding:10px 16px;font-size:12px;color:var(--muted-foreground);">Semantic pairs (<span style="font-family:'IBM Plex Mono',monospace;">-bg</span>, <span style="font-family:'IBM Plex Mono',monospace;">-border</span>) exist for success / warning / destructive / info badge tints. Chart series map to: primary, info, warning, success, muted-foreground.</div>
+  </div>
+
+  <div style="margin:44px 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">3 · TYPOGRAPHY</div>
+  <h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">IBM Plex Sans + Plex Mono</h2>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:30px;font-weight:600;line-height:1.2;">Fizetendő összeg — display 30/600</div>
+        <div style="font-size:24px;font-weight:600;">Page title · Havi kimutatás — h1 24/600</div>
+        <div style="font-size:18px;font-weight:600;">Section header · Mérőórák — h2 18/600</div>
+        <div style="font-size:15px;font-weight:600;">Card title · Vízóra (fürdőszoba) — h3 15/600</div>
+        <div style="font-size:14px;">Body · A kimutatás kiállítás után nem módosítható; korrekció új tétellel lehetséges. — 14/400</div>
+        <div style="font-size:13px;color:var(--muted-foreground);">Secondary · Utolsó leolvasás: 2026. 06. 28. — 13/400 muted</div>
+        <div style="font-size:12px;font-weight:500;letter-spacing:0.02em;color:var(--muted-foreground);">Caption / column header — 12/500</div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:16px;">Árvíztűrő tükörfúrógép — árvíztűrő TÜKÖRFÚRÓGÉP <span style="color:var(--muted-foreground);font-size:13px;">(full Hungarian diacritics incl. ő ű)</span></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Tabular figures for money &amp; meters</div>
+      <div style="font-feature-settings:'tnum';display:grid;grid-template-columns:1fr auto;gap:4px 24px;font-size:14px;max-width:280px;">
+        <span>Bérleti díj</span><span style="text-align:right;">245 000 Ft</span>
+        <span>Közös költség</span><span style="text-align:right;">18 500 Ft</span>
+        <span>Internet</span><span style="text-align:right;">6 490 Ft</span>
+        <span>Villany (198 kWh)</span><span style="text-align:right;">14 256 Ft</span>
+        <span style="font-weight:600;border-top:1px solid var(--border);padding-top:4px;">Összesen</span><span style="font-weight:600;border-top:1px solid var(--border);padding-top:4px;text-align:right;">284 246 Ft</span>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:var(--muted-foreground);">Apply <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">font-feature-settings:'tnum'</span> on all money/meter columns. Locale formats: <b style="font-weight:600;">hu</b> 245 000 Ft · <b style="font-weight:600;">en</b> HUF 245,000 · dates hu 2026. 07. 15. · en 15 Jul 2026.</div>
+      <div style="margin-top:12px;font-size:13px;color:var(--muted-foreground);">Meter serials &amp; token names in <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">IBM Plex Mono — E-4471 8823</span>.</div>
+    </div>
+  </div>
+
+  <div style="margin:44px 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">4 · SPACING · RADII · BORDERS · SHADOWS</div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Spacing — 4px base (Tailwind scale)</div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <div style="width:4px;height:4px;background:var(--primary);"></div><div style="width:8px;height:8px;background:var(--primary);"></div><div style="width:12px;height:12px;background:var(--primary);"></div><div style="width:16px;height:16px;background:var(--primary);"></div><div style="width:24px;height:24px;background:var(--primary);"></div><div style="width:32px;height:32px;background:var(--primary);"></div><div style="width:48px;height:48px;background:var(--primary);"></div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);margin-top:6px;">1 2 3 4 6 8 12 · card padding 16–20 · section gap 24–32</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Radii</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div style="width:52px;height:36px;border:1px solid var(--input);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">4</div>
+        <div style="width:52px;height:36px;border:1px solid var(--input);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">6</div>
+        <div style="width:52px;height:36px;border:1px solid var(--input);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">8</div>
+        <div style="width:52px;height:28px;border:1px solid var(--input);border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">pill</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:8px;">sm 4 checkboxes · md 6 controls · lg 8 cards (--radius) · pill badges</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Borders &amp; shadows</div>
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;height:56px;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">1px + shadow-sm</div>
+        <div style="flex:1;height:56px;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted-foreground);">1px + shadow-md</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:8px;">Every surface has a real 1px border in both themes — shadows are seasoning, never the only edge.</div>
+    </div>
+  </div>
+
+  <div style="margin:44px 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">5 · COMPONENT SHEET</div>
+  <h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">Recurring components — all states</h2>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Buttons</div>
+    <div style="display:grid;grid-template-columns:110px repeat(4,auto) 1fr;gap:10px 14px;align-items:center;font-size:12px;color:var(--muted-foreground);">
+      <div></div><div>Default</div><div>Hover</div><div>Focus</div><div>Disabled</div><div></div>
+      <div>Primary</div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">Kiállítás</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;filter:brightness(0.92);">Kiállítás</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;outline:2px solid var(--ring);outline-offset:2px;">Kiállítás</button>
+      <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;opacity:0.5;cursor:not-allowed;">Kiállítás</button><div></div>
+      <div>Secondary</div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border);">Mégse</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:color-mix(in oklab, var(--secondary) 92%, var(--foreground));color:var(--secondary-foreground);border:1px solid var(--border);">Mégse</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border);outline:2px solid var(--ring);outline-offset:2px;">Mégse</button>
+      <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:var(--secondary);color:var(--secondary-foreground);border:1px solid var(--border);opacity:0.5;cursor:not-allowed;">Mégse</button><div></div>
+      <div>Outline</div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">Szerkesztés</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--muted);color:var(--foreground);border:1px solid var(--input);">Szerkesztés</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);outline:2px solid var(--ring);outline-offset:2px;">Szerkesztés</button>
+      <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:var(--card);color:var(--foreground);border:1px solid var(--input);opacity:0.5;cursor:not-allowed;">Szerkesztés</button><div></div>
+      <div>Ghost</div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--foreground);border:1px solid transparent;">Előzmények</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--muted);color:var(--foreground);border:1px solid transparent;">Előzmények</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--foreground);border:1px solid transparent;outline:2px solid var(--ring);outline-offset:2px;">Előzmények</button>
+      <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:transparent;color:var(--foreground);border:1px solid transparent;opacity:0.5;cursor:not-allowed;">Előzmények</button><div></div>
+      <div>Destructive</div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--destructive);color:oklch(0.99 0.003 25);border:1px solid transparent;">Törlés</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--destructive);color:oklch(0.99 0.003 25);border:1px solid transparent;filter:brightness(0.92);">Törlés</button>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--destructive);color:oklch(0.99 0.003 25);border:1px solid transparent;outline:2px solid var(--ring);outline-offset:2px;">Törlés</button>
+      <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:var(--destructive);color:oklch(0.99 0.003 25);border:1px solid transparent;opacity:0.5;cursor:not-allowed;">Törlés</button><div></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted-foreground);margin-top:10px;">Admin default height 36px · tenant/touch 44px. Buttons keep visible borders or fills — honest affordances.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Inputs</div>
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:340px;">
+        <div>
+          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Mérőállás (kWh)</label>
+          <input value="12 480" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-feature-settings:'tnum';" />
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Focus</label>
+          <input value="12 480" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--ring);outline:2px solid var(--ring);outline-offset:2px;background:var(--card);color:var(--foreground);font:inherit;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Error</label>
+          <input value="12 190" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--destructive);background:var(--card);color:var(--foreground);font:inherit;" />
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--destructive);margin-top:4px;">
+            <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M6 3.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="8.6" r="0.8" fill="currentColor"></circle></svg>
+            Kisebb, mint az előző állás (12 316) — ellenőrizd a fotót
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;color:var(--muted-foreground);">Disabled</label>
+          <input value="Garden St 12" readOnly disabled="{{ true }}" style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);color:var(--muted-foreground);font:inherit;cursor:not-allowed;" />
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Editability indicator — 3-way field policy</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div><div style="font-size:13px;font-weight:500;">Születési idő / Date of birth</div><div style="font-size:13px;color:var(--muted-foreground);">1991. 03. 22.</div></div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">
+            <svg width="11" height="11" viewBox="0 0 12 12"><rect x="2.5" y="5.5" width="7" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"></rect><path d="M4 5.5V4a2 2 0 014 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>
+            Csak olvasható</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div><div style="font-size:13px;font-weight:500;">Okmány szerinti név / Document name</div><div style="font-size:13px;color:var(--muted-foreground);">Alex Tenant</div></div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">
+            <svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+            Jóváhagyás szükséges</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div><div style="font-size:13px;font-weight:500;">Telefonszám / Phone</div><div style="font-size:13px;color:var(--muted-foreground);">+36 30 111 2233</div></div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">
+            <svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 9.5l0.9-2.7 5-5a1 1 0 011.4 0l0.4 0.4a1 1 0 010 1.4l-5 5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>
+            Szabadon szerkeszthető</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted-foreground);border-top:1px solid var(--border);padding-top:10px;">Every editable field carries one of these; approval-required edits open a change request. Icons: lock / clock / pencil — never colour alone.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Status badges — label + icon, never colour alone</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted-foreground);width:150px;">Statement lifecycle</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px dashed var(--input);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2.5 2"></circle></svg>Piszkozat</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6h7M6.5 3.5L9 6l-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Kiállítva</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 1.5A4.5 4.5 0 016 10.5z" fill="currentColor"></path></svg>Részben fizetve</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Fizetve</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--destructive-bg);color:var(--destructive);border:1px solid var(--destructive-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M6 3.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="8.6" r="0.8" fill="currentColor"></circle></svg>Lejárt / Overdue</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted-foreground);width:150px;">Request status</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.2" fill="currentColor"></circle></svg>Open</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>In progress</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Resolved</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M3.5 3.5l5 5M8.5 3.5l-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>Withdrawn</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted-foreground);width:150px;">Notice severity</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>Tájékoztatás</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 1.8L10.8 10H1.2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M6 5v2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><circle cx="6" cy="8.7" r="0.7" fill="currentColor"></circle></svg>Fizetési emlékeztető</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--destructive-bg);color:var(--destructive);border:1px solid var(--destructive-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 1.8L10.8 10H1.2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M6 5v2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><circle cx="6" cy="8.7" r="0.7" fill="currentColor"></circle></svg>Hivatalos felszólítás<span style="background:var(--destructive);color:oklch(0.99 0.003 25);border-radius:999px;padding:0 6px;font-size:11px;margin-left:2px;">2.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Effective-dated table — rates with history</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:10px;">Current row highlighted with accent edge; past rows muted; 36px rows (admin density).</div>
+      <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;padding:8px 12px;background:var(--muted);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted-foreground);">
+          <div>Díjtétel</div><div>Érvényes ettől</div><div>Eddig</div><div style="text-align:right;">Egységár</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted-foreground);align-items:center;font-feature-settings:'tnum';">
+          <div>Villany</div><div>2024. 09. 01.</div><div>2025. 08. 31.</div><div style="text-align:right;">68 Ft/kWh</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;align-items:center;font-feature-settings:'tnum';box-shadow:inset 3px 0 0 var(--primary);background:color-mix(in oklab, var(--primary) 5%, var(--card));">
+          <div style="font-weight:500;">Villany <span style="display:inline-flex;align-items:center;padding:0 7px;border-radius:999px;font-size:11px;font-weight:500;border:1px solid var(--primary);color:var(--primary);margin-left:6px;">érvényes</span></div><div>2025. 09. 01.</div><div>—</div><div style="text-align:right;font-weight:600;">72 Ft/kWh</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;padding:8px 12px;font-size:13px;align-items:center;font-feature-settings:'tnum';box-shadow:inset 3px 0 0 var(--primary);background:color-mix(in oklab, var(--primary) 5%, var(--card));">
+          <div style="font-weight:500;">Víz <span style="display:inline-flex;align-items:center;padding:0 7px;border-radius:999px;font-size:11px;font-weight:500;border:1px solid var(--primary);color:var(--primary);margin-left:6px;">érvényes</span></div><div>2025. 01. 01.</div><div>—</div><div style="text-align:right;font-weight:600;">820 Ft/m³</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Lifecycle stepper</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Statement: draft → issued → paid.</div>
+      <div style="display:flex;align-items:flex-start;">
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="width:24px;height:24px;border-radius:999px;background:var(--success);display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="oklch(0.99 0 0)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+          <div style="font-size:12px;font-weight:500;margin-top:5px;">Piszkozat</div>
+          <div style="font-size:11px;color:var(--muted-foreground);">júl. 1.</div>
+        </div>
+        <div style="height:2px;background:var(--success);flex:1;margin-top:11px;"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="width:24px;height:24px;border-radius:999px;background:var(--card);border:2px solid var(--primary);box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:999px;background:var(--primary);"></div></div>
+          <div style="font-size:12px;font-weight:600;margin-top:5px;">Kiállítva</div>
+          <div style="font-size:11px;color:var(--muted-foreground);">júl. 3.</div>
+        </div>
+        <div style="height:2px;background:var(--border);flex:1;margin-top:11px;"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="width:24px;height:24px;border-radius:999px;background:var(--card);border:2px dashed var(--input);box-sizing:border-box;"></div>
+          <div style="font-size:12px;color:var(--muted-foreground);margin-top:5px;">Fizetve</div>
+          <div style="font-size:11px;color:var(--muted-foreground);">esedékes: júl. 5.</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Month picker</div>
+        <div style="display:inline-flex;align-items:center;border:1px solid var(--input);border-radius:6px;overflow:hidden;background:var(--card);">
+          <button style="width:32px;height:34px;border:none;background:transparent;color:var(--foreground);cursor:pointer;font-size:14px;border-right:1px solid var(--border);">‹</button>
+          <div style="padding:0 14px;font-size:13px;font-weight:500;min-width:110px;text-align:center;">2026. július</div>
+          <button style="width:32px;height:34px;border:none;background:transparent;color:var(--foreground);cursor:pointer;font-size:14px;border-left:1px solid var(--border);">›</button>
+        </div>
+        <span style="display:inline-flex;margin-left:10px;align-items:center;border:1px solid var(--input);border-radius:6px;overflow:hidden;">
+          <button style="height:34px;padding:0 12px;border:none;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:12px;font-weight:600;cursor:pointer;">HU</button>
+          <button style="height:34px;padding:0 12px;border:none;background:var(--card);color:var(--foreground);font:inherit;font-size:12px;cursor:pointer;border-left:1px solid var(--border);">EN</button>
+          <button disabled="{{ true }}" style="height:34px;padding:0 12px;border:none;background:var(--card);color:var(--muted-foreground);font:inherit;font-size:12px;opacity:0.5;cursor:not-allowed;border-left:1px solid var(--border);">DE</button>
+        </span>
+        <div style="font-size:11px;color:var(--muted-foreground);margin-top:6px;">Language switcher — de slot ready, disabled.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Photo capture tile</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:12px;">Empty / captured / error. Tenant flow: whole tile is the tap target (≥44px).</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div>
+          <div style="aspect-ratio:4/3;border:1.5px dashed var(--input);border-radius:8px;background:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted-foreground);cursor:pointer;">
+            <svg width="22" height="22" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"></rect><path d="M8 6.5l1.5-2.5h5L16 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+            <span style="font-size:12px;font-weight:500;">Fotó készítése</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;text-align:center;">Empty</div>
+        </div>
+        <div>
+          <div style="aspect-ratio:4/3;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden;background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted-foreground);">meter photo</div>
+            <div style="position:absolute;top:6px;right:6px;display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>OK</div>
+            <button style="position:absolute;bottom:6px;right:6px;height:26px;padding:0 10px;border-radius:6px;font:inherit;font-size:11px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">Újra</button>
+          </div>
+          <div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;text-align:center;">Captured</div>
+        </div>
+        <div>
+          <div style="aspect-ratio:4/3;border:1.5px dashed var(--destructive);border-radius:8px;background:var(--destructive-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--destructive);cursor:pointer;">
+            <svg width="22" height="22" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"></rect><path d="M8 6.5l1.5-2.5h5L16 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+            <span style="font-size:12px;font-weight:500;">Hiányzó fotó</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;text-align:center;">Error — required</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Attachment chips</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 1.5h4L9.5 4v6.5h-6.5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path></svg>szerzodes_2026.pdf <span style="color:var(--muted-foreground);">1,2 MB</span><button style="border:none;background:transparent;color:var(--muted-foreground);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;">×</button></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="1.5" y="2" width="9" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"></rect><circle cx="4.2" cy="4.8" r="0.9" fill="currentColor"></circle><path d="M2.5 9l2.5-2.5 2 2 1.5-1.5 1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path></svg>vizora_0628.jpg <span style="color:var(--muted-foreground);">640 kB</span><button style="border:none;background:transparent;color:var(--muted-foreground);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;">×</button></span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">Audit-history drawer</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:12px;">Who / when / before → after. Opens from any editable entity.</div>
+      <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:baseline;">
+          <div style="flex:1;">
+            <div style="font-size:13px;"><b style="font-weight:600;">Emma Admin</b> módosította: <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">villany egységár</span></div>
+            <div style="font-size:13px;margin-top:3px;font-feature-settings:'tnum';"><span style="color:var(--muted-foreground);text-decoration:line-through;">68 Ft/kWh</span> <span style="color:var(--muted-foreground);">→</span> <b style="font-weight:600;">72 Ft/kWh</b></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">2026. 06. 12. 14:32</div>
+        </div>
+        <div style="padding:10px 14px;display:flex;gap:10px;align-items:baseline;">
+          <div style="flex:1;">
+            <div style="font-size:13px;"><b style="font-weight:600;">Alex Tenant</b> módosította: <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">telefonszám</span></div>
+            <div style="font-size:13px;margin-top:3px;"><span style="color:var(--muted-foreground);text-decoration:line-through;">+36 30 111 2222</span> <span style="color:var(--muted-foreground);">→</span> <b style="font-weight:600;">+36 30 111 2233</b></div>
+            <div style="font-size:11px;color:var(--success);margin-top:2px;display:inline-flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Jóváhagyta: Emma Admin</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">2026. 05. 03. 09:12</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Acknowledge pattern — formal items</div>
+        <div style="border:1px solid var(--destructive-border);border-radius:8px;padding:14px;background:var(--destructive-bg);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--card);color:var(--destructive);border:1px solid var(--destructive-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 1.8L10.8 10H1.2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M6 5v2.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><circle cx="6" cy="8.7" r="0.7" fill="currentColor"></circle></svg>Hivatalos felszólítás · 2.</span>
+            <span style="font-size:12px;color:var(--muted-foreground);">Szerződés 7.2 pont</span>
+          </div>
+          <div style="font-size:13px;color:var(--foreground);margin-bottom:10px;">Fizetési késedelem — a júniusi kimutatás 8 napja lejárt.</div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--input);background:var(--card);display:inline-block;"></span>
+            Elolvastam és tudomásul vettem
+          </label>
+          <button disabled="{{ true }}" style="margin-top:10px;height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;opacity:0.5;cursor:not-allowed;">Tudomásulvétel megerősítése</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin:44px 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">6 · RATIONALE</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Accent: deep teal</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">Confident without being "default Office". Keeps semantic blue free for info, harmonises with warm greys (teal is their complement), and holds AA as a button fill in light and as text-on-dark. All three options ship as one-line token swaps — flip above to compare.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Type: IBM Plex Sans</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">A grotesque literally designed for enterprise clarity; full Hungarian set incl. double-acute ő/ű, true tabular figures (tnum) for money and meter columns, 400–700 weights for honest hierarchy, and a matching Mono for serials and token names. No ALL-CAPS anywhere.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Density: two registers</div>
+      <p style="margin:0;font-size:13px;color:var(--muted-foreground);">Admin is comfortable-dense: 36px rows, 13px table text, 16–20px card padding — sheet-like scanning without cramping. Tenant is airy: 44px+ touch targets, 48px list rows, one primary action per screen. Same tokens, two spacing registers.</p>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;accent&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;teal&quot;, &quot;blue&quot;, &quot;indigo&quot;], &quot;default&quot;: &quot;teal&quot;, &quot;tsType&quot;: &quot;'teal' | 'blue' | 'indigo'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, accent: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const accent = this.state.accent ?? this.props.accent ?? 'teal';
+    const on = 'background:color-mix(in oklab, var(--primary) 12%, var(--card));border-color:var(--primary);color:var(--primary);font-weight:600;';
+    return {
+      theme, accent,
+      tealSel: accent === 'teal' ? on : '',
+      blueSel: accent === 'blue' ? on : '',
+      indigoSel: accent === 'indigo' ? on : '',
+      lightSel: theme === 'light' ? on : '',
+      darkSel: theme === 'dark' ? on : '',
+      setTeal: () => this.setState({ accent: 'teal' }),
+      setBlue: () => this.setState({ accent: 'blue' }),
+      setIndigo: () => this.setState({ accent: 'indigo' }),
+      setLight: () => this.setState({ theme: 'light' }),
+      setDark: () => this.setState({ theme: 'dark' }),
+      colorTokens: [
+        { name: '--background', light: 'oklch(0.962 0.006 85)', dark: 'oklch(0.215 0.009 75)', usage: 'Warm-grey app background — never white-on-white' },
+        { name: '--foreground', light: 'oklch(0.25 0.012 75)', dark: 'oklch(0.928 0.006 85)', usage: 'Primary text' },
+        { name: '--card', light: 'oklch(1 0 0)', dark: 'oklch(0.262 0.010 75)', usage: 'Surfaces — white in light, warm dark (no pure black)' },
+        { name: '--muted / -foreground', light: 'oklch(0.94 0.007 85)', dark: 'oklch(0.305 0.011 75)', usage: 'Table headers, hover rows / secondary text' },
+        { name: '--border', light: 'oklch(0.872 0.010 85)', dark: 'oklch(0.365 0.013 75)', usage: 'Visible 1px on every card and row' },
+        { name: '--input', light: 'oklch(0.826 0.012 85)', dark: 'oklch(0.42 0.014 75)', usage: 'Form control borders — one step stronger' },
+        { name: '--primary', light: 'oklch(0.47 0.085 205)', dark: 'oklch(0.76 0.095 197)', usage: 'Accent (selected option) — buttons, links, active nav' },
+        { name: '--ring', light: 'oklch(0.55 0.09 205)', dark: 'oklch(0.76 0.095 197)', usage: '2px focus outline, offset 2px — keyboard-heavy admin' },
+        { name: '--success (+bg/border)', light: 'oklch(0.51 0.12 155)', dark: 'oklch(0.74 0.13 155)', usage: 'Paid, verified, approved' },
+        { name: '--warning (+bg/border)', light: 'oklch(0.50 0.11 70)', dark: 'oklch(0.80 0.12 82)', usage: 'Partially paid, pending approval, due soon' },
+        { name: '--destructive (+bg/border)', light: 'oklch(0.52 0.185 27)', dark: 'oklch(0.74 0.15 25)', usage: 'Overdue, formal warnings, errors' },
+        { name: '--info (+bg/border)', light: 'oklch(0.50 0.12 250)', dark: 'oklch(0.74 0.11 250)', usage: 'Issued, informational notices' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

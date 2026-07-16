@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:var(--background);color:var(--foreground);font-size:14px;line-height:1.5;padding:32px 24px 70px;box-sizing:border-box;">
+<div style="max-width:1180px;margin:0 auto;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+    <div>
+      <div style="font-size:20px;font-weight:700;">Logo ideation — schematic, home-first</div>
+      <div style="font-size:13px;color:var(--muted-foreground);">Winner: C5 · colour applications below · single-colour marks, work at 16px</div>
+    </div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ darkSel }}">Dark</button>
+  </div>
+
+  <div style="margin-top:20px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">ROUND 2 · C REFINEMENTS</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;">
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C1 — Happy home</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Eyes float above the roofline — the whole badge is the face, house as nose.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><circle cx="16.7" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <svg width="44" height="44" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><circle cx="16.7" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="5.7" r="1.05" fill="var(--primary-foreground)"></circle><circle cx="16.7" cy="5.7" r="1.05" fill="var(--primary-foreground)"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><circle cx="16.7" cy="5.7" r="0.95" fill="var(--primary-foreground)"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Risk: cute — check it still feels right on a formal payment notice.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C2 — Sheltered</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Hold below + shelter above — no face reading; house centred with a slight upward nudge.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M9 7.2q5-2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M9 13.9L14 9.4l5 4.5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.8 13.5v3.6h6.4v-3.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 21.4q5 2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <svg width="44" height="44" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M9 7.2q5-2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M9 13.9L14 9.4l5 4.5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.8 13.5v3.6h6.4v-3.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 21.4q5 2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M9 7.2q5-2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path><path d="M9 13.9L14 9.4l5 4.5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.8 13.5v3.6h6.4v-3.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 21.4q5 2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M9 7.2q5-2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M9 13.9L14 9.4l5 4.5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.8 13.5v3.6h6.4v-3.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 21.4q5 2.9 10 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Symmetric brackets read as care/enclosure; neutral in tone — safest for formal contexts.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C3 — Hollow badge</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Outlined container, no fill; inverted arcs tucked into the top corners allude to eyes without drawing a face.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <svg width="44" height="44" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 28 28" style="color:var(--foreground);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="2.2"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Needs a filled fallback for the OS app icon (hollow icons get lost on wallpapers).</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C4 — Hollow + eyes</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">C1's above-roof eyes in the outlined container — friendliest of the hollow set.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="6.5" r="0.85" fill="currentColor"></circle><circle cx="16.7" cy="6.5" r="0.85" fill="currentColor"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <svg width="44" height="44" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="6.5" r="0.85" fill="currentColor"></circle><circle cx="16.7" cy="6.5" r="0.85" fill="currentColor"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 28 28" style="color:var(--foreground);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="2.2"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="6.5" r="0.9" fill="currentColor"></circle><circle cx="16.7" cy="6.5" r="0.9" fill="currentColor"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary);"><rect x="2.8" y="2.8" width="22.4" height="22.4" rx="6.5" fill="none" stroke="currentColor" stroke-width="1.9"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11.3" cy="6.5" r="0.85" fill="currentColor"></circle><circle cx="16.7" cy="6.5" r="0.85" fill="currentColor"></circle><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Eyes hold up at 18px; the outline keeps it from feeling like a sticker.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px;">C5 — Free mark · sheltered <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Selected</span></div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">C2 without any container — the arcs frame the near-centred house. Most distinctive silhouette.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28" style="color:var(--primary);"><path d="M7.5 5.6q6.5-3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M8 13.8L14 8.4l6 5.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.2 13.3v4.4h7.6v-4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <div style="width:44px;height:44px;border-radius:11px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="30" height="30" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M8 13.8L14 8.4l6 5.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.2 13.3v4.4h7.6v-4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg></div>
+        <svg width="18" height="18" viewBox="0 0 28 28" style="color:var(--foreground);"><path d="M7.5 5.6q6.5-3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path d="M8 13.8L14 8.4l6 5.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.2 13.3v4.4h7.6v-4.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary);"><path d="M7.5 5.6q6.5-3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M8 13.8L14 8.4l6 5.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.2 13.3v4.4h7.6v-4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Free mark in UI chrome; drops into the accent tile for the app icon (shown).</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C6 — Doorstep</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Door replaces the mouth-void; inverted corner arcs hint at eyes; the arc below reads as welcome mat / palm.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 12.8L14 7.8l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 12.3v5.2h7v-5.2" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17.5v-2.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 21.6q6 3.2 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <svg width="44" height="44" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 12.8L14 7.8l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 12.3v5.2h7v-5.2" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17.5v-2.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 21.6q6 3.2 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        <svg width="18" height="18" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 12.8L14 7.8l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 12.3v5.2h7v-5.2" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17.5v-2.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path><path d="M8 21.6q6 3.2 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="var(--primary-foreground)" stroke-width="2.5" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;"><svg width="24" height="24" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 12.8L14 7.8l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 12.3v5.2h7v-5.2" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17.5v-2.6" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M8 21.6q6 3.2 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path><path d="M5.8 10.2Q5.8 5.8 10.2 5.8M22.2 10.2Q22.2 5.8 17.8 5.8" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg><span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Most conventional of the set — reads "property" instantly, zero whimsy.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">C5 · COLOUR APPLICATIONS</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:10px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;">
+      <div style="height:86px;border-radius:8px;background:oklch(0.962 0.006 85);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><svg width="54" height="54" viewBox="0 0 28 28" style="color:oklch(0.47 0.085 205);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">Teal on light ✓</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">UI chrome, light theme — --primary</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;">
+      <div style="height:86px;border-radius:8px;background:oklch(0.215 0.009 75);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><svg width="54" height="54" viewBox="0 0 28 28" style="color:oklch(0.76 0.095 197);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">Light teal on dark ✓</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">UI chrome, dark theme — same token</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;">
+      <div style="height:86px;border-radius:8px;background:var(--muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><span style="width:54px;height:54px;border-radius:13px;background:oklch(0.47 0.085 205);display:inline-flex;align-items:center;justify-content:center;"><svg width="40" height="40" viewBox="0 0 28 28" style="color:oklch(0.99 0.003 200);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">White in teal tile ✓</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">App icon &amp; sidebar tile — used across screens</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;">
+      <div style="height:86px;border-radius:8px;background:oklch(0.99 0.002 85);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><svg width="54" height="54" viewBox="0 0 28 28" style="color:oklch(0.25 0.012 75);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">Ink mono ✓</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">Print: statements, notices, PDF headers</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;opacity:0.7;">
+      <div style="height:86px;border-radius:8px;background:var(--muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><span style="width:54px;height:54px;border-radius:13px;background:oklch(0.55 0.12 45);display:inline-flex;align-items:center;justify-content:center;"><svg width="40" height="40" viewBox="0 0 28 28" style="color:oklch(0.99 0.005 45);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">Copper — passed</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">Warm but collides with warning amber</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px;opacity:0.7;">
+      <div style="height:86px;border-radius:8px;background:var(--muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><span style="width:54px;height:54px;border-radius:13px;background:oklch(0.47 0.13 252);display:inline-flex;align-items:center;justify-content:center;"><svg width="40" height="40" viewBox="0 0 28 28" style="color:oklch(0.99 0.003 252);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>
+      <div style="font-size:12px;font-weight:600;margin-top:8px;">MS blue — passed</div>
+      <div style="font-size:11px;color:var(--muted-foreground);">Would collide with semantic info blue</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:12px;color:var(--muted-foreground);">The mark never introduces a second brand colour: it always renders in --primary (or its foreground inside the tile), so theme and accent swaps carry it automatically. ✓ = applied in the screens.</div>
+
+  <div style="margin-top:28px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted-foreground);">ROUND 1 · A &amp; B DROPPED, C CARRIED FORWARD</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;opacity:0.55;">
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;position:relative;">
+      <div style="font-weight:600;margin-bottom:2px;">A — Cradle (dropped)</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Open palm as a single arc holding the house; thumb tick keeps it a hand, not a bowl.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28" style="color:var(--primary);">
+          <path d="M7 13.5L14 7l7 6.5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M9.5 12.5v5.5h9v-5.5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M5.5 20.5q8.5 6.5 17 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path>
+          <path d="M5.5 20.5q-1.6-.4-2.4-1.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"></path>
+        </svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <div style="width:44px;height:44px;border-radius:11px;background:var(--primary);display:flex;align-items:center;justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7 13.5L14 7l7 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.5 12.5v5.5h9v-5.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.5 20.5q8.5 6.5 17 0" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path><path d="M5.5 20.5q-1.6-.4-2.4-1.8" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path></svg>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 28 28" style="color:var(--foreground);"><path d="M7 13.5L14 7l7 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.5 12.5v5.5h9v-5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.5 20.5q8.5 6.5 17 0" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path d="M5.5 20.5q-1.6-.4-2.4-1.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary);"><path d="M7 13.5L14 7l7 6.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9.5 12.5v5.5h9v-5.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.5 20.5q8.5 6.5 17 0" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path><path d="M5.5 20.5q-1.6-.4-2.4-1.8" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"></path></svg>
+          <span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Why: reads at favicon size, one stroke weight (matches the icon set), warmth from the curve without literal fingers. Home dominant, hand supportive.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">B — In good hands</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Two mirrored palms cupping the house — more literal "care", slightly busier.</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28" style="color:var(--primary);">
+          <path d="M8 12.5L14 7l6 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M10 11.7v4.8h8v-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M3.5 17.5q1 4 6 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M24.5 17.5q-1 4-6 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M3.5 17.5l2.3.8M24.5 17.5l-2.3.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <div style="width:44px;height:44px;border-radius:11px;background:var(--primary);display:flex;align-items:center;justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M8 12.5L14 7l6 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.7v4.8h8v-4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.5 17.5q1 4 6 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M24.5 17.5q-1 4-6 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M3.5 17.5l2.3.8M24.5 17.5l-2.3.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 28 28" style="color:var(--foreground);"><path d="M8 12.5L14 7l6 5.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.7v4.8h8v-4.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.5 17.5q1 4 6 4.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path d="M24.5 17.5q-1 4-6 4.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary);"><path d="M8 12.5L14 7l6 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.7v4.8h8v-4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.5 17.5q1 4 6 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M24.5 17.5q-1 4-6 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><path d="M3.5 17.5l2.3.8M24.5 17.5l-2.3.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Risk: the thumb ticks blur below 20px; the open sides read less contained than A.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+      <div style="font-weight:600;margin-bottom:2px;">C — Home badge</div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:14px;">Solid rounded badge, house + palm arc in negative space — strongest at tiny sizes, least "hand".</div>
+      <div style="display:flex;align-items:center;justify-content:center;height:150px;background:var(--muted);border:1px solid var(--border);border-radius:8px;">
+        <svg width="110" height="110" viewBox="0 0 28 28">
+          <rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect>
+          <path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path>
+        </svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;">
+        <div style="width:44px;height:44px;">
+          <svg width="44" height="44" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 28 28"><rect x="2" y="2" width="24" height="24" rx="7" fill="var(--primary)"></rect><path d="M8.5 13.5L14 8.5l5.5 5" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.5 13v4h7v-4" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 20.5q6 3.5 12 0" fill="none" stroke="var(--primary-foreground)" stroke-width="2.1" stroke-linecap="round"></path></svg>
+          <span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;">Flatlord</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-top:12px;">Drop-in replacement for the current "F" tile: same footprint, works as app icon / favicon as-is.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;font-size:13px;color:var(--muted-foreground);">
+    <b style="font-weight:600;color:var(--foreground);">Decision:</b> C5 selected. Applied as white-on-teal tile in sidebars/headers and logon, teal free mark on plain surfaces, ink mono reserved for print. Copper and MS-blue alternatives evaluated and passed (semantic-colour collisions).
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1240}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    return {
+      theme,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

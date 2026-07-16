@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:14px;line-height:1.5;padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="max-width:1240px;margin:0 auto 16px;display:flex;align-items:center;gap:8px;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Admin · Access management · desktop</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+  </div>
+
+  <div data-screen-label="Access management" style="max-width:1240px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);padding:20px 24px;box-sizing:border-box;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="width:30px;height:30px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:19px;font-weight:600;">Access management</div>
+      <div style="flex:1;"></div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">+ Invite via email (one-time token)</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);font-size:12px;margin-bottom:16px;">
+      <svg width="13" height="13" viewBox="0 0 12 12" style="flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>
+      <div style="flex:1;">No passwords exist in Flatlord: sign-in is Google OAuth or an emailed one-time token only. Every user links to a <a href="12 Personal Data.dc.html" style="color:inherit;text-decoration:underline;">personal record</a>; tenants are automatically scoped to their own tenancy.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1.4fr 1.1fr 0.8fr 1.1fr 1.1fr 0.9fr;padding:8px 18px;background:var(--muted);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted-foreground);">
+        <div>Person</div><div>Sign-in</div><div>Role type</div><div>Kertész utca 12.</div><div>Rózsa utca 8.</div><div>Last sign-in</div>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+        <div tabIndex="{{ zero }}" style="display:grid;grid-template-columns:1.4fr 1.1fr 0.8fr 1.1fr 1.1fr 0.9fr;align-items:center;padding:8px 18px;border-bottom:1px solid var(--border);font-size:13px;min-height:40px;box-sizing:border-box;{{ r.rowStyle }}" style-hover="background:var(--muted);" style-focus="outline:2px solid var(--ring);outline-offset:-2px;">
+          <div><b style="font-weight:600;">{{ r.name }}</b><span style="color:var(--muted-foreground);font-size:12px;"> {{ r.sub }}</span></div>
+          <div><span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">{{ r.auth }}</span></div>
+          <div><span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;border:1px solid {{ r.roleBd }};color:{{ r.roleFg }};">{{ r.role }}</span></div>
+          <div><span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:{{ r.p1Bg }};color:{{ r.p1Fg }};border:1px solid {{ r.p1Bd }};">{{ r.p1 }}</span></div>
+          <div><span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:{{ r.p2Bg }};color:{{ r.p2Fg }};border:1px solid {{ r.p2Bd }};{{ r.p2Style }}">{{ r.p2 }}</span></div>
+          <div style="color:var(--muted-foreground);font-size:12px;font-feature-settings:'tnum';">{{ r.last }}</div>
+        </div>
+      </sc-for>
+      <div style="padding:9px 18px;font-size:12px;color:var(--muted-foreground);">Role type is <b style="font-weight:600;">owner</b> or <b style="font-weight:600;">tenant</b>; within both, per-property level is full control / limited control / read-only. Click a row for function-level detail.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">
+        <div style="font-size:15px;font-weight:600;">Gábor Ügynök — function-level access</div>
+        <span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;border:1px solid var(--primary);color:var(--primary);">Owner (agent)</span>
+        <span style="font-size:12px;color:var(--muted-foreground);">Kertész utca 12. · overall: Limited control</span>
+        <div style="flex:1;"></div>
+        <button style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--destructive);border:1px solid var(--destructive-border);">Revoke all access</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:12px;">Fine-grained overrides per function — the strictest of property-level and function-level applies.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
+        <sc-for list="{{ funcs }}" as="f" hint-placeholder-count="8">
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);">
+            <div style="font-size:13px;flex:1;">{{ f.name }}</div>
+            <span style="display:inline-flex;border:1px solid var(--input);border-radius:6px;overflow:hidden;">
+              <span style="height:28px;padding:0 10px;display:inline-flex;align-items:center;font-size:11px;font-weight:{{ f.w1 }};background:{{ f.b1 }};color:{{ f.c1 }};cursor:pointer;">Full</span>
+              <span style="height:28px;padding:0 10px;display:inline-flex;align-items:center;font-size:11px;font-weight:{{ f.w2 }};background:{{ f.b2 }};color:{{ f.c2 }};border-left:1px solid var(--border);cursor:pointer;">Limited</span>
+              <span style="height:28px;padding:0 10px;display:inline-flex;align-items:center;font-size:11px;font-weight:{{ f.w3 }};background:{{ f.b3 }};color:{{ f.c3 }};border-left:1px solid var(--border);cursor:pointer;">Read-only</span>
+              <span style="height:28px;padding:0 10px;display:inline-flex;align-items:center;font-size:11px;font-weight:{{ f.w4 }};background:{{ f.b4 }};color:{{ f.c4 }};border-left:1px solid var(--border);cursor:pointer;">None</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted-foreground);align-items:center;">
+        <span><b style="font-weight:600;color:var(--foreground);">Full</b> — create, edit, issue/verify</span>
+        <span><b style="font-weight:600;color:var(--foreground);">Limited</b> — act within policy, no issuing/deleting</span>
+        <span><b style="font-weight:600;color:var(--foreground);">Read-only</b> — view only, sensitive fields masked</span>
+        <span style="margin-left:auto;">Every grant &amp; revoke is audit-logged.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1300}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    const L = {
+      full: { Bg: 'var(--primary)', Fg: 'var(--primary-foreground)', Bd: 'var(--primary)' },
+      limited: { Bg: 'var(--warning-bg)', Fg: 'var(--warning)', Bd: 'var(--warning-border)' },
+      ro: { Bg: 'var(--muted)', Fg: 'var(--muted-foreground)', Bd: 'var(--border)' },
+      none: { Bg: 'transparent', Fg: 'var(--muted-foreground)', Bd: 'var(--input)' },
+    };
+    const mk = (p, lvl, label) => ({ [p + 'Bg']: L[lvl].Bg, [p + 'Fg']: L[lvl].Fg, [p + 'Bd']: L[lvl].Bd, [p]: label });
+    const rows = [
+      { name: 'Emma Admin', sub: '· owner', auth: 'Google OAuth', role: 'Owner', roleBd: 'var(--primary)', roleFg: 'var(--primary)', ...mk('p1', 'full', '● Full control'), ...mk('p2', 'full', '● Full control'), last: 'today 09:12', rowStyle: '' },
+      { name: 'Gábor Ügynök', sub: '· agent', auth: 'Email token', role: 'Owner', roleBd: 'var(--primary)', roleFg: 'var(--primary)', ...mk('p1', 'limited', '◐ Limited'), ...mk('p2', 'ro', '👁 Read-only'), last: '3 Jul', rowStyle: 'background:color-mix(in oklab, var(--primary) 5%, var(--card));box-shadow:inset 3px 0 0 var(--primary);' },
+      { name: 'Alex Tenant', sub: '· tenant', auth: 'Google OAuth', role: 'Tenant', roleBd: 'var(--info-border)', roleFg: 'var(--info)', ...mk('p1', 'limited', '◐ Limited'), ...mk('p2', 'none', '— No access'), p2Style: 'border-style:dashed;', last: 'yesterday', rowStyle: '' },
+      { name: 'Kata Tenant', sub: '· co-occupant', auth: 'Email token', role: 'Tenant', roleBd: 'var(--info-border)', roleFg: 'var(--info)', ...mk('p1', 'ro', '👁 Read-only'), ...mk('p2', 'none', '— No access'), p2Style: 'border-style:dashed;', last: '12 Jun', rowStyle: '' },
+    ];
+    rows.forEach(r => { if (!r.p2Style) r.p2Style = ''; });
+    const sel = 'background:color-mix(in oklab, var(--primary) 14%, var(--card));color:var(--primary);font-weight:600;';
+    const off = 'background:var(--card);color:var(--muted-foreground);font-weight:400;';
+    const mkF = (name, lvl) => {
+      const f = { name };
+      ['1', '2', '3', '4'].forEach((n, i) => {
+        const isSel = i === lvl;
+        f['b' + n] = isSel ? 'color-mix(in oklab, var(--primary) 14%, var(--card))' : 'var(--card)';
+        f['c' + n] = isSel ? 'var(--primary)' : 'var(--muted-foreground)';
+        f['w' + n] = isSel ? '600' : '400';
+      });
+      return f;
+    };
+    const funcs = [
+      mkF('Statements & payments', 1), mkF('Meters & readings', 0),
+      mkF('Requests', 0), mkF('Notices', 1),
+      mkF('Inventory', 2), mkF('Property metadata', 2),
+      mkF('Personal data', 2), mkF('Access management', 3),
+    ];
+    return {
+      theme, rows, funcs, zero: 0,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
