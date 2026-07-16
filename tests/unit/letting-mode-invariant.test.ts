@@ -98,6 +98,32 @@ describe("letting-mode invariant", () => {
     ).rejects.toThrow(/parent flat/i);
   });
 
+  it("rejects re-parenting an active room under a whole-mode flat (regression: the exclusivity trigger must watch parent_id, not just active/letting_mode)", async () => {
+    await expect(
+      sql.begin(async (tx) => {
+        const houseId = await makeHouse(tx);
+        const [wholeFlat] = await tx`
+          insert into properties (root_property_id, parent_id, type, name, letting_mode, active)
+          values (${houseId}, ${houseId}, 'flat', 'LMI Test Flat Whole', 'whole', true)
+          returning id
+        `;
+        const [byRoomFlat] = await tx`
+          insert into properties (root_property_id, parent_id, type, name, letting_mode, active)
+          values (${houseId}, ${houseId}, 'flat', 'LMI Test Flat ByRoom', 'by_room', false)
+          returning id
+        `;
+        const [room] = await tx`
+          insert into properties (root_property_id, parent_id, type, name, active)
+          values (${houseId}, ${byRoomFlat.id}, 'room', 'LMI Test Room', true)
+          returning id
+        `;
+        // Bypass attempt: re-parent the active room under the whole-mode
+        // flat instead of touching active/letting_mode directly.
+        await tx`update properties set parent_id = ${wholeFlat.id} where id = ${room.id}`;
+      }),
+    ).rejects.toThrow(/whole/i);
+  });
+
   it("rejects a tenancy targeting a house directly", async () => {
     const houseId = await sql.begin((tx) => makeHouse(tx));
     const [person] = await sql`
