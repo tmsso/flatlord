@@ -23,8 +23,13 @@ export const tenancies = pgTable(
     unitId: uuid("unit_id")
       .notNull()
       .references(() => properties.id),
-    unitType: propertyTypeEnum("unit_type").notNull(),
-    propertyId: uuid("property_id").notNull(),
+    // Both columns below are populated by trg_tenancies_validate_unit
+    // (BEFORE INSERT/UPDATE) from unit_id, unconditionally overwriting
+    // whatever is passed — the defaults here only exist so callers can
+    // omit them; the NOT NULL guarantee stays a DB-level safety net that
+    // the trigger actually ran.
+    unitType: propertyTypeEnum("unit_type").notNull().default("flat"),
+    propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
     primaryTenantId: uuid("primary_tenant_id")
       .notNull()
       .references(() => persons.id),
