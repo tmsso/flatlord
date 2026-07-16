@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:14px;line-height:1.5;padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="max-width:1240px;margin:0 auto 16px;display:flex;align-items:center;gap:8px;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Admin · Personal records · desktop (tenants get the same form for their own record, edits per field policy)</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+  </div>
+
+  <div data-screen-label="Personal records" style="max-width:1240px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);padding:20px 24px;box-sizing:border-box;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:30px;height:30px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:19px;font-weight:600;">Personal records</div>
+      <div style="flex:1;"></div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">+ New person</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:310px 1fr;gap:16px;align-items:start;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--card);border:1px solid var(--primary);border-radius:var(--radius);box-shadow:var(--shadow-sm), inset 3px 0 0 var(--primary);padding:11px 14px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;flex:1;">Alex Tenant</div><span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">✓ Complete</span></div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Tenant · main-address inhabitant</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:11px 14px;cursor:pointer;" style-hover="background:var(--muted);">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;flex:1;">Kata Tenant</div><span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">2 fields missing</span></div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Co-occupant · main-address inhabitant</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:11px 14px;cursor:pointer;" style-hover="background:var(--muted);">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;flex:1;">Bence Tenant</div><span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">✓ Complete</span></div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Co-occupant · temporary residence</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:11px 14px;cursor:pointer;" style-hover="background:var(--muted);">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;flex:1;">Emma Admin</div><span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">Name only · OK</span></div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Owner</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:11px 14px;cursor:pointer;" style-hover="background:var(--muted);">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;flex:1;">Gábor Ügynök</div><span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">Name only · OK</span></div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Agent</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted-foreground);padding:4px 6px;">Everyone with access — owner and agent included — has a personal record. For <b style="font-weight:600;">owner / agent</b> only the name is mandatory; inhabitant roles inherit their required set from the property's registration types.</div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="font-size:16px;font-weight:600;">Alex Tenant</div>
+          <span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--primary);color:var(--primary);">Tenant</span>
+          <span style="font-size:12px;color:var(--muted-foreground);font-family:'IBM Plex Mono',monospace;">PERS-0003</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);font-size:12px;margin-bottom:16px;">
+          <svg width="13" height="13" viewBox="0 0 12 12" style="flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>
+          <div style="flex:1;">Required set: <b style="font-weight:600;">registered inhabitant — main address</b> at Kertész utca 12. Fields marked * are mandatory because of this; the set is driven by <a href="11 Property Metadata.dc.html" style="color:inherit;text-decoration:underline;">property metadata</a>, not hard-coded.</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Full name *</label><span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="9" height="9" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>Approval needed</span></div>
+            <input value="Alex Tenant" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Birth name</label></div>
+            <input value="Alex Tenant" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Mother's name *</label></div>
+            <input value="Tenant Erzsébet" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Place &amp; date of birth *</label><span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);"><svg width="9" height="9" viewBox="0 0 12 12"><rect x="2.5" y="5.5" width="7" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"></rect><path d="M4 5.5V4a2 2 0 014 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>Verified · read-only</span></div>
+            <input value="Szeged, 1991. 03. 22." readOnly disabled="{{ true }}" style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);color:var(--muted-foreground);font:inherit;cursor:not-allowed;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Citizenship *</label></div>
+            <input value="magyar" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">ID document — type &amp; number *</label></div>
+            <div style="display:flex;gap:8px;">
+              <div style="height:36px;display:flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);font-size:13px;box-sizing:border-box;white-space:nowrap;">Személyi ig. ▾</div>
+              <input value="123456AB" readOnly style="flex:1;min-width:0;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-family:'IBM Plex Mono',monospace;font-size:13px;" />
+            </div>
+            <div style="font-size:11px;color:var(--muted-foreground);margin-top:3px;">* because main-address inhabitant.</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Address card no. (lakcímkártya) *</label></div>
+            <input value="AB 123456" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-family:'IBM Plex Mono',monospace;font-size:13px;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Tax ID</label><span style="margin-left:auto;font-size:11px;color:var(--muted-foreground);">optional</span></div>
+            <input value="" placeholder="—" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Phone *</label><span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="9" height="9" viewBox="0 0 12 12"><path d="M2.5 9.5l0.9-2.7 5-5a1 1 0 011.4 0l0.4 0.4a1 1 0 010 1.4l-5 5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Free edit</span></div>
+            <input value="+36 30 111 2233" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-feature-settings:'tnum';" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Email *</label><span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="9" height="9" viewBox="0 0 12 12"><path d="M2.5 9.5l0.9-2.7 5-5a1 1 0 011.4 0l0.4 0.4a1 1 0 010 1.4l-5 5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>Free edit</span></div>
+            <input value="alex.tenant@example.com" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Registered address (main) *</label></div>
+            <input value="Kertész utca 12. 3/12, 1073 Budapest" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><label style="font-size:13px;font-weight:500;">Temporary address</label><span style="margin-left:auto;font-size:11px;color:var(--muted-foreground);">optional</span></div>
+            <input value="" placeholder="—" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;align-items:center;border-top:1px solid var(--border);padding-top:14px;">
+          <span style="font-size:12px;color:var(--muted-foreground);margin-right:auto;">Sensitive fields masked for limited-access viewers · edits follow the 3-way policy (free / approval / read-only)</span>
+          <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">Cancel</button>
+          <button style="height:36px;padding:0 16px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1300}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    return {
+      theme,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

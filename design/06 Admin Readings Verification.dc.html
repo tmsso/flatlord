@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --secondary:oklch(0.93 0.008 85); --secondary-foreground:oklch(0.30 0.012 75);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --secondary:oklch(0.33 0.011 75); --secondary-foreground:oklch(0.90 0.008 85);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div style="min-height:100vh;background:oklch(0.90 0.008 85);padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="max-width:1440px;margin:0 auto 16px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Admin Readings verification · 1440px · incl. future AI slot</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+  </div>
+
+  <div class="fl" data-theme="{{ theme }}" data-screen-label="Readings verification" style="max-width:1440px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;color:var(--foreground);font-size:14px;line-height:1.5;min-height:880px;">
+
+    <div style="width:64px;flex-shrink:0;border-right:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;">
+      <div style="width:32px;height:32px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center;margin-bottom:10px;"><svg width="24" height="24" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div title="Dashboard" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="17" height="17" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect></svg></div>
+      <div title="Statements" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 3.5h14v17H5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></div>
+      <div title="Meters &amp; Readings" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in oklab, var(--primary) 12%, var(--card));color:var(--primary);box-shadow:inset 3px 0 0 var(--primary);cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 13l3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path><path d="M9.5 3.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></div>
+      <div title="Property" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5h-5v5H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg></div>
+      <div title="Requests" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);cursor:pointer;position:relative;" style-hover="background:var(--muted);"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg><span style="position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:999px;background:var(--destructive);border:1.5px solid var(--card);"></span></div>
+      <div style="flex:1;"></div>
+      <div style="width:32px;height:32px;border-radius:999px;background:var(--muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;">E</div>
+    </div>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--card);flex-wrap:wrap;">
+        <div>
+          <div style="font-size:19px;font-weight:600;">Readings verification</div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Submitted 28 Jun, 09:41 by Alex Tenant · Kertész utca 12.</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;border:1px solid var(--input);border-radius:6px;overflow:hidden;background:var(--card);">
+          <button style="width:30px;height:32px;border:none;background:transparent;color:var(--foreground);cursor:pointer;border-right:1px solid var(--border);">‹</button>
+          <div style="padding:0 12px;font-size:13px;font-weight:500;min-width:92px;text-align:center;">June 2026</div>
+          <button style="width:30px;height:32px;border:none;background:transparent;color:var(--foreground);cursor:pointer;border-left:1px solid var(--border);">›</button>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:130px;height:8px;border-radius:999px;background:var(--muted);border:1px solid var(--border);overflow:hidden;"><div style="width:50%;height:100%;background:var(--success);"></div></div>
+          <span style="font-size:13px;font-weight:500;font-feature-settings:'tnum';">2 / 4 verified</span>
+        </div>
+        <button disabled="{{ true }}" style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;opacity:0.5;cursor:not-allowed;">All verified → draft July statement</button>
+      </div>
+
+      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start;">
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div tabIndex="{{ zero }}" style="background:var(--card);border:1px solid var(--primary);border-radius:var(--radius);box-shadow:var(--shadow-sm), inset 3px 0 0 var(--primary);padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;" style-focus="outline:2px solid var(--ring);outline-offset:2px;">
+            <div style="width:64px;height:48px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;">Electricity · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:400;">E-4471 8823</span></div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">12 316 kWh · Δ +198 · <span style="display:inline-flex;align-items:center;gap:4px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);">AI 12 316 · 96%</span></div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>Reviewing</span>
+          </div>
+          <div tabIndex="{{ zero }}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;" style-hover="background:var(--muted);" style-focus="outline:2px solid var(--ring);outline-offset:2px;">
+            <div style="width:64px;height:48px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;">Gas · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:400;">G-2210 4471</span></div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">4 872 m³ · Δ +24 · <span style="display:inline-flex;align-items:center;gap:4px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">AI 4 812 · 62% — check</span></div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>Pending</span>
+          </div>
+          <div tabIndex="{{ zero }}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;" style-hover="background:var(--muted);" style-focus="outline:2px solid var(--ring);outline-offset:2px;">
+            <div style="width:64px;height:48px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;">Water — bathroom · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:400;">W-118 2234</span></div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">318,4 m³ · Δ +2,3 · <span style="display:inline-flex;align-items:center;gap:4px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);">AI 318,4 · 94%</span></div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Verified</span>
+          </div>
+          <div tabIndex="{{ zero }}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;" style-hover="background:var(--muted);" style-focus="outline:2px solid var(--ring);outline-offset:2px;">
+            <div style="width:64px;height:48px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;">Water — kitchen · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:400;">W-118 2235</span></div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">122,9 m³ · Δ +0,9 · <span style="display:inline-flex;align-items:center;gap:4px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);">AI 122,9 · 91%</span></div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Verified</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted-foreground);padding:2px 4px;">The AI chip is a Phase-5 slot: OCR-proposed value + confidence. Below the threshold it renders amber with "check". A human always confirms — the chip never auto-verifies.</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+            <div style="font-size:15px;font-weight:600;">Electricity · <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:400;color:var(--muted-foreground);">E-4471 8823</span></div>
+            <div style="display:flex;gap:6px;">
+              <button style="width:32px;height:32px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);cursor:pointer;font-size:15px;" aria-label="Zoom in">+</button>
+              <button style="width:32px;height:32px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);cursor:pointer;font-size:15px;" aria-label="Zoom out">−</button>
+              <button style="width:32px;height:32px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);cursor:pointer;" aria-label="Rotate"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M12 1.5L9 4l3 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+            </div>
+          </div>
+          <div style="height:290px;position:relative;background:repeating-linear-gradient(45deg,var(--muted) 0 12px,var(--card) 12px 24px);border-bottom:1px solid var(--border);">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);">meter photo — full resolution, pinch/scroll zoom</div>
+            <div style="position:absolute;left:26%;right:26%;top:38%;height:22%;border:2px solid var(--primary);border-radius:8px;"></div>
+            <div style="position:absolute;left:26%;top:63%;font-size:11px;color:var(--primary);font-weight:600;">detected counter region</div>
+          </div>
+          <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:2px;">Tenant entered</div>
+              <div style="font-size:22px;font-weight:600;font-feature-settings:'tnum';">12 316 <span style="font-size:13px;font-weight:400;color:var(--muted-foreground);">kWh</span></div>
+            </div>
+            <div style="border:1px solid var(--info-border);border-radius:8px;padding:12px 14px;background:var(--info-bg);">
+              <div style="font-size:12px;color:var(--info);margin-bottom:2px;display:flex;align-items:center;gap:6px;">AI proposal <span style="display:inline-flex;align-items:center;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;background:var(--card);color:var(--info);border:1px solid var(--info-border);">96% confident</span></div>
+              <div style="font-size:22px;font-weight:600;font-feature-settings:'tnum';color:var(--info);">12 316 <span style="font-size:13px;font-weight:400;">kWh</span></div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:2px;">Previous · 28 May</div>
+              <div style="font-size:16px;font-weight:500;font-feature-settings:'tnum';">12 118 kWh</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:12px;color:var(--muted-foreground);margin-bottom:2px;">Delta · 6-month avg +171</div>
+              <div style="font-size:16px;font-weight:600;font-feature-settings:'tnum';color:var(--success);">+198 kWh <span style="font-size:12px;font-weight:400;color:var(--muted-foreground);">≈ 14 256 Ft @ 72 Ft</span></div>
+            </div>
+          </div>
+          <div style="padding:0 18px 16px;">
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:5px;">Confirmed value</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input value="12 316" readOnly style="width:170px;height:40px;padding:0 12px;border-radius:6px;border:1px solid var(--ring);outline:2px solid var(--ring);outline-offset:2px;background:var(--card);color:var(--foreground);font:inherit;font-size:17px;font-weight:600;font-feature-settings:'tnum';box-sizing:border-box;" />
+              <span style="font-size:13px;color:var(--muted-foreground);">kWh</span>
+              <div style="flex:1;"></div>
+              <button style="height:38px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--destructive);border:1px solid var(--destructive-border);" style-hover="background:var(--destructive-bg);">Ask for retake</button>
+              <button style="height:38px;padding:0 16px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;" style-hover="filter:brightness(0.94);">Verify &amp; next ↵</button>
+            </div>
+            <div style="font-size:12px;color:var(--muted-foreground);margin-top:8px;">Editing the value records an override (entered ≠ confirmed) in the audit log. Keyboard: ↵ verify · E edit · R retake · ↑↓ switch meter.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    return {
+      theme, zero: 0,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

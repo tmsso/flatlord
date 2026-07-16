@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --secondary:oklch(0.93 0.008 85); --secondary-foreground:oklch(0.30 0.012 75);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --secondary:oklch(0.33 0.011 75); --secondary-foreground:oklch(0.90 0.008 85);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div style="min-height:100vh;background:oklch(0.90 0.008 85);padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="max-width:1440px;margin:0 auto 16px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',system-ui,sans-serif;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Admin Dashboard · 1440px</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+  </div>
+
+  <div class="fl" data-theme="{{ theme }}" data-screen-label="Admin Dashboard" style="max-width:1440px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;color:var(--foreground);font-size:14px;line-height:1.5;min-height:900px;">
+
+    <div style="width:232px;flex-shrink:0;border-right:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid var(--border);">
+        <div style="width:30px;height:30px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+        <div style="font-weight:600;font-size:15px;">Flatlord</div>
+      </div>
+      <nav style="padding:10px;display:flex;flex-direction:column;gap:2px;font-size:13px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:color-mix(in oklab, var(--primary) 12%, var(--card));color:var(--primary);font-weight:600;box-shadow:inset 3px 0 0 var(--primary);cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect></svg>Dashboard</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 3.5h14v17H5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>Statements &amp; Payments</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 13l3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path><path d="M9.5 3.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>Meters &amp; Readings</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5h-5v5H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>Property &amp; Tenancy</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 3.5h8L19 8.5v12H6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M14 3.5v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>Documents</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" fill="none" stroke="currentColor" stroke-width="1.7"></path></svg>Inventory</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;justify-content:space-between;" style-hover="background:var(--muted);"><span style="display:flex;align-items:center;gap:10px;"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>Requests</span><span style="background:var(--destructive);color:oklch(0.99 0.003 25);border-radius:999px;padding:0 7px;font-size:11px;font-weight:600;">2</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0112 0v5l1.5 2.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M10 20.5a2 2 0 004 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>Notices</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;justify-content:space-between;" style-hover="background:var(--muted);"><span style="display:flex;align-items:center;gap:10px;"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3.5l7.5 3v5c0 4.5-3 8-7.5 9.5-4.5-1.5-7.5-5-7.5-9.5v-5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M9 11.5l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Approvals</span><span style="background:var(--warning);color:oklch(0.15 0.02 80);border-radius:999px;padding:0 7px;font-size:11px;font-weight:600;">1</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--foreground);cursor:pointer;" style-hover="background:var(--muted);"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>Settings</div>
+      </nav>
+      <div style="flex:1;"></div>
+      <div style="padding:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;border-radius:999px;background:var(--muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;">E</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;">Emma Admin</div>
+          <div style="font-size:11px;color:var(--muted-foreground);">Owner · hu</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--card);">
+        <div style="font-size:19px;font-weight:600;">Dashboard</div>
+        <div style="display:inline-flex;align-items:center;border:1px solid var(--input);border-radius:6px;overflow:hidden;background:var(--card);">
+          <button style="width:30px;height:32px;border:none;background:transparent;color:var(--foreground);cursor:pointer;border-right:1px solid var(--border);">‹</button>
+          <div style="padding:0 12px;font-size:13px;font-weight:500;min-width:92px;text-align:center;">July 2026</div>
+          <button style="width:30px;height:32px;border:none;background:transparent;color:var(--foreground);cursor:pointer;border-left:1px solid var(--border);">›</button>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="position:relative;">
+          <input placeholder="Search… ( / )" readOnly style="height:34px;width:220px;padding:0 10px 0 32px;border-radius:6px;border:1px solid var(--input);background:var(--background);color:var(--foreground);font:inherit;font-size:13px;box-sizing:border-box;" />
+          <svg width="14" height="14" viewBox="0 0 24 24" style="position:absolute;left:10px;top:10px;color:var(--muted-foreground);"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"></circle><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        </div>
+        <button style="width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0112 0v5l1.5 2.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M10 20.5a2 2 0 004 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          <span style="position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:999px;background:var(--destructive);border:1.5px solid var(--card);"></span>
+        </button>
+      </div>
+
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius);background:var(--destructive-bg);border:1px solid var(--destructive-border);">
+          <svg width="18" height="18" viewBox="0 0 12 12" style="color:var(--destructive);flex-shrink:0;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M6 3.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="8.6" r="0.8" fill="currentColor"></circle></svg>
+          <div style="flex:1;font-size:13px;"><b style="font-weight:600;color:var(--destructive);">July statement overdue by 10 days</b> — 286 870 Ft was due 5 Jul. No payment recorded yet.</div>
+          <button style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);white-space:nowrap;">Send reminder email</button>
+          <button style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);white-space:nowrap;">WhatsApp</button>
+          <button style="height:32px;padding:0 12px;border-radius:6px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;background:var(--destructive);color:oklch(0.99 0.003 25);border:1px solid transparent;white-space:nowrap;">Draft late notice</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.2fr 1.4fr 1fr;gap:16px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+            <div style="font-size:12px;font-weight:600;color:var(--muted-foreground);margin-bottom:8px;">Property &amp; tenancy</div>
+            <div style="font-size:15px;font-weight:600;">Kertész utca 12., Budapest</div>
+            <div style="font-size:13px;color:var(--muted-foreground);margin-top:2px;">Alex Tenant + 2 co-occupants</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>Term ends in 47 days</span>
+              <a href="#renew" style="font-size:13px;">Renew contract →</a>
+            </div>
+            <div style="font-size:12px;color:var(--muted-foreground);margin-top:8px;font-feature-settings:'tnum';">Contract v4 · until 2026. 08. 31. · 60-day notice</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+            <div style="font-size:12px;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">July billing cycle</div>
+            <div style="display:flex;align-items:flex-start;">
+              <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+                <div style="width:22px;height:22px;border-radius:999px;background:var(--success);display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="oklch(0.99 0 0)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                <div style="font-size:12px;font-weight:500;margin-top:4px;">Readings 4/4</div>
+                <div style="font-size:11px;color:var(--muted-foreground);">verified 29 Jun</div>
+              </div>
+              <div style="height:2px;background:var(--success);flex:1;margin-top:10px;"></div>
+              <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+                <div style="width:22px;height:22px;border-radius:999px;background:var(--success);display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="oklch(0.99 0 0)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                <div style="font-size:12px;font-weight:500;margin-top:4px;">Issued</div>
+                <div style="font-size:11px;color:var(--muted-foreground);">1 Jul · 286 870 Ft</div>
+              </div>
+              <div style="height:2px;background:var(--border);flex:1;margin-top:10px;"></div>
+              <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+                <div style="width:22px;height:22px;border-radius:999px;background:var(--destructive-bg);border:2px solid var(--destructive);box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:var(--destructive);font-size:11px;font-weight:700;">!</div>
+                <div style="font-size:12px;font-weight:600;margin-top:4px;color:var(--destructive);">Payment</div>
+                <div style="font-size:11px;color:var(--destructive);">overdue 10 days</div>
+              </div>
+            </div>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">Next: August reading window opens <b style="font-weight:600;color:var(--foreground);">25 Jul</b> · reminder scheduled 24 Jul</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+            <div style="font-size:12px;font-weight:600;color:var(--muted-foreground);margin-bottom:8px;">Outstanding</div>
+            <div style="font-size:28px;font-weight:700;font-feature-settings:'tnum';color:var(--destructive);">286 870 Ft</div>
+            <div style="font-size:12px;color:var(--muted-foreground);margin-top:2px;">1 statement · due 5 Jul</div>
+            <div style="font-size:12px;color:var(--muted-foreground);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-feature-settings:'tnum';">Last payment: <b style="font-weight:600;color:var(--foreground);">283 120 Ft</b> · 4 Jun · transfer</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+              <div style="font-size:15px;font-weight:600;">Recent statements</div>
+              <a href="#statements" style="font-size:13px;">All statements →</a>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1.2fr auto;padding:8px 18px;background:var(--muted);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted-foreground);">
+              <div>Month</div><div>Issued</div><div style="text-align:right;">Total</div><div style="text-align:right;">Paid</div><div style="padding-left:16px;">Status</div><div></div>
+            </div>
+            <sc-for list="{{ statements }}" as="s" hint-placeholder-count="4">
+              <div tabIndex="{{ zero }}" style="display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1.2fr auto;align-items:center;padding:7px 18px;border-bottom:1px solid var(--border);font-size:13px;font-feature-settings:'tnum';min-height:36px;box-sizing:border-box;{{ s.rowStyle }}" style-hover="background:var(--muted);" style-focus="outline:2px solid var(--ring);outline-offset:-2px;">
+                <div style="font-weight:500;">{{ s.month }}</div>
+                <div style="color:var(--muted-foreground);">{{ s.issued }}</div>
+                <div style="text-align:right;">{{ s.total }}</div>
+                <div style="text-align:right;color:var(--muted-foreground);">{{ s.paid }}</div>
+                <div style="padding-left:16px;"><span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:{{ s.bBg }};color:{{ s.bFg }};border:1px solid {{ s.bBd }};">{{ s.badge }}</span></div>
+                <a href="#detail" style="font-size:13px;">Open</a>
+              </div>
+            </sc-for>
+            <div style="padding:9px 18px;font-size:12px;color:var(--muted-foreground);">36px rows · tabular figures · full keyboard focus (Tab through rows — 2px ring, inset)</div>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+              <div style="font-size:15px;font-weight:600;">Needs attention</div>
+              <span style="font-size:12px;color:var(--muted-foreground);">4 items</span>
+            </div>
+            <div style="display:flex;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);align-items:flex-start;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>Approval</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;">Name correction: <span style="text-decoration:line-through;color:var(--muted-foreground);">Alex Tenant</span> → <b style="font-weight:600;">Alexandru Tenant</b></div>
+                <div style="font-size:11px;color:var(--muted-foreground);">passport spelling · requested 13 Jul</div>
+              </div>
+              <a href="#approve" style="font-size:12px;white-space:nowrap;">Review</a>
+            </div>
+            <div style="display:flex;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);align-items:flex-start;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.2" fill="currentColor"></circle></svg>Request</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;">Dripping tap in bathroom — photo attached</div>
+                <div style="font-size:11px;color:var(--muted-foreground);">repair · appointment pending · 12 Jul</div>
+              </div>
+              <a href="#req1" style="font-size:12px;white-space:nowrap;">Open</a>
+            </div>
+            <div style="display:flex;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);align-items:flex-start;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.2" fill="currentColor"></circle></svg>Request</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;">Insurer case #KH-2291 — worksheet uploaded</div>
+                <div style="font-size:11px;color:var(--muted-foreground);">repair · external ref · 8 Jul</div>
+              </div>
+              <a href="#req2" style="font-size:12px;white-space:nowrap;">Open</a>
+            </div>
+            <div style="display:flex;gap:10px;padding:12px 18px;align-items:flex-start;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><rect x="2" y="3" width="8" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"></rect><path d="M4 3V2h4v1" stroke="currentColor" stroke-width="1.2"></path></svg>Inventory</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;">Washing machine — ownership decision due <b style="font-weight:600;">31 Aug</b></div>
+                <div style="font-size:11px;color:var(--muted-foreground);">conditional ownership · action-by flag</div>
+              </div>
+              <a href="#inv" style="font-size:12px;white-space:nowrap;">Open</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:15px;font-weight:600;">Electricity consumption (kWh)</div>
+              <a href="#charts" style="font-size:13px;">Utilities view →</a>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:14px;height:110px;">
+              <sc-for list="{{ elecBars }}" as="b" hint-placeholder-count="6">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:11px;color:var(--muted-foreground);font-feature-settings:'tnum';">{{ b.v }}</div>
+                  <div style="width:100%;border-radius:4px 4px 2px 2px;background:{{ b.bg }};height:{{ b.h }};border:1px solid {{ b.bd }};box-sizing:border-box;"></div>
+                  <div style="font-size:11px;color:var(--muted-foreground);">{{ b.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:15px;font-weight:600;">Monthly cost (Ft)</div>
+              <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-foreground);">
+                <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:2px;background:color-mix(in oklab, var(--primary) 30%, var(--card));border:1px solid var(--primary);"></span>Fixed</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:2px;background:var(--primary);"></span>Metered</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:14px;height:110px;">
+              <sc-for list="{{ costBars }}" as="b" hint-placeholder-count="6">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:11px;color:var(--muted-foreground);font-feature-settings:'tnum';">{{ b.total }}</div>
+                  <div style="width:100%;display:flex;flex-direction:column;border-radius:4px 4px 2px 2px;overflow:hidden;">
+                    <div style="height:{{ b.mh }};background:var(--primary);"></div>
+                    <div style="height:{{ b.fh }};background:color-mix(in oklab, var(--primary) 30%, var(--card));border:1px solid var(--primary);border-top:none;box-sizing:border-box;"></div>
+                  </div>
+                  <div style="font-size:11px;color:var(--muted-foreground);">{{ b.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    const badge = {
+      overdue: { bBg: 'var(--destructive-bg)', bFg: 'var(--destructive)', bBd: 'var(--destructive-border)' },
+      paid: { bBg: 'var(--success-bg)', bFg: 'var(--success)', bBd: 'var(--success-border)' },
+      partial: { bBg: 'var(--warning-bg)', bFg: 'var(--warning)', bBd: 'var(--warning-border)' },
+    };
+    const statements = [
+      { month: 'July 2026', issued: '1 Jul', total: '286 870 Ft', paid: '—', badge: '! Overdue', ...badge.overdue, rowStyle: 'background:color-mix(in oklab, var(--destructive) 4%, var(--card));' },
+      { month: 'June 2026', issued: '1 Jun', total: '283 120 Ft', paid: '283 120 Ft', badge: '✓ Paid', ...badge.paid, rowStyle: '' },
+      { month: 'May 2026', issued: '1 May', total: '291 480 Ft', paid: '291 480 Ft', badge: '✓ Paid', ...badge.paid, rowStyle: '' },
+      { month: 'April 2026', issued: '1 Apr', total: '279 950 Ft', paid: '279 950 Ft', badge: '✓ Paid', ...badge.paid, rowStyle: '' },
+    ];
+    const ev = [176, 182, 164, 158, 171, 198];
+    const labels = ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+    const elecBars = ev.map((v, i) => ({
+      v, label: labels[i], h: Math.round(v / 198 * 74) + 'px',
+      bg: i === 5 ? 'var(--primary)' : 'color-mix(in oklab, var(--primary) 22%, var(--card))',
+      bd: i === 5 ? 'transparent' : 'color-mix(in oklab, var(--primary) 35%, var(--border))',
+    }));
+    const fixed = 269990;
+    const metered = [15890, 16480, 14210, 13560, 13130, 16880];
+    const costBars = metered.map((m, i) => {
+      const total = fixed + m, max = 287000, H = 74;
+      return {
+        label: labels[i], total: Math.round(total / 1000) + 'k',
+        mh: Math.max(4, Math.round(m / max * H)) + 'px',
+        fh: Math.round(fixed / max * H) + 'px',
+      };
+    });
+    return {
+      theme, statements, elecBars, costBars, zero: 0,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

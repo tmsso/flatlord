@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" data-screen-label="Logon" style="min-height:100vh;background:var(--background);color:var(--foreground);font-size:14px;line-height:1.5;display:flex;flex-direction:column;align-items:center;padding:36px 20px 40px;box-sizing:border-box;">
+  <div style="width:100%;max-width:420px;display:flex;gap:8px;justify-content:flex-end;margin-bottom:26px;">
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ darkSel }}">Dark</button>
+    <button onClick="{{ setHu }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ huSel }}">HU</button>
+    <button onClick="{{ setEn }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);{{ enSel }}">EN</button>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:22px;">
+    <div style="width:56px;height:56px;border-radius:14px;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);margin-bottom:12px;"><svg width="42" height="42" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+    <div style="font-size:24px;font-weight:700;letter-spacing:-0.01em;">Flatlord</div>
+    <div style="font-size:13px;color:var(--muted-foreground);margin-top:2px;">{{ t.tagline }}</div>
+  </div>
+
+  <div style="width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);padding:26px;box-sizing:border-box;">
+    <div style="font-size:17px;font-weight:600;margin-bottom:18px;">{{ t.signIn }}</div>
+
+    <button style="width:100%;min-height:46px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;" style-hover="background:var(--muted);">
+      <span style="width:20px;height:20px;border-radius:999px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--info);background:var(--card);">G</span>
+      {{ t.google }}
+    </button>
+    <div style="font-size:11px;color:var(--muted-foreground);margin-top:6px;text-align:center;">{{ t.googleNote }}</div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted-foreground);font-size:12px;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>{{ t.or }}<div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+
+    <label style="display:block;font-size:13px;font-weight:500;margin-bottom:5px;">{{ t.email }}</label>
+    <input value="alex.tenant@example.com" readOnly style="width:100%;box-sizing:border-box;height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+    <button style="margin-top:12px;width:100%;min-height:46px;border-radius:8px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);" style-hover="filter:brightness(0.95);">{{ t.magicLink }}</button>
+    <div style="font-size:11px;color:var(--muted-foreground);margin-top:6px;text-align:center;">{{ t.magicNote }}</div>
+
+    <div style="margin-top:16px;text-align:center;font-size:13px;"><a href="#pw">{{ t.usePassword }}</a></div>
+  </div>
+
+  <div style="width:100%;max-width:420px;margin-top:16px;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);box-sizing:border-box;">
+    <svg width="14" height="14" viewBox="0 0 12 12" style="color:var(--info);flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>
+    <div style="font-size:12px;color:var(--info);">{{ t.privateNote }}</div>
+  </div>
+
+  <div style="margin-top:26px;font-size:12px;color:var(--muted-foreground);">{{ t.roleNote }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 560, &quot;height&quot;: 720}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;locale&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;hu&quot;, &quot;en&quot;], &quot;default&quot;: &quot;hu&quot;, &quot;tsType&quot;: &quot;'hu' | 'en'&quot;, &quot;section&quot;: &quot;Locale&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, locale: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const locale = this.state.locale ?? this.props.locale ?? 'hu';
+    const hu = locale === 'hu';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    const t = hu ? {
+      tagline: 'Kertész utca 12. · privát bérleménykezelő',
+      signIn: 'Bejelentkezés', google: 'Folytatás Google-fiókkal',
+      googleNote: 'Google OAuth (Supabase Auth) — csak meghívott fiókok léphetnek be.',
+      or: 'vagy', email: 'E-mail cím', magicLink: 'Belépő link küldése',
+      magicNote: 'E-mailben kapsz egy egyszer használatos belépő linket — jelszó nem kell.',
+      usePassword: 'Belépés jelszóval',
+      privateNote: 'Privát alkalmazás: nincs regisztráció. A fiókodat a tulajdonos hozza létre; a bérlő csak a saját bérleményét látja.',
+      roleNote: 'Belépés után szerep szerinti felület: bérlő → portál · tulajdonos → admin.',
+    } : {
+      tagline: 'Kertész utca 12 · private rental manager',
+      signIn: 'Sign in', google: 'Continue with Google',
+      googleNote: 'Google OAuth (Supabase Auth) — invited accounts only.',
+      or: 'or', email: 'Email address', magicLink: 'Send sign-in link',
+      magicNote: 'You will get a one-time sign-in link by email — no password needed.',
+      usePassword: 'Sign in with a password',
+      privateNote: 'Private app: no self-signup. Your account is created by the owner; a tenant sees only their own tenancy.',
+      roleNote: 'After sign-in, role decides the interface: tenant → portal · owner → admin.',
+    };
+    return {
+      theme, t,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      huSel: hu ? on : '', enSel: !hu ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+      setHu: () => this.setState({ locale: 'hu' }), setEn: () => this.setState({ locale: 'en' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
