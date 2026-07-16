@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { SignOutButton } from "@/components/sign-out-button";
 
 const navKeys = [
   "dashboard",
@@ -36,6 +37,7 @@ export default async function AdminLayout({
         <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-end gap-2 px-4">
           <LocaleSwitcher />
           <ThemeToggle />
+          <SignOutButton />
         </header>
         <main className="flex-1 p-6">{children}</main>
       </div>

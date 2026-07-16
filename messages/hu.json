@@ -10,12 +10,18 @@
   },
   "auth": {
     "title": "Flatlord",
+    "tagline": "Privát bérleménykezelő",
     "google": "Folytatás Google-fiókkal",
-    "googleNote": "Google OAuth (Supabase Auth) — csak meghívott fiókok.",
+    "googleNote": "Google OAuth (Supabase Auth) — csak meghívott fiókok léphetnek be.",
+    "or": "vagy",
     "magicLinkLabel": "E-mail cím",
     "magicLinkSubmit": "Belépési link küldése",
     "magicLinkNote": "Egyszer használatos belépési linket kapsz e-mailben — jelszó nem szükséges.",
-    "privateNote": "Privát alkalmazás: önregisztráció nincs. A fiókot a tulajdonos hozza létre."
+    "magicLinkSent": "Elküldtük a belépési linket — nézd meg a postaládád.",
+    "privateNote": "Privát alkalmazás: nincs regisztráció. A fiókodat a tulajdonos hozza létre; a bérlő csak a saját bérleményét látja.",
+    "roleNote": "Belépés után szerep szerinti felület: bérlő → portál · tulajdonos → admin.",
+    "errorNotInvited": "Ehhez a fiókhoz nincs érvényes meghívás.",
+    "errorGeneric": "Hiba történt a bejelentkezés során. Próbáld újra."
   },
   "nav": {
     "dashboard": "Áttekintés",

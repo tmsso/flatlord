@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { SignOutButton } from "@/components/sign-out-button";
 
 const tabKeys = [
   "home",
@@ -23,6 +24,7 @@ export default async function TenantLayout({
         <div className="flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
+          <SignOutButton />
         </div>
       </header>
       <main className="flex-1 p-4 pb-20">{children}</main>
