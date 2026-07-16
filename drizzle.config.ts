@@ -9,6 +9,11 @@ export default {
   schema: "./src/db/schema/index.ts",
   out: "./supabase/migrations",
   dialect: "postgresql",
+  // Supabase owns the `auth` schema (auth.users etc.) — our schema only
+  // stubs auth.users for FK typing (src/db/schema/auth.ts). Restricting to
+  // `public` stops drizzle-kit from trying to CREATE SCHEMA/TABLE for
+  // something that already exists on any real Supabase project.
+  schemaFilter: ["public"],
   dbCredentials: {
     url: process.env.SUPABASE_DB_URL ?? "",
   },

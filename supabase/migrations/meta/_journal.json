@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784238703529,
+      "tag": "0000_clean_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784238746515,
+      "tag": "0001_letting-mode-invariant-and-rls",
+      "breakpoints": true
+    }
+  ]
+}
