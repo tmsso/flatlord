@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:14px;line-height:1.5;padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="max-width:1240px;margin:0 auto 16px;display:flex;align-items:center;gap:8px;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Admin · Property metadata · desktop</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+  </div>
+
+  <div data-screen-label="Property metadata" style="max-width:1240px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);padding:20px 24px;box-sizing:border-box;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:30px;height:30px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 28 28" style="color:var(--primary-foreground);"><path d="M7.5 5.6q6.5-3.8 13 0M8 13.8L14 8.4l6 5.4M10.2 13.3v4.4h7.6v-4.4M7.5 22.4q6.5 3.8 13 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+      <div style="font-size:19px;font-weight:600;">Properties</div>
+      <div style="flex:1;"></div>
+      <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">+ Add property</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:310px 1fr;gap:16px;align-items:start;">
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--card);border:1px solid var(--primary);border-radius:var(--radius);box-shadow:var(--shadow-sm), inset 3px 0 0 var(--primary);padding:12px 14px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:14px;font-weight:600;flex:1;">Kertész utca 12. 3/12</div>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="9" height="9" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.5" fill="currentColor"></circle></svg>Active</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted-foreground);">Flat · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">hrsz 34567/0/A/12</span> · 3 rooms</div>
+        </div>
+        <div style="margin-left:18px;display:flex;flex-direction:column;gap:6px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;" style-hover="background:var(--muted);">
+            <div style="font-size:13px;flex:1;">Szoba 1 <span style="color:var(--muted-foreground);font-size:12px;">· room</span></div>
+            <span style="font-size:11px;color:var(--muted-foreground);">lettable</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;" style-hover="background:var(--muted);">
+            <div style="font-size:13px;flex:1;">Szoba 2 <span style="color:var(--muted-foreground);font-size:12px;">· room</span></div>
+            <span style="font-size:11px;color:var(--muted-foreground);">lettable</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;opacity:0.65;" style-hover="background:var(--muted);">
+            <div style="font-size:13px;flex:1;">Szoba 3 <span style="color:var(--muted-foreground);font-size:12px;">· room</span></div>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">Inactive</span>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 14px;cursor:pointer;opacity:0.75;" style-hover="background:var(--muted);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:14px;font-weight:600;flex:1;">Rózsa utca 8.</div>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:11px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">Inactive</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted-foreground);">House · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">hrsz 6621/2</span></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted-foreground);padding:4px 6px;">Hierarchy rule: every <b style="font-weight:600;">room</b> must have a parent <b style="font-weight:600;">flat</b> — even if the flat itself is not lettable. Flats may sit in a house.</div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <div style="font-size:16px;font-weight:600;">Kertész utca 12. 3/12</div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);"><svg width="11" height="11" viewBox="0 0 12 12"><rect x="2.5" y="5.5" width="7" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"></rect><path d="M4 5.5V4a2 2 0 014 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>ID <span style="font-family:'IBM Plex Mono',monospace;">PROP-0001</span></span>
+          <div style="flex:1;"></div>
+          <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;">Active
+            <span style="width:36px;height:20px;border-radius:999px;background:var(--success);position:relative;display:inline-block;flex-shrink:0;"><span style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:#fff;"></span></span>
+          </label>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Type</label>
+            <span style="display:inline-flex;border:1px solid var(--input);border-radius:6px;overflow:hidden;">
+              <button style="height:36px;padding:0 16px;border:none;font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);">Room</button>
+              <button style="height:36px;padding:0 16px;border:none;border-left:1px solid var(--border);font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:color-mix(in oklab, var(--primary) 14%, var(--card));color:var(--primary);">Flat</button>
+              <button style="height:36px;padding:0 16px;border:none;border-left:1px solid var(--border);font:inherit;font-size:13px;cursor:pointer;background:var(--card);color:var(--foreground);">House</button>
+            </span>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Parent property</label>
+            <div style="height:36px;display:flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);color:var(--muted-foreground);font-size:13px;box-sizing:border-box;">— top level (optional house parent) ▾</div>
+            <div style="font-size:11px;color:var(--muted-foreground);margin-top:3px;">Required when type = room: the parent flat, even if that flat is not lettable itself.</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Address</label>
+            <input value="Kertész utca 12. 3/12, 1073 Budapest" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;" />
+            <div style="font-size:11px;color:var(--muted-foreground);margin-top:3px;">Rooms inherit the parent flat's address automatically.</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Local ID — helyrajzi szám (hrsz)</label>
+            <input value="34567/0/A/12" readOnly style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-family:'IBM Plex Mono',monospace;font-size:13px;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Ownership</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:6px;border:1px solid var(--border);background:var(--muted);font-size:13px;">Emma Admin <b style="font-weight:600;">100%</b><button style="border:none;background:transparent;color:var(--muted-foreground);cursor:pointer;font-size:14px;line-height:1;padding:0;">×</button></span>
+              <button style="height:32px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px dashed var(--input);">+ co-owner</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted-foreground);margin-top:3px;">Owners link to <a href="12 Personal Data.dc.html">personal records</a>.</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:4px;">Lettable</label>
+            <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;height:36px;">
+              <span style="width:36px;height:20px;border-radius:999px;background:var(--primary);position:relative;display:inline-block;flex-shrink:0;"><span style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:#fff;"></span></span>
+              Let as a whole <span style="color:var(--muted-foreground);">(rooms can also be let individually)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="font-size:14px;font-weight:600;">Inhabitants by registration type</div>
+            <button style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:var(--card);color:var(--foreground);border:1px dashed var(--input);margin-left:auto;">+ Add inhabitant</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Registered — main address <span style="color:var(--muted-foreground);font-weight:400;">(állandó lakcím)</span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);font-size:12px;">Alex Tenant<span style="margin-left:auto;color:var(--success);">✓ ID on file</span></span>
+                <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--warning-border);background:var(--warning-bg);font-size:12px;color:var(--warning);">Kata Tenant<span style="margin-left:auto;">ID missing</span></span>
+              </div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Registered — temporary <span style="color:var(--muted-foreground);font-weight:400;">(tartózkodási hely)</span></div>
+              <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--muted);font-size:12px;width:100%;box-sizing:border-box;">Bence Tenant<span style="margin-left:auto;color:var(--success);">✓</span></span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Casual <span style="color:var(--muted-foreground);font-weight:400;">(no registration)</span></div>
+              <div style="font-size:12px;color:var(--muted-foreground);">1 person · no registration obligations</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);font-size:12px;">
+            <svg width="13" height="13" viewBox="0 0 12 12" style="flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>
+            <div style="flex:1;">Only people with a <a href="12 Personal Data.dc.html" style="color:inherit;text-decoration:underline;">personal record</a> can be selected as inhabitants. The registration type drives which of their fields become mandatory (e.g. main-address inhabitants must have an ID number).</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;align-items:center;border-top:1px solid var(--border);padding-top:14px;">
+          <span style="font-size:12px;color:var(--muted-foreground);margin-right:auto;">All edits logged · <a href="#audit">history</a></span>
+          <button style="height:36px;padding:0 14px;border-radius:6px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">Cancel</button>
+          <button style="height:36px;padding:0 16px;border-radius:6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1300}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    return {
+      theme,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --secondary:oklch(0.93 0.008 85); --secondary-foreground:oklch(0.30 0.012 75);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --secondary:oklch(0.33 0.011 75); --secondary-foreground:oklch(0.90 0.008 85);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:14px;line-height:1.5;padding:28px 20px 60px;box-sizing:border-box;">
+<div style="max-width:430px;margin:0 auto;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Tenant Home · 390px</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+    <button onClick="{{ setHu }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ huSel }}">HU</button>
+    <button onClick="{{ setEn }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ enSel }}">EN</button>
+  </div>
+
+  <div data-screen-label="Tenant Home" style="width:390px;margin:0 auto;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:844px;box-sizing:border-box;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px;font-size:12px;font-weight:500;color:var(--muted-foreground);">
+      <span style="font-feature-settings:'tnum';">9:41</span>
+      <span style="display:flex;gap:5px;align-items:center;">
+        <span style="display:inline-flex;gap:1.5px;align-items:flex-end;"><span style="width:3px;height:4px;background:currentColor;border-radius:1px;"></span><span style="width:3px;height:6px;background:currentColor;border-radius:1px;"></span><span style="width:3px;height:8px;background:currentColor;border-radius:1px;"></span><span style="width:3px;height:10px;background:currentColor;border-radius:1px;"></span></span>
+        <span style="width:20px;height:10px;border:1px solid currentColor;border-radius:3px;display:inline-flex;align-items:center;padding:1px;box-sizing:border-box;"><span style="width:70%;height:100%;background:currentColor;border-radius:1px;"></span></span>
+      </span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 20px 14px;">
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;">A</div>
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:600;">{{ t.greeting }}</div>
+        <div style="font-size:12px;color:var(--muted-foreground);">Kertész utca 12., Budapest</div>
+      </div>
+      <button aria-label="Notifications" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0112 0v5l1.5 2.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M10 20.5a2 2 0 004 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <span style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:999px;background:var(--destructive);border:1.5px solid var(--card);"></span>
+      </button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:2px 20px 20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:500;color:var(--muted-foreground);">{{ t.amountDue }}</div>
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6h7M6.5 3.5L9 6l-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{ t.issued }}</span>
+        </div>
+        <div style="font-size:34px;font-weight:700;font-feature-settings:'tnum';letter-spacing:-0.01em;">{{ t.amount }}</div>
+        <div style="font-size:13px;color:var(--muted-foreground);margin-top:2px;">{{ t.dueBy }}</div>
+        <button onClick="{{ toggleCalc }}" style="margin-top:12px;width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-radius:6px;border:1px solid var(--border);background:var(--muted);color:var(--foreground);font:inherit;font-size:13px;font-weight:500;cursor:pointer;">
+          {{ t.howCalc }}
+          <span style="font-size:12px;color:var(--muted-foreground);transition:transform 0.15s;{{ chevRot }}">▾</span>
+        </button>
+        <sc-if value="{{ calcOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:12px;font-feature-settings:'tnum';display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-size:13px;">
+            <span>{{ t.liRent }}</span><span style="text-align:right;">245 000 Ft</span>
+            <span>{{ t.liCommon }}</span><span style="text-align:right;">18 500 Ft</span>
+            <span>Internet</span><span style="text-align:right;">6 490 Ft</span>
+            <span>{{ t.liElec }}</span><span style="text-align:right;">14 256 Ft</span>
+            <span>{{ t.liWater }}</span><span style="text-align:right;">2 624 Ft</span>
+            <span style="font-weight:600;border-top:1px solid var(--border);padding-top:6px;">{{ t.liTotal }}</span><span style="font-weight:600;border-top:1px solid var(--border);padding-top:6px;text-align:right;">286 870 Ft</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--shadow-sm);" style-hover="filter:brightness(0.95);">
+          <svg width="19" height="19" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="M8 6.5l1.5-2.5h5L16 6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"></circle></svg>
+          {{ t.submitReadings }}
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;font-size:12px;color:var(--warning);">
+          <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+          {{ t.readingWindow }}
+        </div>
+        <button style="min-height:48px;border-radius:10px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;" style-hover="background:var(--muted);">
+          <svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><path d="M8 9.5h8M8 12.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          {{ t.newRequest }}
+        </button>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:600;">{{ t.notices }}</div>
+          <a href="#notices" style="font-size:13px;">{{ t.all }}</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>{{ t.info }}</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;">{{ t.notice1 }}</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">2026. 07. 10.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--border);padding-top:10px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2 5.5L6 2.5l4 3V10H2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>{{ t.houseRule }}</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;">{{ t.notice2 }}</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">2026. 07. 02.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:600;">{{ t.consumption }}</div>
+          <a href="#charts" style="font-size:13px;">{{ t.details }}</a>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:76px;">
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="6">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="font-size:10px;color:var(--muted-foreground);font-feature-settings:'tnum';">{{ b.v }}</div>
+              <div style="width:100%;border-radius:4px 4px 2px 2px;background:{{ b.bg }};height:{{ b.h }};border:1px solid {{ b.bd }};box-sizing:border-box;"></div>
+              <div style="font-size:10px;color:var(--muted-foreground);">{{ b.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;border-top:1px solid var(--border);background:var(--card);padding:6px 8px 18px;">
+      <div style="flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--primary);cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5h-5v5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+        <span style="font-size:11px;font-weight:600;">{{ t.tabHome }}</span>
+      </div>
+      <div style="flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted-foreground);cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M3 9.5h18" stroke="currentColor" stroke-width="1.8"></path></svg>
+        <span style="font-size:11px;font-weight:500;">{{ t.tabPayments }}</span>
+      </div>
+      <div style="flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted-foreground);cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="1.8"></circle><path d="M12 13l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M9 3.5h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        <span style="font-size:11px;font-weight:500;">{{ t.tabMeters }}</span>
+      </div>
+      <div style="flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted-foreground);cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+        <span style="font-size:11px;font-weight:500;">{{ t.tabRequests }}</span>
+      </div>
+      <div style="flex:1;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted-foreground);cursor:pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor"></circle><circle cx="12" cy="12" r="1.7" fill="currentColor"></circle><circle cx="19" cy="12" r="1.7" fill="currentColor"></circle></svg>
+        <span style="font-size:11px;font-weight:500;">{{ t.tabMore }}</span>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:12px;color:oklch(0.45 0.01 75);margin-top:14px;">Hero: amount + status + calculation expander · one primary action · notices strip · consumption mini-chart · 44px+ targets</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 470}, &quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;locale&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;hu&quot;, &quot;en&quot;], &quot;default&quot;: &quot;hu&quot;, &quot;tsType&quot;: &quot;'hu' | 'en'&quot;, &quot;section&quot;: &quot;Locale&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, locale: null, calcOpen: true };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const locale = this.state.locale ?? this.props.locale ?? 'hu';
+    const hu = locale === 'hu';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    const vals = [176, 182, 164, 158, 171, 198];
+    const labels = hu ? ['febr', 'márc', 'ápr', 'máj', 'jún', 'júl'] : ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+    const bars = vals.map((v, i) => ({
+      v, label: labels[i],
+      h: Math.round(v / 198 * 46) + 'px',
+      bg: i === 5 ? 'var(--primary)' : 'color-mix(in oklab, var(--primary) 22%, var(--card))',
+      bd: i === 5 ? 'transparent' : 'color-mix(in oklab, var(--primary) 35%, var(--border))',
+    }));
+    const t = hu ? {
+      greeting: 'Szia, Alex!', amountDue: 'Fizetendő összeg', amount: '286 870 Ft', dueBy: 'Esedékes: 2026. 07. 05.',
+      issued: 'Kiállítva', howCalc: 'Hogyan jött ki ez az összeg?',
+      liRent: 'Bérleti díj', liCommon: 'Közös költség', liElec: 'Villany (198 kWh × 72 Ft)', liWater: 'Víz (3,2 m³ × 820 Ft)', liTotal: 'Összesen',
+      submitReadings: 'Mérőállás beküldése', readingWindow: 'Leolvasási időszak: júl. 25–31.', newRequest: 'Új kérés',
+      notices: 'Értesítések', all: 'Összes', info: 'Tájékoztatás', houseRule: 'Házirend',
+      notice1: 'Vízóra-csere: aug. 12. (szerda) 9–12 között, a szerelő becsönget.',
+      notice2: 'Emlékeztető: a tárolóban tilos éghető anyagot tartani.',
+      consumption: 'Villanyfogyasztás (kWh)', details: 'Részletek',
+      tabHome: 'Főoldal', tabPayments: 'Fizetések', tabMeters: 'Mérőórák', tabRequests: 'Kérések', tabMore: 'Egyéb',
+    } : {
+      greeting: 'Hi, Alex!', amountDue: 'Amount due', amount: 'HUF 286,870', dueBy: 'Due by 5 Jul 2026',
+      issued: 'Issued', howCalc: 'How this amount is calculated',
+      liRent: 'Rent', liCommon: 'Common cost', liElec: 'Electricity (198 kWh × 72 Ft)', liWater: 'Water (3.2 m³ × 820 Ft)', liTotal: 'Total',
+      submitReadings: 'Submit meter readings', readingWindow: 'Reading window: 25–31 Jul', newRequest: 'New request',
+      notices: 'Notices', all: 'View all', info: 'Info', houseRule: 'House rule',
+      notice1: 'Water-meter replacement: 12 Aug (Wed) 9–12, the technician will ring.',
+      notice2: 'Reminder: no flammable materials in the storage unit.',
+      consumption: 'Electricity use (kWh)', details: 'Details',
+      tabHome: 'Home', tabPayments: 'Payments', tabMeters: 'Meters', tabRequests: 'Requests', tabMore: 'More',
+    };
+    return {
+      theme, t, bars, calcOpen: this.state.calcOpen,
+      chevRot: this.state.calcOpen ? 'transform:rotate(180deg);' : '',
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      huSel: hu ? on : '', enSel: !hu ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+      setHu: () => this.setState({ locale: 'hu' }), setEn: () => this.setState({ locale: 'en' }),
+      toggleCalc: () => this.setState(s => ({ calcOpen: !s.calcOpen })),
+    };
+  }
+}
+</script>
+</body>
+</html>

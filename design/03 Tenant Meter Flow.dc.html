@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:var(--primary,#22687a);text-decoration:none;}
+a:hover{color:var(--primary,#22687a);text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --secondary:oklch(0.93 0.008 85); --secondary-foreground:oklch(0.30 0.012 75);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --shadow-md:0 1px 3px oklch(0.3 0.02 75 / 0.09), 0 2px 8px oklch(0.3 0.02 75 / 0.05);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200); --ring:oklch(0.55 0.09 205);
+}
+.fl[data-theme="dark"]{
+  --background:oklch(0.215 0.009 75); --foreground:oklch(0.928 0.006 85);
+  --card:oklch(0.262 0.010 75); --muted:oklch(0.305 0.011 75); --muted-foreground:oklch(0.705 0.012 80);
+  --border:oklch(0.365 0.013 75); --input:oklch(0.42 0.014 75);
+  --secondary:oklch(0.33 0.011 75); --secondary-foreground:oklch(0.90 0.008 85);
+  --success:oklch(0.74 0.13 155); --success-bg:oklch(0.30 0.045 155); --success-border:oklch(0.42 0.07 155);
+  --warning:oklch(0.80 0.12 82); --warning-bg:oklch(0.31 0.05 82); --warning-border:oklch(0.44 0.08 82);
+  --destructive:oklch(0.74 0.15 25); --destructive-bg:oklch(0.30 0.05 25); --destructive-border:oklch(0.44 0.08 25);
+  --info:oklch(0.74 0.11 250); --info-bg:oklch(0.30 0.04 250); --info-border:oklch(0.43 0.07 250);
+  --shadow-sm:0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-md:0 1px 3px oklch(0 0 0 / 0.4), 0 2px 10px oklch(0 0 0 / 0.25);
+  --primary:oklch(0.76 0.095 197); --primary-foreground:oklch(0.21 0.03 200); --ring:oklch(0.76 0.095 197);
+}
+</style>
+</helmet>
+<div class="fl" data-theme="{{ theme }}" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:14px;line-height:1.5;padding:28px 24px 60px;box-sizing:border-box;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+    <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);">Meter submission flow · signature flow · 390px · one-handed · meter set, scope &amp; reading frequency are per-flat admin config</div>
+    <div style="flex:1;"></div>
+    <button onClick="{{ setLight }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ lightSel }}">Light</button>
+    <button onClick="{{ setDark }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ darkSel }}">Dark</button>
+    <button onClick="{{ setHu }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ huSel }}">HU</button>
+    <button onClick="{{ setEn }}" style="height:30px;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer;background:#fff;color:#333;border:1px solid #c8c4bd;{{ enSel }}">EN</button>
+  </div>
+
+  <div style="display:flex;gap:28px;align-items:flex-start;">
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">1 · {{ t.s1title }}</div>
+      <div data-screen-label="Meters list" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;">
+        <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 12px;">
+          <button style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;font-size:17px;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:600;">{{ t.s1title }}</div>
+            <div style="font-size:12px;color:var(--muted-foreground);">{{ t.s1window }}</div>
+          </div>
+        </div>
+        <div style="padding:4px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px;display:flex;gap:12px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:9px;background:var(--warning-bg);border:1px solid var(--warning-border);color:var(--warning);display:flex;align-items:center;justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M13 3L6 13.5h4.5L10 21l7.5-10.5H13z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;">{{ t.elec }}</div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">E-4471 8823</span> · {{ t.last }}: 12 316 kWh · 06. 28.</div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>{{ t.pending }}</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px;display:flex;gap:12px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:9px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);display:flex;align-items:center;justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;">{{ t.gas }}</div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">G-2210 4471</span> · {{ t.last }}: 4 872 m³ · 06. 28.</div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>{{ t.pending }}</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px;display:flex;gap:12px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:9px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);display:flex;align-items:center;justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 01-11 0c0-3 2.5-6 5.5-10z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;">{{ t.waterBath }}</div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">W-118 2234</span> · {{ t.last }}: 318,4 m³ · 06. 28.</div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{ t.done }}</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px;display:flex;gap:12px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:9px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);display:flex;align-items:center;justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 01-11 0c0-3 2.5-6 5.5-10z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;">{{ t.waterKitchen }}</div>
+              <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">W-118 2235</span> · {{ t.last }}: 122,9 m³ · 06. 28.</div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);"><svg width="10" height="10" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.7" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 3.6V6l1.7 1.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>{{ t.pending }}</span>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="font-size:12px;color:var(--muted-foreground);text-align:center;">1 / 4 {{ t.doneCount }}</div>
+          <button style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);">{{ t.continueMissing }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">2 · {{ t.s2label }}</div>
+      <div data-screen-label="Camera capture" style="width:390px;background:oklch(0.17 0.01 75);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;color:oklch(0.95 0.005 85);">
+        <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 10px;">
+          <button style="width:44px;height:44px;border-radius:10px;border:1px solid oklch(0.4 0.01 75);background:oklch(0.24 0.01 75);color:oklch(0.95 0.005 85);cursor:pointer;font-size:17px;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;">{{ t.elec }}</div>
+            <div style="font-size:12px;color:oklch(0.7 0.01 80);font-feature-settings:'tnum';">2 / 4 · <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">E-4471 8823</span></div>
+          </div>
+          <button style="min-width:44px;height:44px;border-radius:10px;border:1px solid oklch(0.4 0.01 75);background:oklch(0.24 0.01 75);color:oklch(0.95 0.005 85);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M13 3L6 13.5h4.5L10 21l7.5-10.5H13z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg></button>
+        </div>
+        <div style="flex:1;position:relative;margin:6px 16px;border-radius:14px;overflow:hidden;background:repeating-linear-gradient(45deg,oklch(0.22 0.01 75) 0 10px,oklch(0.26 0.01 75) 10px 20px);">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:oklch(0.65 0.01 80);">live camera preview</div>
+          <div style="position:absolute;left:10%;right:10%;top:34%;height:24%;border:2px solid oklch(0.76 0.095 197);border-radius:10px;box-shadow:0 0 0 2000px oklch(0.1 0.01 75 / 0.35);"></div>
+          <div style="position:absolute;left:0;right:0;top:61%;text-align:center;font-size:13px;color:oklch(0.9 0.005 85);text-shadow:0 1px 3px oklch(0 0 0/0.6);">{{ t.frameHint }}</div>
+        </div>
+        <div style="padding:14px 16px 26px;display:flex;align-items:center;justify-content:space-between;">
+          <button style="width:52px;height:52px;border-radius:12px;border:1px solid oklch(0.4 0.01 75);background:oklch(0.24 0.01 75);color:oklch(0.95 0.005 85);cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Upload from gallery"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"></rect><circle cx="8.5" cy="9.5" r="1.6" fill="currentColor"></circle><path d="M4.5 18l5-5 4 4 3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg></button>
+          <button style="width:76px;height:76px;border-radius:999px;border:4px solid oklch(0.95 0.005 85);background:oklch(0.76 0.095 197);cursor:pointer;box-shadow:0 2px 10px oklch(0 0 0/0.4);" aria-label="Capture"></button>
+          <button style="width:52px;height:52px;border-radius:12px;border:1px solid oklch(0.4 0.01 75);background:oklch(0.24 0.01 75);color:oklch(0.95 0.005 85);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;">{{ t.skipPhoto }}</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:oklch(0.45 0.01 75);margin-top:6px;max-width:390px;">{{ t.s2note }}</div>
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">3 · {{ t.s3label }}</div>
+      <div data-screen-label="Value entry" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;">
+        <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 10px;">
+          <button style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;font-size:17px;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;">{{ t.elec }}</div>
+            <div style="font-size:12px;color:var(--muted-foreground);">2 / 4 · {{ t.enterValue }}</div>
+          </div>
+        </div>
+        <div style="padding:6px 16px 16px;display:flex;flex-direction:column;gap:12px;flex:1;">
+          <div style="height:150px;border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden;background:repeating-linear-gradient(45deg,var(--muted) 0 10px,var(--card) 10px 20px);">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);">captured photo</div>
+            <button style="position:absolute;bottom:8px;right:8px;height:36px;padding:0 12px;border-radius:8px;font:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">{{ t.retake }}</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;">
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px;">{{ t.newValue }}</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input value="12 480" readOnly inputMode="numeric" style="flex:1;min-width:0;height:56px;padding:0 14px;border-radius:10px;border:1px solid var(--ring);outline:2px solid var(--ring);outline-offset:2px;background:var(--card);color:var(--foreground);font:inherit;font-size:26px;font-weight:600;font-feature-settings:'tnum';box-sizing:border-box;" />
+              <span style="font-size:15px;color:var(--muted-foreground);font-weight:500;">kWh</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;font-feature-settings:'tnum';">
+              <span style="color:var(--muted-foreground);">{{ t.prev }}: 12 316 kWh</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);">Δ +164 kWh</span>
+            </div>
+            <div style="margin-top:6px;font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">{{ t.estCost }}: 164 × 72 Ft ≈ <b style="font-weight:600;color:var(--foreground);">11 808 Ft</b></div>
+          </div>
+          <div style="flex:1;"></div>
+          <button style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);">{{ t.nextMeter }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">3e · {{ t.s3eLabel }}</div>
+      <div data-screen-label="Value entry error" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;">
+        <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 10px;">
+          <button style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;font-size:17px;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;">{{ t.elec }}</div>
+            <div style="font-size:12px;color:var(--muted-foreground);">2 / 4 · {{ t.enterValue }}</div>
+          </div>
+        </div>
+        <div style="padding:6px 16px 16px;display:flex;flex-direction:column;gap:12px;flex:1;">
+          <div style="height:150px;border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden;background:repeating-linear-gradient(45deg,var(--muted) 0 10px,var(--card) 10px 20px);">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-foreground);">captured photo</div>
+            <button style="position:absolute;bottom:8px;right:8px;height:36px;padding:0 12px;border-radius:8px;font:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--foreground);border:1px solid var(--input);">{{ t.retake }}</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--destructive-border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;">
+            <label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px;">{{ t.newValue }}</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input value="12 190" readOnly inputMode="numeric" style="flex:1;min-width:0;height:56px;padding:0 14px;border-radius:10px;border:1.5px solid var(--destructive);background:var(--card);color:var(--foreground);font:inherit;font-size:26px;font-weight:600;font-feature-settings:'tnum';box-sizing:border-box;" />
+              <span style="font-size:15px;color:var(--muted-foreground);font-weight:500;">kWh</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--destructive-bg);border:1px solid var(--destructive-border);color:var(--destructive);">
+              <svg width="15" height="15" viewBox="0 0 12 12" style="flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M6 3.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="8.6" r="0.8" fill="currentColor"></circle></svg>
+              <div style="font-size:13px;">{{ t.errLower }}</div>
+            </div>
+            <button style="margin-top:10px;width:100%;min-height:44px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--foreground);font:inherit;font-size:13px;font-weight:500;cursor:pointer;">{{ t.errNote }}</button>
+          </div>
+          <div style="flex:1;"></div>
+          <button disabled="{{ true }}" style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;opacity:0.5;cursor:not-allowed;">{{ t.nextMeter }}</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:oklch(0.45 0.01 75);margin-top:6px;max-width:390px;">{{ t.s3eNote }}</div>
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">4 · {{ t.s4label }}</div>
+      <div data-screen-label="Review all" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;">
+        <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 10px;">
+          <button style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;font-size:17px;">‹</button>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:600;">{{ t.s4label }}</div>
+            <div style="font-size:12px;color:var(--muted-foreground);">2026. 07. 28.</div>
+          </div>
+        </div>
+        <div style="padding:4px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1;">
+          <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="4">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:12px;display:flex;gap:12px;align-items:center;">
+              <div style="width:56px;height:44px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 7px,var(--card) 7px 14px);flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;">{{ r.name }}</div>
+                <div style="font-size:12px;color:var(--muted-foreground);font-feature-settings:'tnum';">{{ r.value }}</div>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);white-space:nowrap;font-feature-settings:'tnum';">{{ r.delta }}</span>
+              <button style="width:40px;height:40px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--foreground);cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Edit"><svg width="14" height="14" viewBox="0 0 12 12"><path d="M2.5 9.5l0.9-2.7 5-5a1 1 0 011.4 0l0.4 0.4a1 1 0 010 1.4l-5 5z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg></button>
+            </div>
+          </sc-for>
+          <div style="padding:10px 12px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);font-size:12px;display:flex;gap:8px;align-items:flex-start;">
+            <svg width="13" height="13" viewBox="0 0 12 12" style="flex-shrink:0;margin-top:2px;"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.3"></circle><path d="M6 5.4v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><circle cx="6" cy="3.4" r="0.8" fill="currentColor"></circle></svg>
+            {{ t.s4note }}
+          </div>
+          <div style="flex:1;"></div>
+          <button style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);">{{ t.submitAll }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <div style="font-size:13px;font-weight:600;color:oklch(0.4 0.01 75);margin-bottom:8px;">5 · {{ t.s5label }}</div>
+      <div data-screen-label="Submitted" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;height:800px;box-sizing:border-box;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;text-align:center;">
+          <div style="width:72px;height:72px;border-radius:999px;background:var(--success-bg);border:1px solid var(--success-border);color:var(--success);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="34" height="34" viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
+          <div style="font-size:21px;font-weight:600;margin-bottom:6px;">{{ t.s5title }}</div>
+          <div style="font-size:14px;color:var(--muted-foreground);margin-bottom:22px;">{{ t.s5body }}</div>
+          <div style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px 16px;font-feature-settings:'tnum';display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-size:13px;text-align:left;">
+            <span>{{ t.elec }}</span><span style="font-weight:600;">12 480 kWh</span>
+            <span>{{ t.gas }}</span><span style="font-weight:600;">4 891 m³</span>
+            <span>{{ t.waterBath }}</span><span style="font-weight:600;">321,2 m³</span>
+            <span>{{ t.waterKitchen }}</span><span style="font-weight:600;">124,1 m³</span>
+          </div>
+        </div>
+        <div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:10px;">
+          <button style="min-height:52px;border-radius:10px;border:1px solid transparent;background:var(--primary);color:var(--primary-foreground);font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);">{{ t.backHome }}</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;'light' | 'dark'&quot;, &quot;section&quot;: &quot;Theme&quot;}, &quot;locale&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;hu&quot;, &quot;en&quot;], &quot;default&quot;: &quot;hu&quot;, &quot;tsType&quot;: &quot;'hu' | 'en'&quot;, &quot;section&quot;: &quot;Locale&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, locale: null };
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? 'light';
+    const locale = this.state.locale ?? this.props.locale ?? 'hu';
+    const hu = locale === 'hu';
+    const on = 'background:oklch(0.47 0.085 205);border-color:oklch(0.47 0.085 205);color:#fff;font-weight:600;';
+    const t = hu ? {
+      s1title: 'Mérőállások beküldése', s1window: 'Leolvasási időszak: júl. 25–31.',
+      elec: 'Villanyóra', gas: 'Gázóra', waterBath: 'Vízóra — fürdő', waterKitchen: 'Vízóra — konyha',
+      last: 'előző', pending: 'Hátravan', done: 'Kész', doneCount: 'kész',
+      continueMissing: 'Folytatás a hiányzókkal',
+      s2label: 'Fotó készítése', frameHint: 'Igazítsd a számlálót a keretbe',
+      skipPhoto: 'Kihagy', s2note: 'Alsó harmadban minden vezérlő — egykezes használat. Galéria-feltöltés balra, fotó kihagyása (indoklással) jobbra.',
+      s3label: 'Érték megadása', enterValue: 'érték megadása', retake: 'Újra',
+      newValue: 'Új mérőállás', prev: 'Előző', estCost: 'Várható költség', nextMeter: 'Következő mérő',
+      s3eLabel: 'Hibaállapot', errLower: 'Kisebb, mint az előző állás (12 316 kWh). Ellenőrizd a fotót, vagy jelezd, ha az óra cserélve lett.',
+      errNote: 'Megjegyzés küldése a tulajdonosnak', s3eNote: 'A ≥ előző validáció blokkol; felülbírálni csak az admin tud. A folytatás letiltva, amíg a hiba fennáll.',
+      s4label: 'Ellenőrzés és beküldés', s4note: 'Beküldés után a tulajdonos ellenőrzi az értékeket — csak jóváhagyott állás kerül a kimutatásba.',
+      submitAll: 'Mind a 4 beküldése',
+      s5label: 'Beküldve', s5title: 'Sikeres beküldés!', s5body: 'A tulajdonos értesítést kapott, jóváhagyás után készül a havi kimutatás.',
+      backHome: 'Vissza a főoldalra',
+    } : {
+      s1title: 'Submit meter readings', s1window: 'Reading window: 25–31 Jul',
+      elec: 'Electricity meter', gas: 'Gas meter', waterBath: 'Water — bathroom', waterKitchen: 'Water — kitchen',
+      last: 'last', pending: 'To do', done: 'Done', doneCount: 'done',
+      continueMissing: 'Continue with remaining',
+      s2label: 'Take photo', frameHint: 'Align the counter inside the frame',
+      skipPhoto: 'Skip', s2note: 'All controls in the bottom third — one-handed use. Gallery upload left, skip photo (with reason) right.',
+      s3label: 'Enter value', enterValue: 'enter value', retake: 'Retake',
+      newValue: 'New reading', prev: 'Previous', estCost: 'Estimated cost', nextMeter: 'Next meter',
+      s3eLabel: 'Error state', errLower: 'Lower than the previous reading (12,316 kWh). Check the photo, or flag if the meter was replaced.',
+      errNote: 'Send a note to the owner', s3eNote: 'The ≥ previous validation blocks; only the admin can override. Continue stays disabled while the error persists.',
+      s4label: 'Review & submit', s4note: 'After submission the owner verifies the values — only verified readings enter the statement.',
+      submitAll: 'Submit all 4',
+      s5label: 'Submitted', s5title: 'Successfully submitted!', s5body: 'The owner has been notified; the monthly statement is drafted after verification.',
+      backHome: 'Back to home',
+    };
+    const reviewRows = hu ? [
+      { name: 'Villanyóra', value: '12 480 kWh · előző 12 316', delta: 'Δ +164' },
+      { name: 'Gázóra', value: '4 891 m³ · előző 4 872', delta: 'Δ +19' },
+      { name: 'Vízóra — fürdő', value: '321,2 m³ · előző 318,4', delta: 'Δ +2,8' },
+      { name: 'Vízóra — konyha', value: '124,1 m³ · előző 122,9', delta: 'Δ +1,2' },
+    ] : [
+      { name: 'Electricity meter', value: '12,480 kWh · prev 12,316', delta: 'Δ +164' },
+      { name: 'Gas meter', value: '4,891 m³ · prev 4,872', delta: 'Δ +19' },
+      { name: 'Water — bathroom', value: '321.2 m³ · prev 318.4', delta: 'Δ +2.8' },
+      { name: 'Water — kitchen', value: '124.1 m³ · prev 122.9', delta: 'Δ +1.2' },
+    ];
+    return {
+      theme, t, reviewRows,
+      lightSel: theme === 'light' ? on : '', darkSel: theme === 'dark' ? on : '',
+      huSel: hu ? on : '', enSel: !hu ? on : '',
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+      setHu: () => this.setState({ locale: 'hu' }), setEn: () => this.setState({ locale: 'en' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

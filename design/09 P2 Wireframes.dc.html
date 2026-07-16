@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#e9e6e1;}
+a{color:#22687a;text-decoration:none;} a:hover{text-decoration:underline;}
+.fl{
+  --background:oklch(0.962 0.006 85); --foreground:oklch(0.25 0.012 75);
+  --card:oklch(1 0 0); --muted:oklch(0.94 0.007 85); --muted-foreground:oklch(0.49 0.015 75);
+  --border:oklch(0.872 0.010 85); --input:oklch(0.826 0.012 85);
+  --success:oklch(0.51 0.12 155); --success-bg:oklch(0.95 0.035 155); --success-border:oklch(0.85 0.07 155);
+  --warning:oklch(0.50 0.11 70); --warning-bg:oklch(0.955 0.045 85); --warning-border:oklch(0.85 0.08 80);
+  --destructive:oklch(0.52 0.185 27); --destructive-bg:oklch(0.955 0.028 25); --destructive-border:oklch(0.86 0.06 25);
+  --info:oklch(0.50 0.12 250); --info-bg:oklch(0.945 0.028 250); --info-border:oklch(0.85 0.055 250);
+  --shadow-sm:0 1px 2px oklch(0.3 0.02 75 / 0.07);
+  --radius:8px; --primary:oklch(0.47 0.085 205); --primary-foreground:oklch(0.99 0.003 200);
+}
+</style>
+</helmet>
+<div class="fl" style="min-height:100vh;background:oklch(0.90 0.008 85);color:var(--foreground);font-size:13px;line-height:1.45;padding:28px;box-sizing:border-box;">
+  <div style="font-weight:600;font-size:15px;color:oklch(0.35 0.012 75);margin-bottom:4px;">P2 screens — wireframe fidelity</div>
+  <div style="font-size:12px;color:oklch(0.45 0.01 75);margin-bottom:20px;">Structure + flows only; visual language inherits the P1 token set. Tenant frames 390px, admin frames condensed (sidebar omitted).</div>
+
+  <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">7a · Request — tenant create (390)</div>
+      <div data-screen-label="Request create" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:15px;font-weight:600;">‹ Új kérés</div>
+        <div style="border:1px solid var(--input);border-radius:8px;padding:9px 12px;background:var(--card);display:flex;justify-content:space-between;color:var(--muted-foreground);">Kategória: <b style="color:var(--foreground);font-weight:500;">Javítás ▾</b></div>
+        <div style="border:1px solid var(--input);border-radius:8px;padding:9px 12px;background:var(--card);color:var(--muted-foreground);">Tárgy — pl. "Csöpög a csap"</div>
+        <div style="border:1px solid var(--input);border-radius:8px;padding:9px 12px;background:var(--card);color:var(--muted-foreground);height:84px;">Leírás…</div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;border:1.5px dashed var(--input);border-radius:8px;height:64px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);background:var(--muted);">+ fotó / melléklet</div>
+          <div style="flex:1;border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--muted-foreground);font-size:12px;">Elérhetőség időpont-egyeztetéshez (opcionális)<br /><b style="color:var(--foreground);font-weight:500;">hétköznap 16h után</b></div>
+        </div>
+        <div style="min-height:46px;border-radius:8px;background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;justify-content:center;font-weight:600;">Kérés beküldése</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">7b · Request — thread (390)</div>
+      <div data-screen-label="Request thread" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:14px;font-weight:600;flex:1;">‹ Csöpög a csap</div>
+          <span style="padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">Folyamatban</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted-foreground);">Javítás · #REQ-114 · külső ügyszám: KH-2291 · időpont: <b style="font-weight:600;color:var(--foreground);">júl. 18. 10:00</b></div>
+        <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:10px 12px;">Alex · júl. 12.<br /><span style="color:var(--muted-foreground);">Leírás + 1 fotó melléklet</span></div>
+        <div style="border:1px solid var(--border);border-radius:10px;background:color-mix(in oklab, var(--primary) 7%, var(--card));padding:10px 12px;margin-left:24px;">Emma (tulajdonos) · júl. 13.<br /><span style="color:var(--muted-foreground);">Szerelő időpont-javaslat + biztosítói munkalap.pdf</span></div>
+        <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:10px 12px;">Alex · júl. 13.<br /><span style="color:var(--muted-foreground);">Időpont elfogadva ✓</span></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="flex:1;border:1px solid var(--input);border-radius:999px;padding:9px 14px;background:var(--card);color:var(--muted-foreground);">Válasz…</div>
+          <div style="width:44px;height:44px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;justify-content:center;">→</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">7c · Requests — admin queue (desktop, condensed)</div>
+      <div data-screen-label="Requests admin queue" style="width:860px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;">
+        <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+          <div style="font-size:15px;font-weight:600;flex:1;">Requests</div>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--primary);color:var(--primary);font-weight:600;font-size:12px;">Open · 2</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:12px;">In progress · 1</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:12px;">Resolved · 41</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:12px;">Category ▾</span>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:70px 1.6fr 1fr 1fr 1fr 90px;padding:7px 12px;background:var(--muted);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted-foreground);"><div>#</div><div>Subject</div><div>Category</div><div>External ref</div><div>Appointment</div><div>Status</div></div>
+          <div style="display:grid;grid-template-columns:70px 1.6fr 1fr 1fr 1fr 90px;padding:8px 12px;border-bottom:1px solid var(--border);align-items:center;"><div style="color:var(--muted-foreground);">114</div><div>Dripping tap in bathroom</div><div>Repair</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;">KH-2291</div><div>18 Jul 10:00</div><span style="padding:1px 8px;border-radius:999px;font-size:11px;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);text-align:center;">In progress</span></div>
+          <div style="display:grid;grid-template-columns:70px 1.6fr 1fr 1fr 1fr 90px;padding:8px 12px;border-bottom:1px solid var(--border);align-items:center;"><div style="color:var(--muted-foreground);">113</div><div>Insurer worksheet uploaded</div><div>Repair</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;">KH-2291</div><div>—</div><span style="padding:1px 8px;border-radius:999px;font-size:11px;background:var(--info-bg);color:var(--info);border:1px solid var(--info-border);text-align:center;">Open</span></div>
+          <div style="display:grid;grid-template-columns:70px 1.6fr 1fr 1fr 1fr 90px;padding:8px 12px;align-items:center;color:var(--muted-foreground);"><div>112</div><div>Billing question — May water</div><div>Billing</div><div>—</div><div>—</div><span style="padding:1px 8px;border-radius:999px;font-size:11px;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);text-align:center;">Resolved</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted-foreground);margin-top:8px;">Row click → thread side panel · every transition notifies the other party.</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">8a · Notice — admin compose (desktop)</div>
+      <div data-screen-label="Notice compose" style="width:560px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;">
+        <div style="font-size:15px;font-weight:600;">Compose notice</div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--muted-foreground);">Type: <b style="color:var(--destructive);font-weight:600;">Formal warning ▾</b></div>
+          <div style="flex:1;border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--muted-foreground);">Sequence: <b style="color:var(--foreground);font-weight:600;">2nd ▾</b></div>
+        </div>
+        <div style="border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--muted-foreground);">Contract clause: <b style="color:var(--foreground);font-weight:500;">7.2 — payment default ▾</b> <span style="font-size:11px;">(searchable from parsed contract)</span></div>
+        <div style="border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--muted-foreground);height:72px;">Body (hu + en tabs)…</div>
+        <div style="display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--destructive-bg);border:1px solid var(--destructive-border);color:var(--destructive);font-size:12px;">Formal warnings require explicit tenant acknowledgement and become immutable on send.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <div style="padding:9px 14px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--muted-foreground);">Preview (hu/en)</div>
+          <div style="padding:9px 14px;border-radius:8px;background:var(--destructive);color:#fff;font-weight:600;">Send — in-app + email</div>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:600;margin:14px 0 6px;color:oklch(0.4 0.01 75);">8b · Notice — tenant acknowledge (390)</div>
+      <div data-screen-label="Notice acknowledge" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;">
+        <div style="display:flex;gap:8px;align-items:center;"><span style="padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--destructive-bg);color:var(--destructive);border:1px solid var(--destructive-border);">Hivatalos felszólítás · 2.</span><span style="font-size:11px;color:var(--muted-foreground);">Szerződés 7.2 · 2026. 07. 15.</span></div>
+        <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:12px;color:var(--muted-foreground);height:120px;">Teljes szöveg… (görgethető, nem szerkeszthető)</div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:12px;"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--input);background:var(--card);"></span>Elolvastam és tudomásul vettem</div>
+        <div style="min-height:46px;border-radius:8px;background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;justify-content:center;font-weight:600;opacity:0.5;">Tudomásulvétel megerősítése</div>
+        <div style="font-size:11px;color:var(--muted-foreground);">Megerősítés naplózva (ki + mikor) · archívum megváltoztathatatlan.</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">9 · Approval — change request diff (desktop)</div>
+      <div data-screen-label="Approval diff" style="width:560px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;"><div style="font-size:15px;font-weight:600;flex:1;">Change request — Alex Tenant</div><span style="padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">Needs approval</span></div>
+        <div style="font-size:12px;color:var(--muted-foreground);">Field: <span style="font-family:'IBM Plex Mono',monospace;">person.document_name</span> · policy: approval_required · requested 13 Jul</div>
+        <div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:8px;align-items:center;">
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--muted);padding:10px 12px;"><div style="font-size:11px;color:var(--muted-foreground);">Current</div><div style="text-decoration:line-through;color:var(--muted-foreground);">Alex Tenant</div></div>
+          <div style="text-align:center;color:var(--muted-foreground);">→</div>
+          <div style="border:1px solid var(--success-border);border-radius:8px;background:var(--success-bg);padding:10px 12px;"><div style="font-size:11px;color:var(--success);">Proposed</div><div style="font-weight:600;">Alexandru Tenant</div></div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:8px;background:var(--card);padding:9px 12px;font-size:12px;color:var(--muted-foreground);">Note: "Passport spelling" · attachment: passport-scan.jpg (masked preview)</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <div style="padding:9px 14px;border-radius:8px;border:1px solid var(--destructive-border);color:var(--destructive);background:var(--card);">Reject with note</div>
+          <div style="padding:9px 14px;border-radius:8px;background:var(--primary);color:var(--primary-foreground);font-weight:600;">Approve — apply + notify</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted-foreground);">Approved change writes history (actor + approver) · tenant sees "my pending changes" list with the same diff cards.</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;margin:14px 0 6px;color:oklch(0.4 0.01 75);">10b · Inventory — reconfirmation (390)</div>
+      <div data-screen-label="Inventory reconfirm" style="width:390px;background:var(--background);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;">
+        <div style="font-size:14px;font-weight:600;">Leltár megerősítés · 3 / 12</div>
+        <div style="height:6px;border-radius:999px;background:var(--muted);border:1px solid var(--border);"><div style="width:25%;height:100%;border-radius:999px;background:var(--primary);"></div></div>
+        <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:12px;display:flex;gap:10px;">
+          <div style="width:72px;height:56px;border-radius:7px;border:1px solid var(--border);background:repeating-linear-gradient(45deg,var(--muted) 0 7px,var(--card) 7px 14px);"></div>
+          <div style="flex:1;"><div style="font-weight:600;">Mosógép — Samsung</div><div style="font-size:11px;color:var(--muted-foreground);">tulajdon: feltételes · állapot: jó (2025)</div></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;min-height:44px;border-radius:8px;border:1px solid var(--success-border);color:var(--success);background:var(--success-bg);display:flex;align-items:center;justify-content:center;font-weight:600;">✓ Rendben</div>
+          <div style="flex:1;min-height:44px;border-radius:8px;border:1px solid var(--warning-border);color:var(--warning);background:var(--warning-bg);display:flex;align-items:center;justify-content:center;font-weight:600;">Eltérés…</div>
+        </div>
+        <div style="border:1.5px dashed var(--input);border-radius:8px;min-height:40px;display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);background:var(--muted);font-size:12px;">+ opcionális fotó</div>
+        <div style="font-size:11px;color:var(--muted-foreground);">Eltérés jelzése automatikusan kérést nyit.</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:oklch(0.4 0.01 75);">10a · Inventory — grid + detail (desktop)</div>
+      <div data-screen-label="Inventory grid" style="width:860px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:600;flex:1;">Inventory · 12 items</div>
+          <div style="padding:7px 12px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--muted-foreground);font-size:12px;">Start reconfirmation campaign</div>
+          <div style="padding:7px 12px;border-radius:8px;background:var(--primary);color:var(--primary-foreground);font-size:12px;font-weight:600;">+ Add item</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;"><div style="height:70px;background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);border-bottom:1px solid var(--border);"></div><div style="padding:8px 10px;"><div style="font-weight:600;font-size:12px;">Washing machine</div><span style="display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;font-size:10px;background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border);">conditional · by 31 Aug</span></div></div>
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;"><div style="height:70px;background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);border-bottom:1px solid var(--border);"></div><div style="padding:8px 10px;"><div style="font-weight:600;font-size:12px;">Fridge — Bosch</div><span style="display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;font-size:10px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">owner · good</span></div></div>
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;"><div style="height:70px;background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);border-bottom:1px solid var(--border);"></div><div style="padding:8px 10px;"><div style="font-weight:600;font-size:12px;">Sofa</div><span style="display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;font-size:10px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">owner · worn</span></div></div>
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;"><div style="height:70px;background:repeating-linear-gradient(45deg,var(--muted) 0 8px,var(--card) 8px 16px);border-bottom:1px solid var(--border);"></div><div style="padding:8px 10px;"><div style="font-weight:600;font-size:12px;">Desk — renter's</div><span style="display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;font-size:10px;background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);">renter</span></div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted-foreground);margin-top:8px;">Detail view: photo gallery · ownership (owner / renter / conditional + action-by flag &amp; reason) · condition history · move-in/out snapshots.</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;margin:14px 0 6px;color:oklch(0.4 0.01 75);">11 · Contract &amp; documents — version chain + parse review (desktop)</div>
+      <div data-screen-label="Contract module" style="width:860px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);padding:16px;box-sizing:border-box;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:11px;">v1 · 2022</span><span style="color:var(--muted-foreground);">—</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:11px;">v2 · 2023</span><span style="color:var(--muted-foreground);">—</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--input);color:var(--muted-foreground);font-size:11px;">v3 · 2024</span><span style="color:var(--muted-foreground);">—</span>
+          <span style="padding:3px 10px;border-radius:999px;border:1px solid var(--primary);color:var(--primary);font-weight:600;font-size:11px;">v4 · until 31 Aug 2026 (current)</span>
+          <div style="flex:1;"></div>
+          <div style="padding:7px 12px;border-radius:8px;border:1px solid var(--input);background:var(--card);color:var(--muted-foreground);font-size:12px;">Upload renewal…</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;">
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:12px;">
+            <div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;border:1px solid var(--input);border-radius:6px;padding:6px 10px;color:var(--muted-foreground);font-size:12px;">Search in contract text… ("felmondás")</div></div>
+            <div style="height:150px;border:1.5px dashed var(--input);border-radius:8px;background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);font-family:'IBM Plex Mono',monospace;font-size:11px;">PDF viewer — scanned signed contract, hit highlighting</div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:10px;background:var(--card);padding:12px;">
+            <div style="font-weight:600;font-size:12px;margin-bottom:6px;">Key terms (structured)</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12px;color:var(--muted-foreground);">
+              <span>Term:</span><b style="color:var(--foreground);font-weight:500;">1 Sep 2025 – 31 Aug 2026</b>
+              <span>Rent:</span><b style="color:var(--foreground);font-weight:500;">245 000 Ft (phased sched.)</b>
+              <span>Deposit:</span><b style="color:var(--foreground);font-weight:500;">490 000 Ft · ledger →</b>
+              <span>Notice:</span><b style="color:var(--foreground);font-weight:500;">60 days written</b>
+            </div>
+            <div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--info-bg);border:1px solid var(--info-border);color:var(--info);font-size:11px;">Parse review: on upload, extracted terms are proposed field-by-field — admin accepts each (✓ / edit / skip); nothing auto-commits.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
