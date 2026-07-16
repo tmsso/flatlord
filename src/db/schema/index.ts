@@ -1,5 +1,11 @@
-// Domain schema modules land here in M3 (properties, tenancies, persons,
-// profiles, invites, etc.) — see the Phase 0 plan for the letting-mode
-// invariant design. Placeholder export keeps the Drizzle client/config
-// valid until then.
-export {};
+export * from "./enums";
+export * from "./auth";
+export * from "./persons";
+export * from "./profiles";
+export * from "./properties";
+export * from "./property-ownership";
+export * from "./tenancies";
+export * from "./tenancy-occupants";
+export * from "./invites";
+export * from "./field-policies";
+export * from "./audit-log";
