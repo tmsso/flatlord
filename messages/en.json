@@ -1,1 +1,37 @@
-{}
+{
+  "common": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "auth": {
+    "title": "Flatlord",
+    "google": "Continue with Google",
+    "googleNote": "Google OAuth (Supabase Auth) — invited accounts only.",
+    "magicLinkLabel": "Email address",
+    "magicLinkSubmit": "Send sign-in link",
+    "magicLinkNote": "You will get a one-time sign-in link by email — no password needed.",
+    "privateNote": "Private app: no self-signup. Your account is created by the owner."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "tenancies": "Tenancies",
+    "statements": "Statements",
+    "meters": "Meters",
+    "requests": "Requests",
+    "settings": "Settings",
+    "home": "Home",
+    "contract": "Contract",
+    "inventory": "Inventory"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
+}

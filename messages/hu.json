@@ -1,1 +1,37 @@
-{}
+{
+  "common": {
+    "signIn": "Bejelentkezés",
+    "signOut": "Kijelentkezés",
+    "loading": "Betöltés…",
+    "save": "Mentés",
+    "cancel": "Mégse",
+    "active": "Aktív",
+    "inactive": "Inaktív"
+  },
+  "auth": {
+    "title": "Flatlord",
+    "google": "Folytatás Google-fiókkal",
+    "googleNote": "Google OAuth (Supabase Auth) — csak meghívott fiókok.",
+    "magicLinkLabel": "E-mail cím",
+    "magicLinkSubmit": "Belépési link küldése",
+    "magicLinkNote": "Egyszer használatos belépési linket kapsz e-mailben — jelszó nem szükséges.",
+    "privateNote": "Privát alkalmazás: önregisztráció nincs. A fiókot a tulajdonos hozza létre."
+  },
+  "nav": {
+    "dashboard": "Áttekintés",
+    "properties": "Ingatlanok",
+    "tenancies": "Bérleti jogviszonyok",
+    "statements": "Elszámolások",
+    "meters": "Mérőállások",
+    "requests": "Kérések",
+    "settings": "Beállítások",
+    "home": "Kezdőlap",
+    "contract": "Szerződés",
+    "inventory": "Leltár"
+  },
+  "theme": {
+    "light": "Világos",
+    "dark": "Sötét",
+    "system": "Rendszer"
+  }
+}
