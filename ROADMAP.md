@@ -69,6 +69,8 @@ Companion to `CLAUDE.md` (domain rules — read first; note the privacy rule §0
 - AI-assisted contract parsing v2 (structured extraction of clauses, obligations, termination triggers) feeding the searchable clause references used by formal warnings.
 - Second property onboarding (schema-ready; build property switcher, per-property settings), multiple tenancies incl. archives, multi-user (family/friends own their properties via existing RLS scoping).
 - **Full access-control matrix** (deferred from Phase 0 — see `design/13 Access Management.dc.html`): per-user × per-property access level (full/limited/read-only/none) plus per-function overrides, strictest wins; replaces the coarse owner/tenant role once more than one owner exists.
+- **Email address change workflow**: a user-initiated (or admin-assisted) change of their Supabase Auth login email, going through Supabase Auth's own email-change confirmation rather than a silent update; keep `invites.email` and any denormalized references in sync; history recorded per CLAUDE.md §3.5's audit pattern.
+- **Emergency/admin-generated login link**: an owner can generate a one-time sign-in link for any user (owner or tenant) — covers lost access to an invited email, general account recovery, and replaces the raw-DB invite insert used to bootstrap the very first owner account (Phase 0) with a proper in-app capability. For the owner specifically, this kind of backend-level access should remain available even without another owner to grant it (as in that bootstrap case).
 - German locale (`de`) — catalog translation only.
 
 ## Handoff notes for Claude Code (Opus, high thinking effort)
