@@ -31,23 +31,28 @@ jobs:
 
       # The real Supabase Postgres image, not a bare postgres container: our
       # tests depend on the real `auth` schema and RLS roles (auth.users
-      # insert, `set local role authenticated`), which only Supabase's own
-      # bootstrap provides. `supabase start` applies every file in
-      # supabase/migrations to a fresh database automatically, so this
-      # exercises the exact same SQL a new cloud project would get. Runs
-      # once per job on a throwaway GitHub-hosted runner — nothing persists
-      # between runs, nothing to clean up, no cloud project or secrets
-      # involved.
+      # insert, `set local role authenticated`), which come from Supabase's
+      # own bootstrap SQL — applied at the Postgres level regardless of
+      # which other services are running. `db start` also applies every
+      # file in supabase/migrations to the fresh database automatically,
+      # so this exercises the exact same SQL a new cloud project would get.
+      # Runs once per job on a throwaway GitHub-hosted runner — nothing
+      # persists between runs, nothing to clean up, no cloud project or
+      # secrets involved.
       - uses: supabase/setup-cli@v1
         with:
           version: 2.109.1
 
-      # Tests connect straight to Postgres (SUPABASE_DB_URL) rather than
-      # through the REST/gateway API, so only the `db` container (plus the
-      # non-excludable `auth`/GoTrue one, which owns the auth schema) is
-      # needed — excluding the rest keeps the runner light and boot fast.
-      - name: Start local Supabase stack
-        run: supabase start --exclude analytics,edge-runtime,functions,imgproxy,inbucket,kong,meta,realtime,rest,storage,studio,vector
+      # `supabase db start` brings up only the Postgres container (tests
+      # connect straight to it via SUPABASE_DB_URL, not through the REST/
+      # gateway API) and skips the rest of the stack entirely — including
+      # Kong, so there's no gateway-readiness health check to satisfy. The
+      # earlier attempt at trimming `supabase start` via --exclude broke on
+      # exactly that: excluding kong left nothing on port 54321 for the
+      # CLI's own built-in readiness probe, so it timed out and tore the
+      # stack down even though migrations had already applied cleanly.
+      - name: Start local Supabase database
+        run: supabase db start
 
       - name: Seed demo data
         env:
