@@ -2,10 +2,10 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-// SUPABASE_DB_URL points at a real Supabase project's Postgres connection
-// string. There is no local database on this node — see project memory:
-// local Supabase (`supabase start`) is unavailable here and must not be
-// attempted; all connections target a cloud project.
+// SUPABASE_DB_URL points at a Supabase project's Postgres connection
+// string — the cloud dev project for local development (this sandboxed
+// dev node can't run the local Docker-based stack; see project memory),
+// or the ephemeral `supabase start` instance when running in CI.
 const connectionString = process.env.SUPABASE_DB_URL;
 
 if (!connectionString) {
