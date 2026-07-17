@@ -30,6 +30,8 @@ Companion to `CLAUDE.md` (domain rules — read first; note the privacy rule §0
 
 **Accept:** a full monthly cycle executed in-app (photo submission → verification → statement → email/WhatsApp → payment), output identical to the sheet; backup zip restores locally; sheet becomes read-only archive.
 
+*(Optional, once this milestone is live: a demo environment becomes worth building — see "Demo environment" in `IDEAS.md` for the in-database `is_demo`-flag approach, seeded via `seed.demo.ts` and served read-only. Not scheduled; pick up opportunistically.)*
+
 ## Phase 2 — Documents, contract, inventory
 
 - Contract module: version chain per tenancy; scanned PDF + searchable text (`tsvector`); structured key terms driving tenancy record and reminders.
