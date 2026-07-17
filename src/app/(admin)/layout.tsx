@@ -26,7 +26,9 @@ export default async function AdminLayout({
         {navKeys.map((key) => (
           <Link
             key={key}
-            href={key === "dashboard" ? "/dashboard" : "#"}
+            href={
+              key === "dashboard" ? "/dashboard" : key === "settings" ? "/settings" : "#"
+            }
             className="rounded-md px-2.5 h-9 flex items-center text-[13px] font-medium text-foreground hover:bg-muted"
           >
             {t(key)}
