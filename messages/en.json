@@ -39,5 +39,23 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "invites": {
+    "createTitle": "Invite someone",
+    "emailLabel": "Email address",
+    "roleLabel": "Role",
+    "roleOwner": "Owner",
+    "roleTenant": "Tenant",
+    "send": "Send invite",
+    "createdNote": "Invite created — tell {email} to sign in with that exact email address (Google or the magic link) as {role}. No password or code needed.",
+    "pendingTitle": "Pending invites",
+    "empty": "No pending invites.",
+    "colEmail": "Email",
+    "colRole": "Role",
+    "colExpires": "Expires",
+    "colActions": "Actions",
+    "revoke": "Revoke",
+    "expired": "Expired",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

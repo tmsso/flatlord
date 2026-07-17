@@ -39,5 +39,23 @@
     "light": "Világos",
     "dark": "Sötét",
     "system": "Rendszer"
+  },
+  "invites": {
+    "createTitle": "Meghívás",
+    "emailLabel": "E-mail cím",
+    "roleLabel": "Szerep",
+    "roleOwner": "Tulajdonos",
+    "roleTenant": "Bérlő",
+    "send": "Meghívó küldése",
+    "createdNote": "Meghívó létrehozva — kérd meg {email} címet, hogy pontosan ezzel az e-mail címmel jelentkezzen be (Google vagy belépési link), mint {role}. Jelszóra vagy kódra nincs szükség.",
+    "pendingTitle": "Függőben lévő meghívók",
+    "empty": "Nincs függőben lévő meghívó.",
+    "colEmail": "E-mail",
+    "colRole": "Szerep",
+    "colExpires": "Lejárat",
+    "colActions": "Műveletek",
+    "revoke": "Visszavonás",
+    "expired": "Lejárt",
+    "errorGeneric": "Hiba történt. Próbáld újra."
   }
 }
