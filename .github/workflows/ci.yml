@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # The real Supabase Postgres image, not a bare postgres container: our
+      # tests depend on the real `auth` schema and RLS roles (auth.users
+      # insert, `set local role authenticated`), which only Supabase's own
+      # bootstrap provides. `supabase start` applies every file in
+      # supabase/migrations to a fresh database automatically, so this
+      # exercises the exact same SQL a new cloud project would get. Runs
+      # once per job on a throwaway GitHub-hosted runner — nothing persists
+      # between runs, nothing to clean up, no cloud project or secrets
+      # involved.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.1
+
+      # Tests connect straight to Postgres (SUPABASE_DB_URL) rather than
+      # through the REST/gateway API, so only the `db` container (plus the
+      # non-excludable `auth`/GoTrue one, which owns the auth schema) is
+      # needed — excluding the rest keeps the runner light and boot fast.
+      - name: Start local Supabase stack
+        run: supabase start --exclude analytics,edge-runtime,functions,imgproxy,inbucket,kong,meta,realtime,rest,storage,studio,vector
+
+      - name: Seed demo data
+        env:
+          SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: pnpm exec tsx seed/seed.demo.ts
+
+      - name: Run tests
+        env:
+          SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: pnpm exec vitest run
