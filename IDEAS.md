@@ -27,6 +27,14 @@ Loose ideas, deliberately not committed to any phase. Pick up opportunistically 
 - Auto-drafted bilingual notice texts from a category + few keywords, always admin-reviewed.
 - Photo-based inventory condition comparison (move-in vs reconfirmation photos).
 
+## Demo environment
+
+- **In-database demo mode, not a second Supabase project.** Free-tier Supabase caps active projects at 2 per org, and a separate `flatlord-demo` project would fight the CI project (see Phase 0's CI setup) for that slot, plus needs its own keep-alive against the 7-day inactivity auto-pause. Cheaper: seed synthetic demo rows into the *same* production database, tagged, and gate visibility by the tag instead of by database.
+  - `is_demo boolean not null default false` on **root-level entities only** — `properties` and `persons`. Everything else (tenancies, statements, meters, adjustments…) hangs off `property_id`/`tenancy_id`, so it's demo-scoped transitively without touching every table.
+  - Real users need **no RLS changes at all**: a real admin's `property_ownership` rows and a real tenant's `tenancy` never point at a demo property in the first place, so today's ownership-scoped policies already exclude demo data by construction.
+  - Seeding: a variant of `seed.demo.ts` (same synthetic-data spirit, same privacy rule) that inserts with `is_demo = true`, re-runnable any time via `delete ... where is_demo = true` first — cheap to reset on a schedule or on demand, no cross-project sync.
+  - Serving it: a public, unauthenticated `/demo` route rendered server-side through the **service-role client**, hardcoded to `where is_demo = true`. No new login surface, no new RLS branch, so there's no way for it to accidentally surface real data — the query can't reach anything else. Start read-only (view the admin + tenant shells with realistic mock data); a writable sandbox (resettable, isolated per visitor) is a bigger follow-on, not v1.
+
 ## Ops
 
 - Uptime/health check ping (the app becomes the system of record; a dead cron shouldn't go unnoticed for a month).

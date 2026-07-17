@@ -1,1 +1,61 @@
-{}
+{
+  "common": {
+    "signIn": "Bejelentkezés",
+    "signOut": "Kijelentkezés",
+    "loading": "Betöltés…",
+    "save": "Mentés",
+    "cancel": "Mégse",
+    "active": "Aktív",
+    "inactive": "Inaktív"
+  },
+  "auth": {
+    "title": "Flatlord",
+    "tagline": "Privát bérleménykezelő",
+    "google": "Folytatás Google-fiókkal",
+    "googleNote": "Google OAuth (Supabase Auth) — csak meghívott fiókok léphetnek be.",
+    "or": "vagy",
+    "magicLinkLabel": "E-mail cím",
+    "magicLinkSubmit": "Belépési link küldése",
+    "magicLinkNote": "Egyszer használatos belépési linket kapsz e-mailben — jelszó nem szükséges.",
+    "magicLinkSent": "Elküldtük a belépési linket — nézd meg a postaládád.",
+    "privateNote": "Privát alkalmazás: nincs regisztráció. A fiókodat a tulajdonos hozza létre; a bérlő csak a saját bérleményét látja.",
+    "roleNote": "Belépés után szerep szerinti felület: bérlő → portál · tulajdonos → admin.",
+    "errorNotInvited": "Ehhez a fiókhoz nincs érvényes meghívás.",
+    "errorGeneric": "Hiba történt a bejelentkezés során. Próbáld újra."
+  },
+  "nav": {
+    "dashboard": "Áttekintés",
+    "properties": "Ingatlanok",
+    "tenancies": "Bérleti jogviszonyok",
+    "statements": "Elszámolások",
+    "meters": "Mérőállások",
+    "requests": "Kérések",
+    "settings": "Beállítások",
+    "home": "Kezdőlap",
+    "contract": "Szerződés",
+    "inventory": "Leltár"
+  },
+  "theme": {
+    "light": "Világos",
+    "dark": "Sötét",
+    "system": "Rendszer"
+  },
+  "invites": {
+    "createTitle": "Meghívás",
+    "emailLabel": "E-mail cím",
+    "roleLabel": "Szerep",
+    "roleOwner": "Tulajdonos",
+    "roleTenant": "Bérlő",
+    "send": "Meghívó küldése",
+    "createdNote": "Meghívó létrehozva — kérd meg {email} címet, hogy pontosan ezzel az e-mail címmel jelentkezzen be (Google vagy belépési link), mint {role}. Jelszóra vagy kódra nincs szükség.",
+    "pendingTitle": "Függőben lévő meghívók",
+    "empty": "Nincs függőben lévő meghívó.",
+    "colEmail": "E-mail",
+    "colRole": "Szerep",
+    "colExpires": "Lejárat",
+    "colActions": "Műveletek",
+    "revoke": "Visszavonás",
+    "expired": "Lejárt",
+    "errorGeneric": "Hiba történt. Próbáld újra."
+  }
+}

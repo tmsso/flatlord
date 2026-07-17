@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784238703529,
+      "tag": "0000_clean_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784238746515,
+      "tag": "0001_letting-mode-invariant-and-rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784240114324,
+      "tag": "0002_tricky_wrecker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784240504192,
+      "tag": "0003_letting-exclusivity-reparent-fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784241324628,
+      "tag": "0004_handle-new-user-invite-match",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784241374976,
+      "tag": "0005_invites-owner-write-policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784288424090,
+      "tag": "0006_grant-authenticated-role-privileges",
+      "breakpoints": true
+    }
+  ]
+}

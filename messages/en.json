@@ -1,1 +1,61 @@
-{}
+{
+  "common": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "auth": {
+    "title": "Flatlord",
+    "tagline": "Private rental manager",
+    "google": "Continue with Google",
+    "googleNote": "Google OAuth (Supabase Auth) — invited accounts only.",
+    "or": "or",
+    "magicLinkLabel": "Email address",
+    "magicLinkSubmit": "Send sign-in link",
+    "magicLinkNote": "You will get a one-time sign-in link by email — no password needed.",
+    "magicLinkSent": "Check your email for the sign-in link.",
+    "privateNote": "Private app: no self-signup. Your account is created by the owner; a tenant sees only their own tenancy.",
+    "roleNote": "After sign-in, role decides the interface: tenant → portal · owner → admin.",
+    "errorNotInvited": "This account doesn't have a valid invite.",
+    "errorGeneric": "Something went wrong signing in. Please try again."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "tenancies": "Tenancies",
+    "statements": "Statements",
+    "meters": "Meters",
+    "requests": "Requests",
+    "settings": "Settings",
+    "home": "Home",
+    "contract": "Contract",
+    "inventory": "Inventory"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "invites": {
+    "createTitle": "Invite someone",
+    "emailLabel": "Email address",
+    "roleLabel": "Role",
+    "roleOwner": "Owner",
+    "roleTenant": "Tenant",
+    "send": "Send invite",
+    "createdNote": "Invite created — tell {email} to sign in with that exact email address (Google or the magic link) as {role}. No password or code needed.",
+    "pendingTitle": "Pending invites",
+    "empty": "No pending invites.",
+    "colEmail": "Email",
+    "colRole": "Role",
+    "colExpires": "Expires",
+    "colActions": "Actions",
+    "revoke": "Revoke",
+    "expired": "Expired",
+    "errorGeneric": "Something went wrong. Please try again."
+  }
+}
