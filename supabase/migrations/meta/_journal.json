@@ -43,6 +43,13 @@
       "when": 1784241374976,
       "tag": "0005_invites-owner-write-policies",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784288424090,
+      "tag": "0006_grant-authenticated-role-privileges",
+      "breakpoints": true
     }
   ]
 }
