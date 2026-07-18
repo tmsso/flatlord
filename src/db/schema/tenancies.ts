@@ -9,7 +9,7 @@ import {
   check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { propertyTypeEnum, tenancyStatusEnum } from "./enums";
+import { propertyTypeEnum, tenancyStatusEnum, registrationTypeEnum } from "./enums";
 import { properties } from "./properties";
 import { persons } from "./persons";
 
@@ -33,11 +33,19 @@ export const tenancies = pgTable(
     primaryTenantId: uuid("primary_tenant_id")
       .notNull()
       .references(() => persons.id),
+    // Drives the field-requirement engine (field-requirements.ts) — null
+    // until set, meaning no requiredness rules apply yet.
+    primaryTenantRegistrationType: registrationTypeEnum("primary_tenant_registration_type"),
     termStart: date("term_start").notNull(),
     termEnd: date("term_end"),
     noticeDays: integer("notice_days").notNull().default(30),
     dueDay: smallint("due_day").notNull().default(5),
     reminderLeadDays: jsonb("reminder_lead_days").notNull().default({}),
+    // Same idiom as reminder_lead_days: unstructured at the DB level, shape
+    // owned by the app layer, e.g. { windowStartDay, windowEndDay,
+    // frequency: "monthly", meterIds: "all" | uuid[] }. ROADMAP Phase 1:
+    // "reading scope and frequency configurable per flat".
+    meterReadingConfig: jsonb("meter_reading_config").notNull().default({}),
     status: tenancyStatusEnum("status").notNull().default("draft"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

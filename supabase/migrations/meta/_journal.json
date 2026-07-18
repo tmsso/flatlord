@@ -50,6 +50,20 @@
       "when": 1784288424090,
       "tag": "0006_grant-authenticated-role-privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784376442578,
+      "tag": "0007_nervous_multiple_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784376672445,
+      "tag": "0008_billing-meter-invariants-and-rls",
+      "breakpoints": true
     }
   ]
 }
