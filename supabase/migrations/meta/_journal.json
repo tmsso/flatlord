@@ -64,6 +64,13 @@
       "when": 1784376672445,
       "tag": "0008_billing-meter-invariants-and-rls",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784405273945,
+      "tag": "0009_currency-neutral-money-columns",
+      "breakpoints": true
     }
   ]
 }

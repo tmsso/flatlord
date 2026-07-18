@@ -26,8 +26,13 @@ export const chargeSchedules = pgTable("charge_schedules", {
     .references(() => chargeTypes.id),
   // Denormalized from tenancies.property_id, trigger-set.
   propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-  amountHuf: bigint("amount_huf", { mode: "number" }), // fixed only
-  rateHufPerUnit: numeric("rate_huf_per_unit", { precision: 12, scale: 4 }), // metered only
+  // Currency-neutral naming (CLAUDE.md §6): HUF is the only currency in
+  // practice today, but the column name doesn't bake that in. No `currency`
+  // column at this granularity yet — implicitly the tenancy's single
+  // currency (today always HUF via `statements.currency`); see IDEAS.md
+  // (EUR-based pricing) for what per-schedule currency would require.
+  amount: bigint("amount", { mode: "number" }), // fixed only
+  ratePerUnit: numeric("rate_per_unit", { precision: 12, scale: 4 }), // metered only
   validFrom: date("valid_from").notNull(),
   validTo: date("valid_to"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

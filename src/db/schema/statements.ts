@@ -26,7 +26,9 @@ export const statements = pgTable(
     status: statementStatusEnum("status").notNull().default("draft"),
     // Computed from tenancy.due_day, snapshotted at issue.
     dueDate: date("due_date"),
-    totalHuf: bigint("total_huf", { mode: "number" }).notNull().default(0),
+    // Currency-neutral naming (CLAUDE.md §6) — `currency` carries the
+    // actual currency, HUF-only in practice today; see IDEAS.md.
+    total: bigint("total", { mode: "number" }).notNull().default(0),
     currency: char("currency", { length: 3 }).notNull().default("HUF"),
     // Immutable snapshot of non-line-item context at issue time (due day,
     // reminder lead days, tenant contact info) — line items are also

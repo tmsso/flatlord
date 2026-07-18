@@ -24,8 +24,10 @@ export const adjustments = pgTable(
       .references(() => chargeTypes.id),
     // Denormalized from tenancies.property_id, trigger-set.
     propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-    // Signed: positive surcharge, negative credit/discount.
-    amountHuf: bigint("amount_huf", { mode: "number" }).notNull(),
+    // Signed: positive surcharge, negative credit/discount. Currency-neutral
+    // naming (CLAUDE.md §6) — implicitly the tenancy's currency (today
+    // always HUF); see IDEAS.md (EUR-based pricing).
+    amount: bigint("amount", { mode: "number" }).notNull(),
     reason: text("reason").notNull(),
     targetMonth: date("target_month").notNull(), // first-of-month
     // Null = single month; set = inclusive bounded recurring range.

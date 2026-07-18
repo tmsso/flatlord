@@ -155,23 +155,23 @@ async function main() {
     .returning();
 
   await db.insert(chargeSchedules).values([
-    { tenancyId: tenancyWhole.id, chargeTypeId: rentWhole.id, amountHuf: 250000, validFrom: "2026-01-01" },
+    { tenancyId: tenancyWhole.id, chargeTypeId: rentWhole.id, amount: 250000, validFrom: "2026-01-01" },
     {
       tenancyId: tenancyWhole.id,
       chargeTypeId: commonCostWhole.id,
-      amountHuf: 25000,
+      amount: 25000,
       validFrom: "2026-01-01",
     },
     {
       tenancyId: tenancyWhole.id,
       chargeTypeId: electricityWhole.id,
-      rateHufPerUnit: "70",
+      ratePerUnit: "70",
       validFrom: "2026-01-01",
     },
     {
       tenancyId: tenancyWhole.id,
       chargeTypeId: waterWhole.id,
-      rateHufPerUnit: "900",
+      ratePerUnit: "900",
       validFrom: "2026-01-01",
     },
   ]);
@@ -219,17 +219,17 @@ async function main() {
     .returning();
 
   await db.insert(chargeSchedules).values([
-    { tenancyId: tenancyByRoom.id, chargeTypeId: rentRoom.id, amountHuf: 120000, validFrom: "2026-03-01" },
+    { tenancyId: tenancyByRoom.id, chargeTypeId: rentRoom.id, amount: 120000, validFrom: "2026-03-01" },
     {
       tenancyId: tenancyByRoom.id,
       chargeTypeId: electricityRoom.id,
-      rateHufPerUnit: "70",
+      ratePerUnit: "70",
       validFrom: "2026-03-01",
     },
     {
       tenancyId: tenancyByRoom.id,
       chargeTypeId: waterRoom.id,
-      rateHufPerUnit: "900",
+      ratePerUnit: "900",
       validFrom: "2026-03-01",
     },
   ]);

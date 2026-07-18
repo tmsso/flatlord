@@ -16,7 +16,9 @@ export const payments = pgTable("payments", {
   // Denormalized from statements.tenancy_id/property_id, trigger-set.
   tenancyId: uuid("tenancy_id").notNull().default(sql`gen_random_uuid()`),
   propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-  amountHuf: bigint("amount_huf", { mode: "number" }).notNull(),
+  // Currency-neutral naming (CLAUDE.md §6) — `currency` carries the
+  // actual currency, HUF-only in practice today; see IDEAS.md.
+  amount: bigint("amount", { mode: "number" }).notNull(),
   currency: char("currency", { length: 3 }).notNull().default("HUF"),
   paidAt: date("paid_at").notNull(),
   method: paymentMethodEnum("method").notNull(),

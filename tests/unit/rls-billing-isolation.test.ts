@@ -123,13 +123,13 @@ beforeAll(async () => {
   `;
 
   const [scheduleA] = await adminSql`
-    insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from)
+    insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from)
     values (${tenancyAId}, ${rentA.id}, 250000, '2026-01-01') returning id
   `;
   chargeScheduleAId = scheduleA.id;
 
   const [adjustmentA] = await adminSql`
-    insert into adjustments (tenancy_id, charge_type_id, amount_huf, reason, target_month, created_by)
+    insert into adjustments (tenancy_id, charge_type_id, amount, reason, target_month, created_by)
     values (${tenancyAId}, ${rentA.id}, -5000, 'RBI test credit', '2026-01-01', ${personAId}) returning id
   `;
   adjustmentAId = adjustmentA.id;
@@ -139,24 +139,24 @@ beforeAll(async () => {
   // below (trg_statement_line_items_prevent_issued_mutation), making this
   // fixture impossible to clean up in afterAll.
   const [statementA] = await adminSql`
-    insert into statements (tenancy_id, period_month, status, total_huf)
+    insert into statements (tenancy_id, period_month, status, total)
     values (${tenancyAId}, '2026-01-01', 'draft', 250000) returning id
   `;
   const [statementB] = await adminSql`
-    insert into statements (tenancy_id, period_month, status, total_huf)
+    insert into statements (tenancy_id, period_month, status, total)
     values (${tenancyBId}, '2026-01-01', 'draft', 250000) returning id
   `;
   statementAId = statementA.id;
   statementBId = statementB.id;
 
   const [lineItemA] = await adminSql`
-    insert into statement_line_items (statement_id, charge_type_id, description, amount_huf)
+    insert into statement_line_items (statement_id, charge_type_id, description, amount)
     values (${statementAId}, ${rentA.id}, 'RBI Rent', 250000) returning id
   `;
   lineItemAId = lineItemA.id;
 
   const [paymentA] = await adminSql`
-    insert into payments (statement_id, amount_huf, paid_at, method, recorded_by)
+    insert into payments (statement_id, amount, paid_at, method, recorded_by)
     values (${statementAId}, 250000, '2026-01-05', 'bank_transfer', ${personAId}) returning id
   `;
   paymentAId = paymentA.id;
@@ -290,7 +290,7 @@ describe("RLS: billing/meter tenant isolation", () => {
     await expect(
       asUser(userAId, async (tx) => {
         await tx`
-          insert into statements (tenancy_id, period_month, status, total_huf)
+          insert into statements (tenancy_id, period_month, status, total)
           values (${tenancyAId}, '2026-07-01', 'draft', 0)
         `;
       }),
@@ -301,7 +301,7 @@ describe("RLS: billing/meter tenant isolation", () => {
     await expect(
       asUser(userAId, async (tx) => {
         await tx`
-          insert into payments (statement_id, amount_huf, paid_at, method, recorded_by)
+          insert into payments (statement_id, amount, paid_at, method, recorded_by)
           values (${statementAId}, 1000, '2026-07-05', 'cash', ${personAId})
         `;
       }),
