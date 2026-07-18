@@ -1026,14 +1026,14 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "amount_huf": {
-          "name": "amount_huf",
+        "amount": {
+          "name": "amount",
           "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
-        "rate_huf_per_unit": {
-          "name": "rate_huf_per_unit",
+        "rate_per_unit": {
+          "name": "rate_per_unit",
           "type": "numeric(12, 4)",
           "primaryKey": false,
           "notNull": false
@@ -1130,8 +1130,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "amount_huf": {
-          "name": "amount_huf",
+        "amount": {
+          "name": "amount",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -1585,8 +1585,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "total_huf": {
-          "name": "total_huf",
+        "total": {
+          "name": "total",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true,
@@ -1706,14 +1706,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "unit_rate_huf": {
-          "name": "unit_rate_huf",
+        "unit_rate": {
+          "name": "unit_rate",
           "type": "numeric(12, 4)",
           "primaryKey": false,
           "notNull": false
         },
-        "amount_huf": {
-          "name": "amount_huf",
+        "amount": {
+          "name": "amount",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -1901,8 +1901,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "amount_huf": {
-          "name": "amount_huf",
+        "amount": {
+          "name": "amount",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true

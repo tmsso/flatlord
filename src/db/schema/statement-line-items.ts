@@ -10,9 +10,9 @@ import { adjustments } from "./adjustments";
 // One row per contributing source per month: one per charge_schedule in
 // force (fixed), one per meter per statement (metered/tracked-only — a
 // mid-month meter replacement naturally yields two rows under the same
-// charge_type), one per applicable adjustment. The total is
-// SUM(amount_huf); grouping by charge_type_id drives the tenant
-// breakdown/charts without hardcoding a category set.
+// charge_type), one per applicable adjustment. The total is SUM(amount);
+// grouping by charge_type_id drives the tenant breakdown/charts without
+// hardcoding a category set.
 //
 // Typed FKs, not polymorphic — matches the repo's convention everywhere
 // except the deliberately-polymorphic audit_log. Expected combinations
@@ -20,8 +20,11 @@ import { adjustments } from "./adjustments";
 // enforcement given the repo's own pragmatic style):
 //   fixed      -> charge_schedule_id only
 //   metered    -> charge_schedule_id + meter_id + from/to_reading_id
-//   tracked_only -> meter_id + from/to_reading_id only, is_billable=false, amount_huf=0
+//   tracked_only -> meter_id + from/to_reading_id only, is_billable=false, amount=0
 //   adjustment -> adjustment_id only
+//
+// Currency-neutral naming (CLAUDE.md §6): no `currency` column at this
+// granularity, implicitly the parent statement's currency; see IDEAS.md.
 export const statementLineItems = pgTable("statement_line_items", {
   id: uuid("id").primaryKey().defaultRandom(),
   statementId: uuid("statement_id")
@@ -36,8 +39,8 @@ export const statementLineItems = pgTable("statement_line_items", {
   // Snapshotted label, e.g. "Electricity (Kitchen meter)".
   description: text("description").notNull(),
   quantity: numeric("quantity", { precision: 14, scale: 3 }), // meter delta; null for fixed/adjustment
-  unitRateHuf: numeric("unit_rate_huf", { precision: 12, scale: 4 }), // null for fixed/adjustment
-  amountHuf: bigint("amount_huf", { mode: "number" }).notNull(), // rounded per line; see computeStatement (M4)
+  unitRate: numeric("unit_rate", { precision: 12, scale: 4 }), // null for fixed/adjustment
+  amount: bigint("amount", { mode: "number" }).notNull(), // rounded per line; see computeStatement (M4)
   isBillable: boolean("is_billable").notNull().default(true), // false for tracked_only rows
   chargeScheduleId: uuid("charge_schedule_id").references(() => chargeSchedules.id),
   meterId: uuid("meter_id").references(() => meters.id),

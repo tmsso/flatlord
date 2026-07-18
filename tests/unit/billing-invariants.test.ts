@@ -79,28 +79,28 @@ afterAll(async () => {
 });
 
 describe("charge_schedules: kind-gating", () => {
-  it("rejects a fixed schedule with rate_huf_per_unit set instead of amount_huf", async () => {
+  it("rejects a fixed schedule with rate_per_unit set instead of amount", async () => {
     await expect(
       sql`
-        insert into charge_schedules (tenancy_id, charge_type_id, rate_huf_per_unit, valid_from)
+        insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from)
         values (${tenancyId}, ${rentTypeId}, 70, '2027-01-01')
       `,
-    ).rejects.toThrow(/fixed charge_schedule requires amount_huf/i);
+    ).rejects.toThrow(/fixed charge_schedule requires amount/i);
   });
 
-  it("rejects a metered schedule with amount_huf set instead of rate_huf_per_unit", async () => {
+  it("rejects a metered schedule with amount set instead of rate_per_unit", async () => {
     await expect(
       sql`
-        insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from)
+        insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from)
         values (${tenancyId}, ${electricityTypeId}, 25000, '2027-01-01')
       `,
-    ).rejects.toThrow(/metered charge_schedule requires rate_huf_per_unit/i);
+    ).rejects.toThrow(/metered charge_schedule requires rate_per_unit/i);
   });
 
   it("rejects a charge_schedule referencing a tracked_only charge_type", async () => {
     await expect(
       sql`
-        insert into charge_schedules (tenancy_id, charge_type_id, rate_huf_per_unit, valid_from)
+        insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from)
         values (${tenancyId}, ${gasTypeId}, 300, '2027-01-01')
       `,
     ).rejects.toThrow(/tracked_only needs no rate/i);
@@ -109,7 +109,7 @@ describe("charge_schedules: kind-gating", () => {
   it("rejects a charge_schedule referencing a one_off charge_type", async () => {
     await expect(
       sql`
-        insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from)
+        insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from)
         values (${tenancyId}, ${adhocTypeId}, 10000, '2027-01-01')
       `,
     ).rejects.toThrow(/one_off belongs exclusively to adjustments/i);
@@ -119,13 +119,13 @@ describe("charge_schedules: kind-gating", () => {
     await expect(
       sql.begin(async (tx) => {
         await tx`
-          insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from)
+          insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from)
           values (${tenancyId}, ${rentTypeId}, 250000, '2027-02-01')
         `;
         // Overlaps the open-ended schedule above — deferred, so this
         // succeeds within the transaction and only raises at COMMIT.
         await tx`
-          insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from, valid_to)
+          insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from, valid_to)
           values (${tenancyId}, ${rentTypeId}, 260000, '2027-06-01', '2027-08-01')
         `;
       }),
@@ -134,7 +134,7 @@ describe("charge_schedules: kind-gating", () => {
 
   it("allows a valid fixed schedule (sanity check the rejections above aren't blocking everything)", async () => {
     const [row] = await sql`
-      insert into charge_schedules (tenancy_id, charge_type_id, amount_huf, valid_from)
+      insert into charge_schedules (tenancy_id, charge_type_id, amount, valid_from)
       values (${tenancyId}, ${rentTypeId}, 250000, '2028-01-01')
       returning id
     `;
@@ -173,21 +173,21 @@ describe("statements: issued immutability + payment-driven status", () => {
   // needs to commit intermediate state to read-your-own-write within the
   // transaction but still shouldn't leave anything behind afterward.
 
-  it("rejects mutating total_huf on a statement once it's no longer draft", async () => {
+  it("rejects mutating total on a statement once it's no longer draft", async () => {
     await expect(
       sql.begin(async (tx) => {
         const [statement] = await tx`
-          insert into statements (tenancy_id, period_month, status, total_huf)
+          insert into statements (tenancy_id, period_month, status, total)
           values (${tenancyId}, '2026-04-01', 'draft', 0)
           returning id
         `;
         // draft -> issued is the one transition allowed to touch the
         // snapshot fields.
         await tx`
-          update statements set status = 'issued', total_huf = 1000, due_date = '2026-04-05'
+          update statements set status = 'issued', total = 1000, due_date = '2026-04-05'
           where id = ${statement.id}
         `;
-        await tx`update statements set total_huf = 2000 where id = ${statement.id}`;
+        await tx`update statements set total = 2000 where id = ${statement.id}`;
       }),
     ).rejects.toThrow(/only status may change after issue/i);
   });
@@ -196,17 +196,17 @@ describe("statements: issued immutability + payment-driven status", () => {
     await expect(
       sql.begin(async (tx) => {
         const [statement] = await tx`
-          insert into statements (tenancy_id, period_month, status, total_huf)
+          insert into statements (tenancy_id, period_month, status, total)
           values (${tenancyId}, '2026-05-01', 'draft', 1000)
           returning id
         `;
         const [lineItem] = await tx`
-          insert into statement_line_items (statement_id, charge_type_id, description, amount_huf)
+          insert into statement_line_items (statement_id, charge_type_id, description, amount)
           values (${statement.id}, ${rentTypeId}, 'BI Rent', 1000)
           returning id
         `;
         await tx`update statements set status = 'issued' where id = ${statement.id}`;
-        await tx`update statement_line_items set amount_huf = 2000 where id = ${lineItem.id}`;
+        await tx`update statement_line_items set amount = 2000 where id = ${lineItem.id}`;
       }),
     ).rejects.toThrow(/line items are immutable/i);
   });
@@ -215,12 +215,12 @@ describe("statements: issued immutability + payment-driven status", () => {
     await expect(
       sql.begin(async (tx) => {
         const [statement] = await tx`
-          insert into statements (tenancy_id, period_month, status, total_huf)
+          insert into statements (tenancy_id, period_month, status, total)
           values (${tenancyId}, '2026-05-02', 'draft', 1000)
           returning id
         `;
         const [lineItem] = await tx`
-          insert into statement_line_items (statement_id, charge_type_id, description, amount_huf)
+          insert into statement_line_items (statement_id, charge_type_id, description, amount)
           values (${statement.id}, ${rentTypeId}, 'BI Rent', 1000)
           returning id
         `;
@@ -235,20 +235,20 @@ describe("statements: issued immutability + payment-driven status", () => {
     await expect(
       sql.begin(async (tx) => {
         const [statement] = await tx`
-          insert into statements (tenancy_id, period_month, status, total_huf)
+          insert into statements (tenancy_id, period_month, status, total)
           values (${tenancyId}, '2026-06-01', 'issued', 1000)
           returning id
         `;
 
         await tx`
-          insert into payments (statement_id, amount_huf, paid_at, method, recorded_by)
+          insert into payments (statement_id, amount, paid_at, method, recorded_by)
           values (${statement.id}, 400, '2026-06-05', 'bank_transfer', ${personId})
         `;
         const [afterFirst] = await tx`select status from statements where id = ${statement.id}`;
         expect(afterFirst.status).toBe("partially_paid");
 
         await tx`
-          insert into payments (statement_id, amount_huf, paid_at, method, recorded_by)
+          insert into payments (statement_id, amount, paid_at, method, recorded_by)
           values (${statement.id}, 600, '2026-06-10', 'cash', ${personId})
         `;
         const [afterSecond] = await tx`select status from statements where id = ${statement.id}`;

@@ -17,7 +17,7 @@ Loose ideas, deliberately not committed to any phase. Pick up opportunistically 
 - **Move-out wizard**: notice → showing appointments (short-notice permission is contractual) → final readings → deposit settlement calculation → handover protocol → permission revocations.
 - **Utility-rate review nudge**: alert when unit rates haven't been reviewed for 12 months (history shows correction lag) or when computed cost persistently under/overshoots actual provider bills.
 - **Photo archive timeline** per property: handovers, damages, repairs — chronological gallery.
-- **Multi-currency support** activation (schema already carries currency) if ever needed for a non-HUF property.
+- **EUR-based pricing** (or other non-HUF currency) — not viable for a Hungarian residential tenancy today (HUF is the only currency actually used or contemplated), but the money columns are deliberately currency-neutral (`amount`, not `amount_huf` — CLAUDE.md §6) precisely so this stays a config change, not a rename, if it's ever a real requirement (e.g. the app growing beyond this one property/country). `statements`/`payments` already carry `currency char(3)`; `charge_schedules`/`adjustments`/`statement_line_items` don't yet — they implicitly inherit the parent statement/tenancy's single currency. Supporting a genuinely mixed-currency tenancy would need `currency` columns at those finer grains too, plus a currency-consistency check between a statement and its line items, plus FX-rate handling for any cross-currency adjustment or payment — real design work, not a flag flip.
 - **Tenant FAQ / knowledge page** per property: house rules, appliance manuals, building policies, emergency contacts.
 
 ## AI (beyond roadmap Phase 5)

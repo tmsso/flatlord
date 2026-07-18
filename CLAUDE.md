@@ -105,7 +105,7 @@ Sleek, modern, friendly-professional. Explicitly **not** the borderless all-whit
 
 - Zod validation at every boundary (forms, server actions, importers). Server Actions / route handlers for mutations; service-role key never reaches the client; RLS is the last line of defence, not the only one.
 - DB: snake_case, plural tables; every table `id uuid`, `created_at`, `updated_at`; migrations in repo (Supabase CLI / Drizzle Kit); seed scripts: `seed.demo.ts` committed, `seed.real.ts` gitignored.
-- Money: integer HUF (`amount_huf bigint`) + `currency char(3) default 'HUF'` for generality. Meter values: `numeric`.
+- Money: integer amount (`amount bigint`, currency-neutral name — don't bake HUF into table/field names even though it's the only currency in practice today, see IDEAS.md) + `currency char(3) default 'HUF'` for generality. Meter values: `numeric`.
 - Tests: billing golden tests (fixture-driven), RLS tests (tenant cannot read foreign tenancy), Playwright happy paths (submit reading → issue statement → notify → record payment).
 - Personal-document numbers masked in UI except admin detail views; never logged.
 
