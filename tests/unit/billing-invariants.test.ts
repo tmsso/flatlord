@@ -258,4 +258,43 @@ describe("statements: issued immutability + payment-driven status", () => {
       }),
     ).rejects.toThrow(rollbackMarker);
   });
+
+  // M4's record-payment server action rejects a payment recorded against a
+  // draft statement (application-level guard, not DB-enforced) precisely
+  // because of what this test demonstrates: nothing at the DB layer
+  // protects against it on its own. This inserts the payment the way raw
+  // SQL would if that guard didn't exist, bypassing it on purpose, to
+  // prove the statement is left permanently stuck at 'issued' — fully
+  // paid but never recomputed to 'paid' — until some unrelated later
+  // payment event happens to fire the trigger again.
+  it("demonstrates why record-payment must reject draft statements: a payment against a draft isn't corrected when later issued", async () => {
+    const rollbackMarker = "__test_rollback__";
+    await expect(
+      sql.begin(async (tx) => {
+        const [statement] = await tx`
+          insert into statements (tenancy_id, period_month, status, total)
+          values (${tenancyId}, '2026-07-01', 'draft', 1000)
+          returning id
+        `;
+
+        await tx`
+          insert into payments (statement_id, amount, paid_at, method, recorded_by)
+          values (${statement.id}, 1000, '2026-07-05', 'bank_transfer', ${personId})
+        `;
+        const [afterPayment] = await tx`select status from statements where id = ${statement.id}`;
+        // trg_statements_recompute_status no-ops on draft, by design.
+        expect(afterPayment.status).toBe("draft");
+
+        // issue-statement's UPDATE only touches `statements`, never
+        // `payments` — it does not fire trg_statements_recompute_status.
+        await tx`update statements set status = 'issued' where id = ${statement.id}`;
+        const [afterIssue] = await tx`select status from statements where id = ${statement.id}`;
+        // Stuck at 'issued' despite already being fully paid — exactly
+        // the bug record-payment's draft-guard exists to prevent.
+        expect(afterIssue.status).toBe("issued");
+
+        throw new Error(rollbackMarker);
+      }),
+    ).rejects.toThrow(rollbackMarker);
+  });
 });
