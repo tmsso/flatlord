@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { evaluateMeterReadingEntry } from "@/lib/billing/evaluate-meter-reading-entry";
 
 const SubmitMeterReadingSchema = z.object({
   meterId: z.string().uuid(),
@@ -45,7 +46,10 @@ export async function submitMeterReading(input: {
 
   // Billable value is always confirmedValue, never enteredValue — the
   // ≥previous check compares against the meter's own latest *verified*
-  // reading, falling back to its baseValue if none exists.
+  // reading, falling back to its baseValue if none exists. The raw query
+  // result is passed through unconverted — evaluateMeterReadingEntry owns
+  // the numeric coercion (PostgREST can return numeric columns as
+  // strings; see that module for why this matters).
   const { data: previousRows, error: previousError } = await supabase
     .from("meter_readings")
     .select("confirmed_value")
@@ -56,12 +60,10 @@ export async function submitMeterReading(input: {
     .limit(1);
   if (previousError) throw new Error(previousError.message);
 
-  let previousValue: number;
+  let previousValue: number | string;
   const previous = previousRows?.[0];
   if (previous?.confirmed_value != null) {
-    // Number()-wrap explicitly — PostgREST can return numeric columns as
-    // strings, and JS `<` on two strings is lexicographic, not numeric.
-    previousValue = Number(previous.confirmed_value);
+    previousValue = previous.confirmed_value;
   } else {
     const { data: meter, error: meterError } = await supabase
       .from("meters")
@@ -69,20 +71,16 @@ export async function submitMeterReading(input: {
       .eq("id", parsed.meterId)
       .single();
     if (meterError) throw new Error(meterError.message);
-    previousValue = Number(meter.base_value);
+    previousValue = meter.base_value;
   }
 
-  if (parsed.enteredValue < previousValue) {
-    const isOwner = callerProfile.role === "owner";
-    if (!isOwner || !parsed.override) {
-      throw new Error(
-        `New reading (${parsed.enteredValue}) is lower than the previous verified reading (${previousValue}).` +
-          (isOwner
-            ? " Pass override: true to confirm this is expected (e.g. meter replacement)."
-            : " Tenants cannot override this — contact the property owner if this is expected."),
-      );
-    }
-  }
+  const evaluation = evaluateMeterReadingEntry({
+    enteredValue: parsed.enteredValue,
+    previousValue,
+    callerRole: callerProfile.role,
+    override: parsed.override,
+  });
+  if (!evaluation.allowed) throw new Error(evaluation.reason);
 
   const { error } = await supabase.from("meter_readings").insert({
     meter_id: parsed.meterId,
