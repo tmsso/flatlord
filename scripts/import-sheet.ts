@@ -11,8 +11,20 @@
  * compute-statement.ts, all separately tested. Real-data write: run only
  * on explicit instruction, never in CI.
  *
- * Usage: SHEET_FIXTURE_PATH=/private/sheet-export.xlsx IMPORT_TENANCY_ID=<uuid> \
- *   pnpm exec dotenv -e .env.local -- tsx scripts/import-sheet.ts
+ * DRY_RUN=1 wraps the whole run in a transaction and throws at the end
+ * instead of committing — exercises the id-remapping/insert-order logic
+ * below (the one part of this file with no other test coverage) against
+ * the synthetic fixture with zero residue. Known limitation: the
+ * charge_schedules overlap guard is an INITIALLY DEFERRED trigger, so it
+ * only fires at a real COMMIT and a dry run won't exercise it — covered
+ * instead by replay-sheet-history.ts's own collapse tests, which prove
+ * the ranges it produces don't overlap by construction.
+ *
+ * Usage:
+ *   SHEET_FIXTURE_PATH=/private/sheet-export.xlsx IMPORT_TENANCY_ID=<uuid> \
+ *     pnpm exec dotenv -e .env.local -- tsx scripts/import-sheet.ts
+ *   DRY_RUN=1 SHEET_FIXTURE_PATH=fixtures/sheet-demo.csv IMPORT_TENANCY_ID=<uuid> \
+ *     pnpm exec dotenv -e .env.local -- tsx scripts/import-sheet.ts
  */
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
@@ -38,8 +50,11 @@ import { meterBaseValue, parseSheetMonths } from "../src/lib/billing/parse-sheet
 import { replaySheetHistory } from "../src/lib/billing/replay-sheet-history";
 import { ROUNDING_CORRECTION_CODE, reconcileStatementTotal } from "../src/lib/billing/reconcile-statement-total";
 
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
 const fixturePath = process.env.SHEET_FIXTURE_PATH;
 const tenancyId = process.env.IMPORT_TENANCY_ID;
+const dryRun = process.env.DRY_RUN === "1";
 if (!fixturePath) throw new Error("SHEET_FIXTURE_PATH is not set");
 if (!tenancyId) throw new Error("IMPORT_TENANCY_ID is not set");
 
@@ -58,13 +73,15 @@ const ALL_CODES = [
   { code: ROUNDING_CORRECTION_CODE, kind: "one_off" as const },
 ];
 
-async function main() {
-  const [tenancy] = await db.select().from(tenancies).where(eq(tenancies.id, tenancyId!));
+const DRY_RUN_SENTINEL = "__import_sheet_dry_run_rollback__";
+
+async function runImport(tx: Tx) {
+  const [tenancy] = await tx.select().from(tenancies).where(eq(tenancies.id, tenancyId!));
   if (!tenancy) throw new Error(`Tenancy ${tenancyId} not found`);
 
-  const [unit] = await db.select().from(properties).where(eq(properties.id, tenancy.unitId));
+  const [unit] = await tx.select().from(properties).where(eq(properties.id, tenancy.unitId));
   if (!unit) throw new Error(`Unit ${tenancy.unitId} not found`);
-  const [ownership] = await db
+  const [ownership] = await tx
     .select()
     .from(propertyOwnership)
     .where(eq(propertyOwnership.propertyId, unit.rootPropertyId));
@@ -81,11 +98,11 @@ async function main() {
 
   // 1. charge_types — reuse by code if this unit already has them (makes
   // a rerun after a partial failure not duplicate the catalog).
-  const existingChargeTypes = await db.select().from(chargeTypes).where(eq(chargeTypes.unitId, unit.id));
+  const existingChargeTypes = await tx.select().from(chargeTypes).where(eq(chargeTypes.unitId, unit.id));
   const chargeTypeIdByCode = new Map(existingChargeTypes.filter((c) => c.code).map((c) => [c.code!, c.id]));
   const missingChargeTypes = ALL_CODES.filter((c) => !chargeTypeIdByCode.has(c.code));
   if (missingChargeTypes.length > 0) {
-    const inserted = await db
+    const inserted = await tx
       .insert(chargeTypes)
       .values(missingChargeTypes.map((c) => ({ unitId: unit.id, kind: c.kind, code: c.code, name: c.code })))
       .returning();
@@ -94,7 +111,7 @@ async function main() {
   console.log(`charge_types: ${chargeTypeIdByCode.size} available`);
 
   // 2. charge_schedules (fixed + metered rate schedules from replay).
-  const scheduleRows = await db
+  const scheduleRows = await tx
     .insert(chargeSchedules)
     .values(
       replayed.chargeSchedules.map((s) => ({
@@ -108,11 +125,12 @@ async function main() {
     )
     .returning();
   console.log(`charge_schedules: ${scheduleRows.length} inserted`);
+  const scheduleIdByKey = new Map(replayed.chargeSchedules.map((s, i) => [s.id, scheduleRows[i].id]));
 
   // 3. meters (one per metered code that has at least one reading).
   const meterIdByCode = new Map<string, string>();
   for (const m of replayed.meters) {
-    const [row] = await db
+    const [row] = await tx
       .insert(meters)
       .values({
         unitId: unit.id,
@@ -132,7 +150,7 @@ async function main() {
   // confirmedBy/enteredBy = the tenancy's owner (no distinct historical
   // actor to reconstruct — documented import-time convention).
   const readingIdByKey = new Map<string, string>();
-  const readingRows = await db
+  const readingRows = await tx
     .insert(meterReadings)
     .values(
       replayed.meterReadings.map((r) => ({
@@ -155,7 +173,7 @@ async function main() {
   // 5. adjustments (real "Other" rows only — rounding-correction line
   // items are per-statement, added at persist time below, not here).
   const adjustmentIdByKey = new Map<string, string>();
-  const adjustmentRows = await db
+  const adjustmentRows = await tx
     .insert(adjustments)
     .values(
       replayed.adjustments.map((a) => ({
@@ -187,7 +205,7 @@ async function main() {
       unitRate: li.unitRate == null ? null : String(li.unitRate),
       amount: li.amount,
       isBillable: li.isBillable,
-      chargeScheduleId: li.chargeScheduleId ? scheduleRows[replayed.chargeSchedules.findIndex((s) => s.id === li.chargeScheduleId)]?.id ?? null : null,
+      chargeScheduleId: li.chargeScheduleId ? (scheduleIdByKey.get(li.chargeScheduleId) ?? null) : null,
       meterId: li.meterId ? (meterIdByCode.get(li.meterId) ?? null) : null,
       fromReadingId: li.fromReadingId ? (readingIdByKey.get(li.fromReadingId) ?? null) : null,
       toReadingId: li.toReadingId ? (readingIdByKey.get(li.toReadingId) ?? null) : null,
@@ -215,7 +233,7 @@ async function main() {
 
     let statementId: string;
     try {
-      const [row] = await db
+      const [row] = await tx
         .insert(statements)
         .values({
           tenancyId: tenancyId!,
@@ -237,7 +255,7 @@ async function main() {
       throw err;
     }
 
-    await db.insert(statementLineItems).values(reconciled.lineItems.map((li) => translateLineItem(li, statementId)));
+    await tx.insert(statementLineItems).values(reconciled.lineItems.map((li) => translateLineItem(li, statementId)));
 
     // Real source has no per-installment amount when a month has two
     // payment dates — one row at the last date, for the full total (see
@@ -247,7 +265,7 @@ async function main() {
       if (month.payments.length > 1) {
         console.warn(`${month.periodMonth}: ${month.payments.length} payment dates in source, no per-installment amount — importing one payment at ${lastDate} for the full total`);
       }
-      await db.insert(payments).values({
+      await tx.insert(payments).values({
         statementId,
         amount: reconciled.total,
         paidAt: lastDate,
@@ -259,7 +277,21 @@ async function main() {
     imported++;
   }
 
-  console.log(`Done: ${imported} statements imported, ${skipped} skipped (already present).`);
+  console.log(`${dryRun ? "[dry run] " : ""}Done: ${imported} statements imported, ${skipped} skipped (already present).`);
+
+  if (dryRun) throw new Error(DRY_RUN_SENTINEL);
+}
+
+async function main() {
+  try {
+    await db.transaction(runImport);
+  } catch (err) {
+    if (dryRun && err instanceof Error && err.message === DRY_RUN_SENTINEL) {
+      console.log("[dry run] rolled back, nothing persisted.");
+      return;
+    }
+    throw err;
+  }
 }
 
 main()
