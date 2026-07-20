@@ -27,7 +27,13 @@ export default async function AdminLayout({
           <Link
             key={key}
             href={
-              key === "dashboard" ? "/dashboard" : key === "settings" ? "/settings" : "#"
+              key === "dashboard"
+                ? "/dashboard"
+                : key === "settings"
+                  ? "/settings"
+                  : key === "statements"
+                    ? "/statements"
+                    : "#"
             }
             className="rounded-md px-2.5 h-9 flex items-center text-[13px] font-medium text-foreground hover:bg-muted"
           >

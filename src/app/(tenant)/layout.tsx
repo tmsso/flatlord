@@ -32,7 +32,7 @@ export default async function TenantLayout({
         {tabKeys.map((key) => (
           <Link
             key={key}
-            href={key === "home" ? "/home" : "#"}
+            href={key === "home" ? "/home" : key === "statements" ? "/home/statements" : "#"}
             className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-11 text-[12px] font-medium text-muted-foreground hover:text-foreground"
           >
             {t(key)}
