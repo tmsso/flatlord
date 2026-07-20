@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Controller, useForm, type Resolver } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations, useFormatter } from "next-intl";
@@ -191,14 +191,7 @@ function RecordPaymentDialog({ statementId }: { statementId: string }) {
     reset,
     formState: { errors },
   } = useForm<RecordPaymentForm>({
-    // @hookform/resolvers@5.4.0's zod adapter type-checks an internal zod
-    // version literal that doesn't structurally match zod@4.4.3's — a
-    // known type-level mismatch between currently-latest versions of both
-    // packages (both are already pinned to latest; not fixable by an
-    // upgrade), not a runtime issue — verified separately via the
-    // Playwright pass that the resolver behaves correctly.
-    // @ts-expect-error — see comment above; runtime-correct, type-level-only mismatch.
-    resolver: zodResolver(recordPaymentSchema) as Resolver<RecordPaymentForm>,
+    resolver: zodResolver(recordPaymentSchema),
     defaultValues: { method: "bank_transfer", paidAt: new Date().toISOString().slice(0, 10) },
   });
 
