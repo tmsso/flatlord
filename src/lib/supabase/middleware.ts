@@ -75,7 +75,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const isAdminPath = pathname.startsWith("/dashboard");
+  // /settings (invite management) is owner-only content, but wasn't in
+  // this list until now — a pre-existing gap (any authenticated user could
+  // reach it), closed here alongside adding /statements for the new
+  // statement-lifecycle UI. /home/statements is already covered by the
+  // /home prefix below, no separate entry needed.
+  const isAdminPath = pathname.startsWith("/dashboard") || pathname.startsWith("/statements") || pathname.startsWith("/settings");
   const isTenantPath = pathname.startsWith("/home");
   if (
     (isAdminPath && profile.role !== "owner") ||
