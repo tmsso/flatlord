@@ -101,5 +101,11 @@
     "noPaymentsYet": "No payments recorded yet",
     "paymentsCount": "{count} payments",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "backup": {
+    "heading": "Backup & export",
+    "description": "Download a copy of all data in this app as a zip file (JSON and CSV per table). This is a data export, not a full disaster-recovery backup — it doesn't include login accounts, so restoring it would mean re-inviting users afterward.",
+    "dataOnlyLabel": "Data only (skip photos and scans)",
+    "download": "Download backup"
   }
 }

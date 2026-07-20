@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { InviteManager } from "@/components/invite-manager";
+import { BackupExport } from "@/components/backup-export";
 
 export default async function AdminSettingsPage() {
   const t = await getTranslations("nav");
@@ -27,6 +28,7 @@ export default async function AdminSettingsPage() {
           expiresAt: invite.expires_at,
         }))}
       />
+      <BackupExport />
     </div>
   );
 }
