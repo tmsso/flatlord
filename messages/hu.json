@@ -101,5 +101,11 @@
     "noPaymentsYet": "Még nincs rögzített fizetés",
     "paymentsCount": "{count} fizetés",
     "errorGeneric": "Hiba történt. Próbáld újra."
+  },
+  "backup": {
+    "heading": "Biztonsági mentés és exportálás",
+    "description": "Töltsd le az alkalmazásban tárolt összes adat másolatát zip fájlként (JSON és CSV táblánként). Ez adatexport, nem teljes katasztrófa-helyreállítási mentés — nem tartalmazza a bejelentkezési fiókokat, visszaállítás után a felhasználókat újra meg kell hívni.",
+    "dataOnlyLabel": "Csak adatok (fotók és szkennelt dokumentumok kihagyása)",
+    "download": "Mentés letöltése"
   }
 }

@@ -79,8 +79,14 @@ export async function updateSession(request: NextRequest) {
   // this list until now — a pre-existing gap (any authenticated user could
   // reach it), closed here alongside adding /statements for the new
   // statement-lifecycle UI. /home/statements is already covered by the
-  // /home prefix below, no separate entry needed.
-  const isAdminPath = pathname.startsWith("/dashboard") || pathname.startsWith("/statements") || pathname.startsWith("/settings");
+  // /home prefix below, no separate entry needed. /api/admin covers the
+  // backup export route — it also has its own in-handler role check
+  // (defense in depth for the single highest-value target in the app).
+  const isAdminPath =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/statements") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/api/admin");
   const isTenantPath = pathname.startsWith("/home");
   if (
     (isAdminPath && profile.role !== "owner") ||
