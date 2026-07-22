@@ -59,6 +59,28 @@ jobs:
           SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
         run: pnpm exec tsx seed/seed.demo.ts
 
+      # `next build` catches a class of break `tsc --noEmit` and vitest
+      # both miss: a module-scope throw (e.g. a missing env var read at
+      # import time) only fires when something actually collects page
+      # data, which only happens during a real build — confirmed the hard
+      # way when a Vercel Production deploy failed on exactly this while
+      # every check above stayed green. Runs here (DB live and seeded)
+      # rather than earlier so SUPABASE_DB_URL is a genuinely working
+      # connection, not just a syntactically valid string — future-proofs
+      # this against a static page ever needing build-time data. The
+      # Supabase URL/key placeholders below are safe regardless: this
+      # workflow only runs `supabase db start` (Postgres only, no Auth/
+      # REST gateway), and every route in this app is dynamic (nothing
+      # touches Supabase's API at build time) — those three values only
+      # need to exist so module-scope reads don't throw.
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: pnpm build
+
       - name: Run tests
         env:
           SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
