@@ -1,0 +1,2110 @@
+{
+  "id": "4019b88c-5982-4a68-8a0b-c53cdf0782df",
+  "prevId": "7d783418-9cf1-418b-b04a-c82d73b4032f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "auth.users": {
+      "name": "users",
+      "schema": "auth",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.persons": {
+      "name": "persons",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "given_name": {
+          "name": "given_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "family_name": {
+          "name": "family_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "document_type": {
+          "name": "document_type",
+          "type": "document_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_number": {
+          "name": "document_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dob": {
+          "name": "dob",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.profiles": {
+      "name": "profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "profile_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "locale": {
+          "name": "locale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'hu'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "profiles_id_users_id_fk": {
+          "name": "profiles_id_users_id_fk",
+          "tableFrom": "profiles",
+          "columnsFrom": [
+            "id"
+          ],
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "profiles_person_id_persons_id_fk": {
+          "name": "profiles_person_id_persons_id_fk",
+          "tableFrom": "profiles",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.properties": {
+      "name": "properties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "root_property_id": {
+          "name": "root_property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "property_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address_line": {
+          "name": "address_line",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hrsz": {
+          "name": "hrsz",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "letting_mode": {
+          "name": "letting_mode",
+          "type": "letting_mode",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "properties_parent_id_idx": {
+          "name": "properties_parent_id_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "properties_root_property_id_idx": {
+          "name": "properties_root_property_id_idx",
+          "columns": [
+            {
+              "expression": "root_property_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "properties_root_property_id_properties_id_fk": {
+          "name": "properties_root_property_id_properties_id_fk",
+          "tableFrom": "properties",
+          "columnsFrom": [
+            "root_property_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "properties_parent_id_properties_id_fk": {
+          "name": "properties_parent_id_properties_id_fk",
+          "tableFrom": "properties",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "letting_mode_only_on_flat": {
+          "name": "letting_mode_only_on_flat",
+          "value": "(\"properties\".\"type\" = 'flat') = (\"properties\".\"letting_mode\" is not null)"
+        },
+        "hrsz_only_on_house_or_flat": {
+          "name": "hrsz_only_on_house_or_flat",
+          "value": "\"properties\".\"type\" <> 'room' or \"properties\".\"hrsz\" is null"
+        },
+        "address_only_on_house_or_flat": {
+          "name": "address_only_on_house_or_flat",
+          "value": "\"properties\".\"type\" <> 'room' or \"properties\".\"address_line\" is null"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.property_ownership": {
+      "name": "property_ownership",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "property_ownership_property_id_properties_id_fk": {
+          "name": "property_ownership_property_id_properties_id_fk",
+          "tableFrom": "property_ownership",
+          "columnsFrom": [
+            "property_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "property_ownership_person_id_persons_id_fk": {
+          "name": "property_ownership_person_id_persons_id_fk",
+          "tableFrom": "property_ownership",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "property_ownership_property_person_unique": {
+          "name": "property_ownership_property_person_unique",
+          "columns": [
+            "property_id",
+            "person_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "percentage_range": {
+          "name": "percentage_range",
+          "value": "\"property_ownership\".\"percentage\" > 0 and \"property_ownership\".\"percentage\" <= 100"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tenancies": {
+      "name": "tenancies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "unit_id": {
+          "name": "unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_type": {
+          "name": "unit_type",
+          "type": "property_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'flat'"
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "primary_tenant_id": {
+          "name": "primary_tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "primary_tenant_registration_type": {
+          "name": "primary_tenant_registration_type",
+          "type": "registration_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "term_start": {
+          "name": "term_start",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "term_end": {
+          "name": "term_end",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notice_days": {
+          "name": "notice_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 30
+        },
+        "due_day": {
+          "name": "due_day",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 5
+        },
+        "reminder_lead_days": {
+          "name": "reminder_lead_days",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "meter_reading_config": {
+          "name": "meter_reading_config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "status": {
+          "name": "status",
+          "type": "tenancy_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenancies_unit_id_properties_id_fk": {
+          "name": "tenancies_unit_id_properties_id_fk",
+          "tableFrom": "tenancies",
+          "columnsFrom": [
+            "unit_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "tenancies_primary_tenant_id_persons_id_fk": {
+          "name": "tenancies_primary_tenant_id_persons_id_fk",
+          "tableFrom": "tenancies",
+          "columnsFrom": [
+            "primary_tenant_id"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "due_day_range": {
+          "name": "due_day_range",
+          "value": "\"tenancies\".\"due_day\" between 1 and 28"
+        },
+        "unit_type_not_house": {
+          "name": "unit_type_not_house",
+          "value": "\"tenancies\".\"unit_type\" in ('flat', 'room')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tenancy_occupants": {
+      "name": "tenancy_occupants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relationship": {
+          "name": "relationship",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "move_in": {
+          "name": "move_in",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "move_out": {
+          "name": "move_out",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_type": {
+          "name": "registration_type",
+          "type": "registration_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenancy_occupants_tenancy_id_tenancies_id_fk": {
+          "name": "tenancy_occupants_tenancy_id_tenancies_id_fk",
+          "tableFrom": "tenancy_occupants",
+          "columnsFrom": [
+            "tenancy_id"
+          ],
+          "tableTo": "tenancies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "tenancy_occupants_person_id_persons_id_fk": {
+          "name": "tenancy_occupants_person_id_persons_id_fk",
+          "tableFrom": "tenancy_occupants",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.invites": {
+      "name": "invites",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "profile_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invited_by": {
+          "name": "invited_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumed_at": {
+          "name": "consumed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invites_person_id_persons_id_fk": {
+          "name": "invites_person_id_persons_id_fk",
+          "tableFrom": "invites",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "invites_invited_by_persons_id_fk": {
+          "name": "invites_invited_by_persons_id_fk",
+          "tableFrom": "invites",
+          "columnsFrom": [
+            "invited_by"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.field_policies": {
+      "name": "field_policies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field_name": {
+          "name": "field_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "policy": {
+          "name": "policy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'read_only'"
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.field_requirements": {
+      "name": "field_requirements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'person'"
+        },
+        "field_name": {
+          "name": "field_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registration_type": {
+          "name": "registration_type",
+          "type": "registration_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.audit_log": {
+      "name": "audit_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "before": {
+          "name": "before",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after": {
+          "name": "after",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.charge_types": {
+      "name": "charge_types",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "unit_id": {
+          "name": "unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "kind": {
+          "name": "kind",
+          "type": "charge_type_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "charge_types_unit_id_properties_id_fk": {
+          "name": "charge_types_unit_id_properties_id_fk",
+          "tableFrom": "charge_types",
+          "columnsFrom": [
+            "unit_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.charge_schedules": {
+      "name": "charge_schedules",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "charge_type_id": {
+          "name": "charge_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rate_per_unit": {
+          "name": "rate_per_unit",
+          "type": "numeric(12, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "charge_schedules_tenancy_id_tenancies_id_fk": {
+          "name": "charge_schedules_tenancy_id_tenancies_id_fk",
+          "tableFrom": "charge_schedules",
+          "columnsFrom": [
+            "tenancy_id"
+          ],
+          "tableTo": "tenancies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "charge_schedules_charge_type_id_charge_types_id_fk": {
+          "name": "charge_schedules_charge_type_id_charge_types_id_fk",
+          "tableFrom": "charge_schedules",
+          "columnsFrom": [
+            "charge_type_id"
+          ],
+          "tableTo": "charge_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.adjustments": {
+      "name": "adjustments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "charge_type_id": {
+          "name": "charge_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_month": {
+          "name": "target_month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_month_end": {
+          "name": "target_month_end",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "voided_at": {
+          "name": "voided_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "adjustments_tenancy_id_tenancies_id_fk": {
+          "name": "adjustments_tenancy_id_tenancies_id_fk",
+          "tableFrom": "adjustments",
+          "columnsFrom": [
+            "tenancy_id"
+          ],
+          "tableTo": "tenancies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "adjustments_charge_type_id_charge_types_id_fk": {
+          "name": "adjustments_charge_type_id_charge_types_id_fk",
+          "tableFrom": "adjustments",
+          "columnsFrom": [
+            "charge_type_id"
+          ],
+          "tableTo": "charge_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "adjustments_created_by_persons_id_fk": {
+          "name": "adjustments_created_by_persons_id_fk",
+          "tableFrom": "adjustments",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "target_month_end_after_start": {
+          "name": "target_month_end_after_start",
+          "value": "\"adjustments\".\"target_month_end\" is null or \"adjustments\".\"target_month_end\" >= \"adjustments\".\"target_month\""
+        },
+        "target_month_is_month_start": {
+          "name": "target_month_is_month_start",
+          "value": "date_trunc('month', \"adjustments\".\"target_month\") = \"adjustments\".\"target_month\""
+        },
+        "target_month_end_is_month_start": {
+          "name": "target_month_end_is_month_start",
+          "value": "\"adjustments\".\"target_month_end\" is null or date_trunc('month', \"adjustments\".\"target_month_end\") = \"adjustments\".\"target_month_end\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.meters": {
+      "name": "meters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "unit_id": {
+          "name": "unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "charge_type_id": {
+          "name": "charge_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "base_value": {
+          "name": "base_value",
+          "type": "numeric(14, 3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "installed_at": {
+          "name": "installed_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "removed_at": {
+          "name": "removed_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replaces_meter_id": {
+          "name": "replaces_meter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meters_unit_id_properties_id_fk": {
+          "name": "meters_unit_id_properties_id_fk",
+          "tableFrom": "meters",
+          "columnsFrom": [
+            "unit_id"
+          ],
+          "tableTo": "properties",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "meters_charge_type_id_charge_types_id_fk": {
+          "name": "meters_charge_type_id_charge_types_id_fk",
+          "tableFrom": "meters",
+          "columnsFrom": [
+            "charge_type_id"
+          ],
+          "tableTo": "charge_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "meters_replaces_meter_id_meters_id_fk": {
+          "name": "meters_replaces_meter_id_meters_id_fk",
+          "tableFrom": "meters",
+          "columnsFrom": [
+            "replaces_meter_id"
+          ],
+          "tableTo": "meters",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.meter_readings": {
+      "name": "meter_readings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "meter_id": {
+          "name": "meter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "reading_date": {
+          "name": "reading_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entered_value": {
+          "name": "entered_value",
+          "type": "numeric(14, 3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entered_by": {
+          "name": "entered_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ocr_value": {
+          "name": "ocr_value",
+          "type": "numeric(14, 3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocr_confidence": {
+          "name": "ocr_confidence",
+          "type": "numeric(4, 3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_value": {
+          "name": "confirmed_value",
+          "type": "numeric(14, 3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_by": {
+          "name": "confirmed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "photo_path": {
+          "name": "photo_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "meter_reading_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'submitted'"
+        },
+        "source": {
+          "name": "source",
+          "type": "meter_reading_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'tenant'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meter_readings_meter_id_meters_id_fk": {
+          "name": "meter_readings_meter_id_meters_id_fk",
+          "tableFrom": "meter_readings",
+          "columnsFrom": [
+            "meter_id"
+          ],
+          "tableTo": "meters",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "meter_readings_tenancy_id_tenancies_id_fk": {
+          "name": "meter_readings_tenancy_id_tenancies_id_fk",
+          "tableFrom": "meter_readings",
+          "columnsFrom": [
+            "tenancy_id"
+          ],
+          "tableTo": "tenancies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "meter_readings_entered_by_persons_id_fk": {
+          "name": "meter_readings_entered_by_persons_id_fk",
+          "tableFrom": "meter_readings",
+          "columnsFrom": [
+            "entered_by"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "meter_readings_confirmed_by_persons_id_fk": {
+          "name": "meter_readings_confirmed_by_persons_id_fk",
+          "tableFrom": "meter_readings",
+          "columnsFrom": [
+            "confirmed_by"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.statements": {
+      "name": "statements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "period_month": {
+          "name": "period_month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "statement_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total": {
+          "name": "total",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'HUF'"
+        },
+        "issued_snapshot": {
+          "name": "issued_snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "issued_at": {
+          "name": "issued_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "statements_tenancy_id_tenancies_id_fk": {
+          "name": "statements_tenancy_id_tenancies_id_fk",
+          "tableFrom": "statements",
+          "columnsFrom": [
+            "tenancy_id"
+          ],
+          "tableTo": "tenancies",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "statements_tenancy_period_unique": {
+          "name": "statements_tenancy_period_unique",
+          "columns": [
+            "tenancy_id",
+            "period_month"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.statement_line_items": {
+      "name": "statement_line_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "statement_id": {
+          "name": "statement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "charge_type_id": {
+          "name": "charge_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "numeric(14, 3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unit_rate": {
+          "name": "unit_rate",
+          "type": "numeric(12, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_billable": {
+          "name": "is_billable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "charge_schedule_id": {
+          "name": "charge_schedule_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meter_id": {
+          "name": "meter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_reading_id": {
+          "name": "from_reading_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_reading_id": {
+          "name": "to_reading_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "adjustment_id": {
+          "name": "adjustment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "statement_line_items_statement_id_statements_id_fk": {
+          "name": "statement_line_items_statement_id_statements_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "statement_id"
+          ],
+          "tableTo": "statements",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_charge_type_id_charge_types_id_fk": {
+          "name": "statement_line_items_charge_type_id_charge_types_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "charge_type_id"
+          ],
+          "tableTo": "charge_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_charge_schedule_id_charge_schedules_id_fk": {
+          "name": "statement_line_items_charge_schedule_id_charge_schedules_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "charge_schedule_id"
+          ],
+          "tableTo": "charge_schedules",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_meter_id_meters_id_fk": {
+          "name": "statement_line_items_meter_id_meters_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "meter_id"
+          ],
+          "tableTo": "meters",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_from_reading_id_meter_readings_id_fk": {
+          "name": "statement_line_items_from_reading_id_meter_readings_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "from_reading_id"
+          ],
+          "tableTo": "meter_readings",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_to_reading_id_meter_readings_id_fk": {
+          "name": "statement_line_items_to_reading_id_meter_readings_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "to_reading_id"
+          ],
+          "tableTo": "meter_readings",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "statement_line_items_adjustment_id_adjustments_id_fk": {
+          "name": "statement_line_items_adjustment_id_adjustments_id_fk",
+          "tableFrom": "statement_line_items",
+          "columnsFrom": [
+            "adjustment_id"
+          ],
+          "tableTo": "adjustments",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.payments": {
+      "name": "payments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "statement_id": {
+          "name": "statement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenancy_id": {
+          "name": "tenancy_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'HUF'"
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "payment_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "payments_statement_id_statements_id_fk": {
+          "name": "payments_statement_id_statements_id_fk",
+          "tableFrom": "payments",
+          "columnsFrom": [
+            "statement_id"
+          ],
+          "tableTo": "statements",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "payments_recorded_by_persons_id_fk": {
+          "name": "payments_recorded_by_persons_id_fk",
+          "tableFrom": "payments",
+          "columnsFrom": [
+            "recorded_by"
+          ],
+          "tableTo": "persons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.charge_type_kind": {
+      "name": "charge_type_kind",
+      "schema": "public",
+      "values": [
+        "fixed",
+        "metered",
+        "tracked_only",
+        "one_off"
+      ]
+    },
+    "public.document_type": {
+      "name": "document_type",
+      "schema": "public",
+      "values": [
+        "id_card",
+        "passport",
+        "residence_permit"
+      ]
+    },
+    "public.letting_mode": {
+      "name": "letting_mode",
+      "schema": "public",
+      "values": [
+        "whole",
+        "by_room"
+      ]
+    },
+    "public.meter_reading_source": {
+      "name": "meter_reading_source",
+      "schema": "public",
+      "values": [
+        "tenant",
+        "admin",
+        "import"
+      ]
+    },
+    "public.meter_reading_status": {
+      "name": "meter_reading_status",
+      "schema": "public",
+      "values": [
+        "submitted",
+        "verified",
+        "rejected"
+      ]
+    },
+    "public.payment_method": {
+      "name": "payment_method",
+      "schema": "public",
+      "values": [
+        "bank_transfer",
+        "cash",
+        "revolut",
+        "other"
+      ]
+    },
+    "public.profile_role": {
+      "name": "profile_role",
+      "schema": "public",
+      "values": [
+        "owner",
+        "tenant"
+      ]
+    },
+    "public.property_type": {
+      "name": "property_type",
+      "schema": "public",
+      "values": [
+        "house",
+        "flat",
+        "room"
+      ]
+    },
+    "public.registration_type": {
+      "name": "registration_type",
+      "schema": "public",
+      "values": [
+        "main_address",
+        "temporary",
+        "casual",
+        "owner_agent"
+      ]
+    },
+    "public.statement_status": {
+      "name": "statement_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "issued",
+        "partially_paid",
+        "paid",
+        "overdue"
+      ]
+    },
+    "public.tenancy_status": {
+      "name": "tenancy_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "active",
+        "ended",
+        "terminated"
+      ]
+    }
+  },
+  "schemas": {
+    "auth": "auth"
+  },
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

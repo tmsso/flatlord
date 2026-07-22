@@ -20,6 +20,14 @@ let tenancyBId: string;
 let meterAId: string;
 let meterBId: string;
 let chargeScheduleAId: string;
+// Metered-schedule fixtures for the tenant_scope_metered_charge_schedules
+// policy (0011) — deliberately separate ids from chargeScheduleAId (fixed/
+// rent), since that policy must never expose fixed-kind schedules.
+let chargeScheduleActiveAId: string;
+let chargeScheduleExpiredAId: string;
+let chargeScheduleActiveBId: string;
+let gasAId: string;
+let chargeScheduleFutureAId: string;
 let adjustmentAId: string;
 let statementAId: string;
 let statementBId: string;
@@ -104,6 +112,11 @@ beforeAll(async () => {
     insert into charge_types (unit_id, kind, name, unit)
     values (${flatBId}, 'metered', 'RBI Electricity B', 'kWh') returning id
   `;
+  const [gasA] = await adminSql`
+    insert into charge_types (unit_id, kind, name, unit)
+    values (${flatAId}, 'metered', 'RBI Gas A', 'm3') returning id
+  `;
+  gasAId = gasA.id;
 
   const [meterA] = await adminSql`
     insert into meters (unit_id, charge_type_id, label, base_value, installed_at)
@@ -127,6 +140,34 @@ beforeAll(async () => {
     values (${tenancyAId}, ${rentA.id}, 250000, '2026-01-01') returning id
   `;
   chargeScheduleAId = scheduleA.id;
+
+  // Fixtures for tenant_scope_metered_charge_schedules (0011): a currently
+  // active metered rate on A, an expired one on the same charge_type (no
+  // overlap — expired range ends before the active range starts), a
+  // currently active one on B (cross-tenant negative control), and a
+  // not-yet-active one on a second metered charge_type on A (can't share
+  // electricityA with the open-ended active row without violating the
+  // no-overlap guard).
+  const [scheduleActiveA] = await adminSql`
+    insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from)
+    values (${tenancyAId}, ${electricityA.id}, 72, '2026-01-01') returning id
+  `;
+  chargeScheduleActiveAId = scheduleActiveA.id;
+  const [scheduleExpiredA] = await adminSql`
+    insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from, valid_to)
+    values (${tenancyAId}, ${electricityA.id}, 60, '2025-01-01', '2025-12-31') returning id
+  `;
+  chargeScheduleExpiredAId = scheduleExpiredA.id;
+  const [scheduleActiveB] = await adminSql`
+    insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from)
+    values (${tenancyBId}, ${electricityB.id}, 72, '2026-01-01') returning id
+  `;
+  chargeScheduleActiveBId = scheduleActiveB.id;
+  const [scheduleFutureA] = await adminSql`
+    insert into charge_schedules (tenancy_id, charge_type_id, rate_per_unit, valid_from)
+    values (${tenancyAId}, ${gasAId}, 350, '2030-01-01') returning id
+  `;
+  chargeScheduleFutureAId = scheduleFutureA.id;
 
   const [adjustmentA] = await adminSql`
     insert into adjustments (tenancy_id, charge_type_id, amount, reason, target_month, created_by)
@@ -192,6 +233,10 @@ afterAll(async () => {
   await adminSql`delete from statements where id in (${statementAId}, ${statementBId})`;
   await adminSql`delete from adjustments where id = ${adjustmentAId}`;
   await adminSql`delete from charge_schedules where id = ${chargeScheduleAId}`;
+  await adminSql`
+    delete from charge_schedules
+    where id in (${chargeScheduleActiveAId}, ${chargeScheduleExpiredAId}, ${chargeScheduleActiveBId}, ${chargeScheduleFutureAId})
+  `;
   await adminSql`delete from meter_readings where meter_id in (${meterAId}, ${meterBId})`;
   await adminSql`delete from meters where id in (${meterAId}, ${meterBId})`;
   await adminSql`delete from charge_types where unit_id in (${flatAId}, ${flatBId})`;
@@ -249,9 +294,42 @@ describe("RLS: billing/meter tenant isolation", () => {
     ).rejects.toThrow(/row-level security|permission denied/i);
   });
 
-  it("a tenant cannot see charge_schedules at all, even their own tenancy's", async () => {
+  // Title is specifically about fixed-kind schedules (chargeScheduleAId is
+  // rent, 'fixed') — 0011 added a narrow SELECT exception for currently
+  // active *metered* schedules (tenant_scope_metered_charge_schedules,
+  // see the tests below), so "at all" no longer holds globally, only for
+  // fixed/one_off kinds and non-current rows.
+  it("a tenant cannot see fixed-kind charge_schedules at all, even their own tenancy's", async () => {
     await asUser(userAId, async (tx) => {
-      const rows = await tx`select id from charge_schedules where tenancy_id = ${tenancyAId}`;
+      const rows = await tx`select id from charge_schedules where id = ${chargeScheduleAId}`;
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it("a tenant can see their own tenancy's currently active metered charge_schedule", async () => {
+    await asUser(userAId, async (tx) => {
+      const rows = await tx`select id from charge_schedules where id = ${chargeScheduleActiveAId}`;
+      expect(rows).toHaveLength(1);
+    });
+  });
+
+  it("a tenant cannot see another tenant's active metered charge_schedule", async () => {
+    await asUser(userAId, async (tx) => {
+      const rows = await tx`select id from charge_schedules where id = ${chargeScheduleActiveBId}`;
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it("a tenant cannot see an expired metered charge_schedule, even their own tenancy's", async () => {
+    await asUser(userAId, async (tx) => {
+      const rows = await tx`select id from charge_schedules where id = ${chargeScheduleExpiredAId}`;
+      expect(rows).toHaveLength(0);
+    });
+  });
+
+  it("a tenant cannot see a not-yet-active metered charge_schedule, even their own tenancy's", async () => {
+    await asUser(userAId, async (tx) => {
+      const rows = await tx`select id from charge_schedules where id = ${chargeScheduleFutureAId}`;
       expect(rows).toHaveLength(0);
     });
   });

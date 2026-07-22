@@ -71,6 +71,20 @@
       "when": 1784405273945,
       "tag": "0009_currency-neutral-money-columns",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784696257488,
+      "tag": "0010_meter-photos-storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784696267840,
+      "tag": "0011_tenant-metered-rate-visibility",
+      "breakpoints": true
     }
   ]
 }
