@@ -103,7 +103,14 @@ function nextMonthStart(periodMonth: string): string {
 // (a property of ISO 8601 date formatting) — no Date parsing needed for
 // any of the range checks below.
 
-function pickActiveSchedule(
+/**
+ * Exported for reuse outside the billing engine: the tenant meter-reading
+ * flow's live cost estimate must pick "the applicable rate" with this
+ * exact rule, not a separately-written date scan, or the displayed
+ * estimate could silently diverge from what actually gets billed at a
+ * rate-change boundary.
+ */
+export function pickActiveSchedule(
   schedules: ChargeScheduleInput[],
   chargeTypeId: string,
   periodStart: string,

@@ -33,7 +33,9 @@ export default async function AdminLayout({
                   ? "/settings"
                   : key === "statements"
                     ? "/statements"
-                    : "#"
+                    : key === "meters"
+                      ? "/meters"
+                      : "#"
             }
             className="rounded-md px-2.5 h-9 flex items-center text-[13px] font-medium text-foreground hover:bg-muted"
           >

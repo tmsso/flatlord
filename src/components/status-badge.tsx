@@ -55,3 +55,20 @@ export function StatementStatusBadge({ status, label }: { status: StatementDispl
     </StatusPill>
   );
 }
+
+export type MeterReadingStatus = "submitted" | "verified" | "rejected";
+
+const meterReadingStatusConfig: Record<MeterReadingStatus, { tone: StatusTone; icon: typeof Check }> = {
+  submitted: { tone: "muted", icon: Clock },
+  verified: { tone: "success", icon: Check },
+  rejected: { tone: "destructive", icon: AlertCircle },
+};
+
+export function MeterReadingStatusBadge({ status, label }: { status: MeterReadingStatus; label: string }) {
+  const config = meterReadingStatusConfig[status];
+  return (
+    <StatusPill tone={config.tone} icon={config.icon}>
+      {label}
+    </StatusPill>
+  );
+}
