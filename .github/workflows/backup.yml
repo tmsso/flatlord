@@ -1,0 +1,30 @@
+name: Nightly backup
+
+# schedule + workflow_dispatch only, deliberately never pull_request or push:
+# this repo is public, and this workflow carries prod DB + cross-repo push
+# credentials. A PR-triggered run would hand those secrets to anyone who
+# can open a PR.
+on:
+  schedule:
+    - cron: "17 2 * * *" # 02:17 UTC nightly (off-the-hour, avoids GitHub's peak-load minute)
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.1
+
+      - name: Run backup
+        env:
+          SUPABASE_DB_URL_PROD: ${{ secrets.SUPABASE_DB_URL_PROD }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: zarpjgtcwkndtmlnhmdd
+          BACKUP_REPO_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+          BACKUP_REPO: tmsso/flatlord-backups
+          RETENTION_DAYS: "30"
+        run: bash scripts/backup-prod.sh
