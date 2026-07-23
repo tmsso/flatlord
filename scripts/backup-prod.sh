@@ -44,9 +44,12 @@ supabase db dump --db-url "$SUPABASE_DB_URL_PROD" --data-only --use-copy \
 
 echo "== Syncing Storage buckets =="
 mkdir -p "$WORKDIR/storage"
-STORAGE_LS_RAW="$(supabase storage ls --linked --experimental)"
-echo "storage ls raw output: $STORAGE_LS_RAW"
-BUCKETS=$(echo "$STORAGE_LS_RAW" | python3 -c "import json,sys; print('\n'.join(p.strip('/') for p in json.load(sys.stdin)['paths']))")
+# --output-format json is required explicitly: the CLI's actual default is
+# plain text (confirmed by testing in a clean env) even though it silently
+# emits JSON in some interactive shells (agent auto-detection?). Don't rely
+# on the ambient default -- it differs between local dev shells and CI.
+BUCKETS=$(supabase storage ls --linked --experimental --output-format json \
+  | python3 -c "import json,sys; print('\n'.join(p.strip('/') for p in json.load(sys.stdin)['paths']))")
 if [ -z "$BUCKETS" ]; then
   echo "no buckets found"
 else
