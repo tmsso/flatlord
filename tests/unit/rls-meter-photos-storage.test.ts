@@ -3,20 +3,24 @@ import postgres from "postgres";
 import { createClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-// Runs against the real cloud Supabase project (SUPABASE_DB_URL), same
-// asUser/adminSql pattern as rls-billing-isolation.test.ts. INSERT/SELECT
-// against storage.objects go through raw SQL under `asUser` — RLS applies
-// the same way regardless of how a row is written, and this avoids
-// needing an actual file upload in a unit test. DELETE cannot: Supabase
-// blocks direct SQL DELETE on storage.objects ("Direct deletion from
-// storage tables is not allowed. Use the Storage API instead."), so all
-// cleanup goes through the Storage API via a service-role client instead.
+// The RLS assertions below run against SUPABASE_DB_URL alone (raw SQL
+// under `asUser`, same pattern as rls-billing-isolation.test.ts) and work
+// against both the real cloud project and CI's `supabase db start` (which
+// bootstraps storage.objects + its RLS policies at the Postgres level, no
+// gateway needed). Cleanup is different: Supabase blocks direct SQL DELETE
+// on storage.objects ("Direct deletion from storage tables is not allowed.
+// Use the Storage API instead."), so it needs a real Storage API HTTP
+// gateway — which CI's minimal `db start` deliberately excludes (see
+// ci.yml's own comment on why Kong is skipped there). storageAdmin is left
+// undefined in that case; cleanup calls become no-ops, which is fine since
+// CI's database is a fresh, fully disposable container per run anyway.
 const adminSql = postgres(process.env.SUPABASE_DB_URL!, { prepare: false });
-const storageAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } },
-).storage.from("meter-photos");
+const storageAdmin =
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      }).storage.from("meter-photos")
+    : undefined;
 
 let houseId: string;
 let flatAId: string;
@@ -126,7 +130,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await storageAdmin.remove([objectAName, objectBName]);
+  await storageAdmin?.remove([objectAName, objectBName]);
   await adminSql`delete from property_ownership where property_id = ${houseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${strangerOwnerUserId})`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${strangerOwnerPersonId})`;
@@ -152,7 +156,7 @@ describe("RLS: meter-photos Storage bucket", () => {
       insertedId = row.id;
     });
     expect(insertedId).toBeTruthy();
-    await storageAdmin.remove([name]);
+    await storageAdmin?.remove([name]);
   });
 
   it("a tenant cannot insert an object under another tenant's tenancy folder", async () => {
