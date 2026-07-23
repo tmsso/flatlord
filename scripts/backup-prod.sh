@@ -44,7 +44,9 @@ supabase db dump --db-url "$SUPABASE_DB_URL_PROD" --data-only --use-copy \
 
 echo "== Syncing Storage buckets =="
 mkdir -p "$WORKDIR/storage"
-BUCKETS=$(supabase storage ls --linked --experimental | python3 -c "import json,sys; print('\n'.join(p.strip('/') for p in json.load(sys.stdin)['paths']))")
+STORAGE_LS_RAW="$(supabase storage ls --linked --experimental)"
+echo "storage ls raw output: $STORAGE_LS_RAW"
+BUCKETS=$(echo "$STORAGE_LS_RAW" | python3 -c "import json,sys; print('\n'.join(p.strip('/') for p in json.load(sys.stdin)['paths']))")
 if [ -z "$BUCKETS" ]; then
   echo "no buckets found"
 else
