@@ -287,5 +287,15 @@
     "householdTitle": "Household",
     "you": "you",
     "noDocumentOnFile": "No ID document on file"
+  },
+  "charts": {
+    "consumptionTitle": "Consumption per meter",
+    "consumptionScaleNote": "Every series on its own scale — absolute values shown below and in the tooltip.",
+    "costTitle": "Monthly cost (Ft) — rent + utilities",
+    "costWidthNote": "Wide column = rent, narrow = utilities (fixed + metered). Area is proportional to amount.",
+    "rentLabel": "Rent",
+    "fixedOtherLabel": "Fixed utilities",
+    "adjustmentLabel": "Correction",
+    "totalLabel": "Total"
   }
 }

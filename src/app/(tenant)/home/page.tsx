@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { TenantAmountDue } from "@/components/tenant-amount-due";
+import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
+import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 
 export default async function TenantHomePage() {
   const t = await getTranslations("statements");
@@ -47,6 +49,8 @@ export default async function TenantHomePage() {
     ? await supabase.from("payments").select("amount").eq("statement_id", statement.id)
     : { data: [] };
 
+  const chartData = tenancy ? await getTenancyChartData(supabase, tenancy.id, 6, new Date().toISOString().slice(0, 10)) : null;
+
   return (
     <div className="flex flex-col gap-6">
       {self && (
@@ -82,6 +86,9 @@ export default async function TenantHomePage() {
         }))}
         today={new Date().toISOString().slice(0, 10)}
       />
+      {chartData && chartData.consumptionSeries.length > 0 && (
+        <MeterConsumptionChart months={chartData.consumption} series={chartData.consumptionSeries} />
+      )}
     </div>
   );
 }

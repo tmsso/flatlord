@@ -287,5 +287,15 @@
     "householdTitle": "Háztartás",
     "you": "te",
     "noDocumentOnFile": "Nincs igazolvány rögzítve"
+  },
+  "charts": {
+    "consumptionTitle": "Fogyasztás mérőnként",
+    "consumptionScaleNote": "Minden sorozat a saját skáláján — az abszolút értékek alább és a tooltipben.",
+    "costTitle": "Havi költség (Ft) — bérleti díj + rezsi",
+    "costWidthNote": "Széles oszlop = bérleti díj, keskeny = rezsi (fix + mért). A terület arányos az összeggel.",
+    "rentLabel": "Bérleti díj",
+    "fixedOtherLabel": "Fix rezsi",
+    "adjustmentLabel": "Korrekció",
+    "totalLabel": "Összesen"
   }
 }

@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TenancyDetail } from "@/components/tenancy-detail";
+import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
+import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
+import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -36,6 +39,13 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
 
   const { data: persons } = await supabase.from("persons").select("id, given_name, family_name").order("family_name");
 
+  const { consumption, cost, consumptionSeries, meteredSeries } = await getTenancyChartData(
+    supabase,
+    id,
+    12,
+    new Date().toISOString().slice(0, 10),
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div className="text-xs text-muted-foreground">{t("title")}</div>
@@ -66,6 +76,8 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
         })}
         persons={(persons ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
       />
+      {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}
+      <MonthlyCostChart months={cost} meteredSeries={meteredSeries} />
     </div>
   );
 }
