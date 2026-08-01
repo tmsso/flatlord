@@ -5,15 +5,22 @@ import { TenantAmountDue } from "@/components/tenant-amount-due";
 
 export default async function TenantHomePage() {
   const t = await getTranslations("statements");
+  const tHome = await getTranslations("tenantProfile");
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
 
+  const { data: self } = await supabase.from("persons").select("given_name").eq("id", profile.personId).maybeSingle();
+
   const { data: tenancy } = await supabase
     .from("tenancies")
-    .select("id")
+    .select("id, properties(name, address_line)")
     .eq("primary_tenant_id", profile.personId)
     .eq("status", "active")
     .maybeSingle();
+
+  type PropertyRef = { name: string; address_line: string | null };
+  const property = tenancy?.properties as unknown as PropertyRef | PropertyRef[] | null;
+  const addressLine = (Array.isArray(property) ? property[0] : property)?.address_line;
 
   // Outstanding = issued or partially_paid, most recent period first —
   // "overdue" is derived display state, not a separate stored value.
@@ -42,6 +49,12 @@ export default async function TenantHomePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {self && (
+        <div>
+          <p className="text-base font-semibold">{tHome("greeting", { name: self.given_name })}</p>
+          {addressLine && <p className="text-sm text-muted-foreground">{addressLine}</p>}
+        </div>
+      )}
       <h1 className="text-lg font-semibold">{t("amountDue")}</h1>
       <TenantAmountDue
         statement={

@@ -92,6 +92,13 @@
       "when": 1785318087510,
       "tag": "0012_persons-crud-fields-and-write-rls",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1785318087511,
+      "tag": "0013_tenant-scope-properties",
+      "breakpoints": true
     }
   ]
 }

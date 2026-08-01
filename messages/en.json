@@ -270,5 +270,22 @@
     "temporaryAddressLabel": "Temporary address",
     "errorGeneric": "Something went wrong. Please try again.",
     "auditNote": "All edits are logged."
+  },
+  "tenantProfile": {
+    "greeting": "Hi, {name}!",
+    "title": "My tenancy",
+    "tenancyTitle": "Key rental data",
+    "addressLabel": "Address",
+    "termLabel": "Term",
+    "ongoing": "ongoing",
+    "dueDayLabel": "Due day",
+    "dayOfMonth": "day {day} of the month",
+    "noticeDaysLabel": "Notice period",
+    "days": "{count} days",
+    "registrationTypeLabel": "Registration type",
+    "noActiveTenancy": "No active tenancy on file.",
+    "householdTitle": "Household",
+    "you": "you",
+    "noDocumentOnFile": "No ID document on file"
   }
 }

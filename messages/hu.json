@@ -270,5 +270,22 @@
     "temporaryAddressLabel": "Ideiglenes lakcím",
     "errorGeneric": "Hiba történt. Kérjük, próbálja újra.",
     "auditNote": "Minden módosítás naplózásra kerül."
+  },
+  "tenantProfile": {
+    "greeting": "Szia, {name}!",
+    "title": "Bérletem",
+    "tenancyTitle": "Fő bérleti adatok",
+    "addressLabel": "Cím",
+    "termLabel": "Időtartam",
+    "ongoing": "folyamatban",
+    "dueDayLabel": "Fizetési határnap",
+    "dayOfMonth": "minden hónap {day}.",
+    "noticeDaysLabel": "Felmondási idő",
+    "days": "{count} nap",
+    "registrationTypeLabel": "Bejelentkezési típus",
+    "noActiveTenancy": "Nincs aktív bérleti jogviszony rögzítve.",
+    "householdTitle": "Háztartás",
+    "you": "te",
+    "noDocumentOnFile": "Nincs igazolvány rögzítve"
   }
 }
