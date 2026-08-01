@@ -85,6 +85,13 @@
       "when": 1784696267840,
       "tag": "0011_tenant-metered-rate-visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1785318087510,
+      "tag": "0012_persons-crud-fields-and-write-rls",
+      "breakpoints": true
     }
   ]
 }

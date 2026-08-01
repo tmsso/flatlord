@@ -8,6 +8,7 @@ const navKeys = [
   "dashboard",
   "properties",
   "tenancies",
+  "persons",
   "statements",
   "meters",
   "requests",
@@ -35,7 +36,13 @@ export default async function AdminLayout({
                     ? "/statements"
                     : key === "meters"
                       ? "/meters"
-                      : "#"
+                      : key === "properties"
+                        ? "/properties"
+                        : key === "tenancies"
+                          ? "/tenancies"
+                          : key === "persons"
+                            ? "/persons"
+                            : "#"
             }
             className="rounded-md px-2.5 h-9 flex items-center text-[13px] font-medium text-foreground hover:bg-muted"
           >

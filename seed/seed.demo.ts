@@ -272,6 +272,12 @@ async function main() {
       note: "Required for permanent-residence registration.",
     },
     {
+      fieldName: "address_card_number",
+      registrationType: "main_address",
+      required: true,
+      note: "Required for permanent-residence registration (design/11 + design/12: main address needs an ID number and an address card).",
+    },
+    {
       fieldName: "document_number",
       registrationType: "temporary",
       required: true,
