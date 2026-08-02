@@ -1,0 +1,41 @@
+name: Dev project keep-alive
+
+# Supabase free-tier projects auto-pause after a period of API inactivity.
+# This repo's dev/staging project only gets hit when someone is actively
+# in a session, which isn't reliable enough — it already received one
+# pause notice (see ROADMAP.md Phase 1 status, 2026-07-29). A daily ping
+# gives large margin against Supabase's inactivity window even if a
+# scheduled run gets delayed or skipped under GitHub's load.
+#
+# schedule + workflow_dispatch only, same trigger discipline as
+# backup.yml: this is a public repo, and even a read-only anon key
+# shouldn't be reachable from a PR-triggered run.
+on:
+  schedule:
+    - cron: "43 6 * * *" # 06:43 UTC daily (off-the-hour)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      # A REST call against a real table is unambiguously API activity to
+      # Supabase's inactivity timer (unlike, e.g., a direct Postgres
+      # connection, which may not count). RLS denies anon reads on
+      # `properties`, so this always returns an empty array — that's fine,
+      # only the HTTP status matters here. The project ref is not a
+      # secret (already public in the deployed app's client bundle), same
+      # as SUPABASE_PROJECT_REF in backup.yml; only the anon key is.
+      - name: Ping dev project REST API
+        env:
+          SUPABASE_DEV_ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://kqrzqbocruwafvuodatb.supabase.co/rest/v1/properties?select=id&limit=1" \
+            -H "apikey: $SUPABASE_DEV_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_DEV_ANON_KEY")
+          echo "Response: HTTP $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Dev project ping failed (HTTP $status) — it may be paused, or SUPABASE_DEV_ANON_KEY may be missing/stale."
+            exit 1
+          fi
