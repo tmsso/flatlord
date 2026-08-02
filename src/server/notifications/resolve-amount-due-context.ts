@@ -18,6 +18,18 @@ export async function resolveAmountDueContext(supabase: SupabaseClient, statemen
   if (statement.status === "draft") throw new Error("Statement must be issued before it can be sent");
   if (!statement.due_date) throw new Error("Statement has no due date");
 
+  // For a partially_paid statement, the message must state what's still
+  // owed, not the original total — otherwise a tenant who already paid
+  // part of it gets told they owe more than they actually do.
+  const { data: paymentRows, error: paymentsError } = await supabase
+    .from("payments")
+    .select("amount")
+    .eq("statement_id", statementId);
+  if (paymentsError) throw new Error(paymentsError.message);
+  const paidSum = (paymentRows ?? []).reduce((sum, p) => sum + p.amount, 0);
+  const remaining = statement.total - paidSum;
+  if (remaining <= 0) throw new Error("Nothing outstanding on this statement");
+
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select("primary_tenant_id, property_id")
@@ -51,7 +63,7 @@ export async function resolveAmountDueContext(supabase: SupabaseClient, statemen
     style: "currency",
     currency: statement.currency,
     maximumFractionDigits: 0,
-  }).format(statement.total);
+  }).format(remaining);
   const dueDate = new Intl.DateTimeFormat(numberLocale, { dateStyle: "medium", timeZone: "UTC" }).format(
     new Date(`${statement.due_date}T00:00:00Z`),
   );
