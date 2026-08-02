@@ -29,18 +29,21 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
     .order("paid_at");
 
   // wa.me link is built server-side (plain href, no client logic needed).
-  // Only issued/partially_paid statements have anything outstanding to
-  // chase — a paid statement has nothing left to send, and draft has no
-  // due date yet (resolveAmountDueContext enforces both: throws if
-  // status is draft or if nothing remains after payments).
+  // Only issued/partially_paid statements can have anything outstanding —
+  // a paid statement has nothing left to send, and draft has no due date
+  // yet. resolveAmountDueContext returns null (not a throw) if it turns
+  // out nothing actually remains (e.g. a tracked-only month), so this
+  // stays a plain render, never a 500.
   let waLink: string | null = null;
   let canSendEmail = false;
   if (statement.status === "issued" || statement.status === "partially_paid") {
-    const { body, tenantEmail, tenantPhone } = await resolveAmountDueContext(supabase, id);
-    canSendEmail = Boolean(tenantEmail);
-    if (tenantPhone) {
-      const digits = tenantPhone.replace(/[^\d]/g, "");
-      waLink = `https://wa.me/${digits}?text=${encodeURIComponent(body)}`;
+    const context = await resolveAmountDueContext(supabase, id);
+    if (context) {
+      canSendEmail = Boolean(context.tenantEmail);
+      if (context.tenantPhone) {
+        const digits = context.tenantPhone.replace(/[^\d]/g, "");
+        waLink = `https://wa.me/${digits}?text=${encodeURIComponent(context.body)}`;
+      }
     }
   }
 

@@ -8,6 +8,13 @@ import { buildAmountDueMessage } from "@/lib/notifications/amount-due-message";
 // the wa.me link, a plain server-rendered href) and the send-email action
 // (to build what actually gets emailed). Keeping one function means the
 // two channels can never drift out of sync with each other.
+//
+// Returns null (never throws) for "nothing outstanding" — an issued
+// statement can legitimately have a zero/negative remaining balance (a
+// tracked-only month, or an overpayment), and the page.tsx call site is
+// an unguarded server-component render: a throw there would 500 the
+// whole statement page instead of just hiding the send buttons. The
+// send action treats null as its own error instead.
 export async function resolveAmountDueContext(supabase: SupabaseClient, statementId: string) {
   const { data: statement, error: statementError } = await supabase
     .from("statements")
@@ -28,7 +35,7 @@ export async function resolveAmountDueContext(supabase: SupabaseClient, statemen
   if (paymentsError) throw new Error(paymentsError.message);
   const paidSum = (paymentRows ?? []).reduce((sum, p) => sum + p.amount, 0);
   const remaining = statement.total - paidSum;
-  if (remaining <= 0) throw new Error("Nothing outstanding on this statement");
+  if (remaining <= 0) return null;
 
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")

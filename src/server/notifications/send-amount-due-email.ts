@@ -20,7 +20,9 @@ export async function sendAmountDueEmail(input: { statementId: string }) {
   const supabase = await createClient();
   await requireOwnerPersonId(supabase);
 
-  const { subject, body, tenantEmail } = await resolveAmountDueContext(supabase, parsed.statementId);
+  const context = await resolveAmountDueContext(supabase, parsed.statementId);
+  if (!context) throw new Error("Nothing outstanding on this statement");
+  const { subject, body, tenantEmail } = context;
   if (!tenantEmail) throw new Error("Tenant has no contact email on file");
 
   const resend = new Resend(process.env.RESEND_API_KEY);
