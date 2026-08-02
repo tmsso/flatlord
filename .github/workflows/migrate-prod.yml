@@ -1,0 +1,35 @@
+name: Migrate prod database
+
+# workflow_dispatch only, deliberately: this applies pending Drizzle
+# migrations straight to flatlord-prod. A push/PR trigger would mean a
+# migration lands the moment code merges to main — schema changes need a
+# deliberate, reviewed trigger, not an automatic one. Same public-repo
+# secrets-exposure reasoning as backup.yml (see the comment there).
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # drizzle-orm's migrator tracks applied migrations in its own
+      # __drizzle_migrations table and only runs the ones prod hasn't seen
+      # yet — safe to invoke even if some migrations already landed.
+      - name: Apply pending migrations to prod
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL_PROD }}
+        run: pnpm exec tsx src/db/migrate.ts
