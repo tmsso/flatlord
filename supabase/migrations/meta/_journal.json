@@ -99,6 +99,13 @@
       "when": 1785318087511,
       "tag": "0013_tenant-scope-properties",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1785709801754,
+      "tag": "0014_properties-payment-instructions",
+      "breakpoints": true
     }
   ]
 }

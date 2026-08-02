@@ -44,6 +44,14 @@ export const properties = pgTable(
     addressLine: text("address_line"),
     // helyrajzi szám (Hungarian cadastral/local ID) — house/flat only.
     hrsz: text("hrsz"),
+    // Free text (bank IBAN, Revolut tag, etc.) shown to the tenant in
+    // amount-due messages (CLAUDE.md §3.11) — house/flat only, same
+    // inheritance idiom as address_line. No structured receiving-accounts
+    // model yet (CLAUDE.md §3.2's "multiple receiving accounts" is a
+    // later-phase concern); this is the minimal admin-editable field the
+    // amount-due flow needs today. Real values are financial data — never
+    // hardcoded in fixtures/tests, only ever real DB content.
+    paymentInstructions: text("payment_instructions"),
     lettingMode: lettingModeEnum("letting_mode"),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -63,6 +71,10 @@ export const properties = pgTable(
     check(
       "address_only_on_house_or_flat",
       sql`${table.type} <> 'room' or ${table.addressLine} is null`,
+    ),
+    check(
+      "payment_instructions_only_on_house_or_flat",
+      sql`${table.type} <> 'room' or ${table.paymentInstructions} is null`,
     ),
   ],
 );

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { StatementDetail } from "@/components/statement-detail";
+import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
 
 export default async function AdminStatementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,20 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
     .select("id, amount, paid_at, method, note")
     .eq("statement_id", id)
     .order("paid_at");
+
+  // wa.me link is built server-side (plain href, no client logic needed)
+  // — only issued+ statements have a due date, matching resolveAmountDueContext's
+  // own "must be issued" check, so this is skipped for drafts.
+  let waLink: string | null = null;
+  let canSendEmail = false;
+  if (statement.status !== "draft") {
+    const { body, tenantEmail, tenantPhone } = await resolveAmountDueContext(supabase, id);
+    canSendEmail = Boolean(tenantEmail);
+    if (tenantPhone) {
+      const digits = tenantPhone.replace(/[^\d]/g, "");
+      waLink = `https://wa.me/${digits}?text=${encodeURIComponent(body)}`;
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -61,6 +76,8 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
           note: p.note,
         }))}
         today={new Date().toISOString().slice(0, 10)}
+        waLink={waLink}
+        canSendEmail={canSendEmail}
       />
     </div>
   );

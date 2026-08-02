@@ -9,6 +9,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 import { issueStatement } from "@/server/billing/issue-statement";
 import { recordPayment } from "@/server/billing/record-payment";
+import { sendAmountDueEmail } from "@/server/notifications/send-amount-due-email";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,6 +47,8 @@ interface StatementDetailProps {
   lineItems: StatementLineItemDisplay[];
   payments: { id: string; amount: number; paidAt: string; method: string; note: string | null }[];
   today: string;
+  waLink: string | null;
+  canSendEmail: boolean;
 }
 
 const paymentMethods = ["bank_transfer", "cash", "revolut", "other"] as const;
@@ -68,11 +71,12 @@ function capitalize(s: string): string {
     .join("");
 }
 
-export function StatementDetail({ statement, lineItems, payments, today }: StatementDetailProps) {
+export function StatementDetail({ statement, lineItems, payments, today, waLink, canSendEmail }: StatementDetailProps) {
   const t = useTranslations("statements");
   const format = useFormatter();
   const router = useRouter();
   const [isIssuing, startIssuing] = useTransition();
+  const [isSendingEmail, startSendingEmail] = useTransition();
 
   const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(statement.status, statement.dueDate, today);
   const paidSum = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -120,6 +124,17 @@ export function StatementDetail({ statement, lineItems, payments, today }: State
     });
   }
 
+  function handleSendEmail() {
+    startSendingEmail(async () => {
+      try {
+        await sendAmountDueEmail({ statementId: statement.id });
+        toast.success(t("sendEmailSuccess"));
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -142,6 +157,27 @@ export function StatementDetail({ statement, lineItems, payments, today }: State
 
       {statement.status !== "draft" && (
         <p className="text-xs text-muted-foreground">{t("issuedInputsLocked")}</p>
+      )}
+
+      {statement.status !== "draft" && (canSendEmail || waLink) && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-card p-4">
+          <span className="text-sm font-semibold">{t("sendAmountDueTitle")}</span>
+          {canSendEmail && (
+            <Button type="button" variant="outline" size="sm" onClick={handleSendEmail} disabled={isSendingEmail}>
+              {t("sendEmail")}
+            </Button>
+          )}
+          {waLink && (
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<a href={waLink} target="_blank" rel="noopener noreferrer" />}
+            >
+              {t("sendWhatsapp")}
+            </Button>
+          )}
+        </div>
       )}
 
       <StatementLineItemsTable lineItems={lineItems} />
