@@ -12,6 +12,7 @@ import { updateProperty } from "@/server/properties/update-property";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ export interface PropertyDetailProps {
     name: string;
     addressLine: string | null;
     hrsz: string | null;
+    paymentInstructions: string | null;
     lettingMode: "whole" | "by_room" | null;
     active: boolean;
     isRoot: boolean;
@@ -39,6 +41,7 @@ const schema = z.object({
   name: z.string().min(1, "nameRequired"),
   addressLine: z.string().optional(),
   hrsz: z.string().optional(),
+  paymentInstructions: z.string().optional(),
   lettingMode: z.enum(["whole", "by_room"]),
   active: z.boolean(),
 });
@@ -63,6 +66,7 @@ export function PropertyDetail({ property, childProperties, owners, inhabitants,
       name: property.name,
       addressLine: property.addressLine ?? "",
       hrsz: property.hrsz ?? "",
+      paymentInstructions: property.paymentInstructions ?? "",
       lettingMode: property.lettingMode ?? "whole",
       active: property.active,
     },
@@ -76,6 +80,7 @@ export function PropertyDetail({ property, childProperties, owners, inhabitants,
           name: values.name,
           addressLine: property.type === "room" ? null : values.addressLine || null,
           hrsz: property.type === "room" ? null : values.hrsz || null,
+          paymentInstructions: property.type === "room" ? null : values.paymentInstructions || null,
           lettingMode: property.type === "flat" ? values.lettingMode : null,
           active: values.active,
         });
@@ -129,6 +134,11 @@ export function PropertyDetail({ property, childProperties, owners, inhabitants,
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="hrsz">{t("hrszLabel")}</Label>
                 <Input id="hrsz" {...register("hrsz")} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="paymentInstructions">{t("paymentInstructionsLabel")}</Label>
+                <Textarea id="paymentInstructions" {...register("paymentInstructions")} placeholder={t("paymentInstructionsPlaceholder")} />
+                <p className="text-xs text-muted-foreground">{t("paymentInstructionsHint")}</p>
               </div>
             </>
           )}

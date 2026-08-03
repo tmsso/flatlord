@@ -1,0 +1,2 @@
+ALTER TABLE "properties" ADD COLUMN "payment_instructions" text;--> statement-breakpoint
+ALTER TABLE "properties" ADD CONSTRAINT "payment_instructions_only_on_house_or_flat" CHECK ("properties"."type" <> 'room' or "properties"."payment_instructions" is null);

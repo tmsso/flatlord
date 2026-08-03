@@ -14,6 +14,7 @@ const UpdatePropertySchema = z.object({
   name: z.string().min(1, "nameRequired"),
   addressLine: z.string().nullable().optional(),
   hrsz: z.string().nullable().optional(),
+  paymentInstructions: z.string().nullable().optional(),
   lettingMode: z.enum(["whole", "by_room"]).nullable().optional(),
   active: z.boolean(),
 });
@@ -25,7 +26,7 @@ export async function updateProperty(input: z.infer<typeof UpdatePropertySchema>
 
   const { data: before, error: beforeError } = await supabase
     .from("properties")
-    .select("name, address_line, hrsz, letting_mode, active")
+    .select("name, address_line, hrsz, payment_instructions, letting_mode, active")
     .eq("id", parsed.id)
     .single();
   if (beforeError || !before) throw new Error("Property not found");
@@ -36,6 +37,7 @@ export async function updateProperty(input: z.infer<typeof UpdatePropertySchema>
       name: parsed.name,
       address_line: parsed.addressLine ?? null,
       hrsz: parsed.hrsz ?? null,
+      payment_instructions: parsed.paymentInstructions ?? null,
       letting_mode: parsed.lettingMode ?? null,
       active: parsed.active,
     })
@@ -52,6 +54,7 @@ export async function updateProperty(input: z.infer<typeof UpdatePropertySchema>
       name: parsed.name,
       address_line: parsed.addressLine,
       hrsz: parsed.hrsz,
+      payment_instructions: parsed.paymentInstructions,
       letting_mode: parsed.lettingMode,
       active: parsed.active,
     },

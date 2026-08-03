@@ -1,8 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// Sensitive person fields CLAUDE.md §6 says must "never be logged" —
-// applies regardless of entityType, since tenancy_occupants/tenancies
-// snapshots can also carry a denormalized person shape in the future.
+// Sensitive fields CLAUDE.md §6 says must "never be logged" — applies
+// regardless of entityType, since tenancy_occupants/tenancies snapshots
+// can also carry a denormalized person shape in the future.
+// paymentInstructions (properties) is included for the same reason: it
+// holds real bank/Revolut details, not personal-document data, but the
+// same "never log the value" rule applies.
 // Their presence/absence still needs to be visible in the audit trail (an
 // admin reviewing history needs to know *that* a document number changed),
 // just never the value.
@@ -23,6 +26,8 @@ const NEVER_LOG_KEYS = new Set([
   "birthPlace",
   "birth_place",
   "citizenship",
+  "paymentInstructions",
+  "payment_instructions",
 ]);
 
 function redact(snapshot: Record<string, unknown> | null): Record<string, unknown> | null {

@@ -10,7 +10,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   const { data: property } = await supabase
     .from("properties")
-    .select("id, parent_id, root_property_id, type, name, address_line, hrsz, letting_mode, active")
+    .select("id, parent_id, root_property_id, type, name, address_line, hrsz, payment_instructions, letting_mode, active")
     .eq("id", id)
     .maybeSingle();
   if (!property) notFound();
@@ -87,6 +87,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           name: property.name,
           addressLine: property.address_line,
           hrsz: property.hrsz,
+          paymentInstructions: property.payment_instructions,
           lettingMode: property.letting_mode,
           active: property.active,
           isRoot,

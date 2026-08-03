@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { StatementDetail } from "@/components/statement-detail";
+import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
 
 export default async function AdminStatementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,25 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
     .select("id, amount, paid_at, method, note")
     .eq("statement_id", id)
     .order("paid_at");
+
+  // wa.me link is built server-side (plain href, no client logic needed).
+  // Only issued/partially_paid statements can have anything outstanding —
+  // a paid statement has nothing left to send, and draft has no due date
+  // yet. resolveAmountDueContext returns null (not a throw) if it turns
+  // out nothing actually remains (e.g. a tracked-only month), so this
+  // stays a plain render, never a 500.
+  let waLink: string | null = null;
+  let canSendEmail = false;
+  if (statement.status === "issued" || statement.status === "partially_paid") {
+    const context = await resolveAmountDueContext(supabase, id);
+    if (context) {
+      canSendEmail = Boolean(context.tenantEmail);
+      if (context.tenantPhone) {
+        const digits = context.tenantPhone.replace(/[^\d]/g, "");
+        waLink = `https://wa.me/${digits}?text=${encodeURIComponent(context.body)}`;
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -61,6 +81,8 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
           note: p.note,
         }))}
         today={new Date().toISOString().slice(0, 10)}
+        waLink={waLink}
+        canSendEmail={canSendEmail}
       />
     </div>
   );
