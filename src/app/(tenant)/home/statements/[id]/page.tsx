@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { TenantStatementDetail } from "@/components/tenant-statement-detail";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 export default async function TenantStatementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -10,12 +11,15 @@ export default async function TenantStatementDetailPage({ params }: { params: Pr
 
   // RLS scopes this to the caller's own tenancy — a statement belonging
   // to a different tenancy simply returns no row (null), not an error;
-  // notFound() renders Next's 404 rather than throwing.
-  const { data: statement } = await supabase
+  // notFound() renders Next's 404 rather than throwing. A genuine query
+  // error (bad column, connection issue, etc) is a distinct case, checked
+  // separately below rather than folded into the same 404.
+  const { data: statement, error: statementError } = await supabase
     .from("statements")
     .select("id, period_month, status, due_date, total, issued_at, created_at")
     .eq("id", id)
     .maybeSingle();
+  assertNoQueryError("home/statements/[id]", statementError);
   if (!statement) notFound();
 
   const { data: lineItemRows } = await supabase

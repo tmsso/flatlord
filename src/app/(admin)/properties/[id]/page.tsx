@@ -2,17 +2,19 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PropertyDetail } from "@/components/property-detail";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations("properties");
   const supabase = await createClient();
 
-  const { data: property } = await supabase
+  const { data: property, error: propertyError } = await supabase
     .from("properties")
     .select("id, parent_id, root_property_id, type, name, address_line, hrsz, payment_instructions, letting_mode, active")
     .eq("id", id)
     .maybeSingle();
+  assertNoQueryError("properties/[id]", propertyError);
   if (!property) notFound();
 
   const isRoot = property.parent_id === null;
