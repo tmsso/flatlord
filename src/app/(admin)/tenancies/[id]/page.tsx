@@ -5,6 +5,7 @@ import { TenancyDetail } from "@/components/tenancy-detail";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { MonthlyCostChart } from "@/components/monthly-cost-chart";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -14,13 +15,14 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
   const t = await getTranslations("tenancies");
   const supabase = await createClient();
 
-  const { data: tenancy } = await supabase
+  const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select(
       "id, unit_id, primary_tenant_id, primary_tenant_registration_type, term_start, term_end, notice_days, due_day, status, properties(name), persons(given_name, family_name)",
     )
     .eq("id", id)
     .maybeSingle();
+  assertNoQueryError("tenancies/[id]", tenancyError);
   if (!tenancy) notFound();
 
   const property = tenancy.properties as unknown as PropertyRef | PropertyRef[] | null;

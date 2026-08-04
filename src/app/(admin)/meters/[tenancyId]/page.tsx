@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { pickActiveSchedule, type ChargeScheduleInput } from "@/lib/billing/compute-statement";
 import { MeterVerificationPanel, type AdminMeterRow } from "@/components/meter-verification-panel";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 function nextMonthStart(periodMonth: string): string {
   const [year, month] = periodMonth.split("-").map(Number);
@@ -20,11 +21,12 @@ export default async function AdminMeterVerificationPage({
   const { month } = await searchParams;
   const supabase = await createClient();
 
-  const { data: tenancy } = await supabase
+  const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select("id, unit_id, persons(given_name, family_name)")
     .eq("id", tenancyId)
     .maybeSingle();
+  assertNoQueryError("meters/[tenancyId]", tenancyError);
   if (!tenancy) notFound();
 
   const periodMonth = month ?? new Date().toISOString().slice(0, 7);

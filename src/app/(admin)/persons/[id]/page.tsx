@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PersonForm } from "@/components/person-form";
 import { getFieldRequirements } from "@/server/persons/get-required-fields";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 type RegistrationType = "main_address" | "temporary" | "casual" | "owner_agent";
 type PropertyRef = { name: string };
@@ -13,13 +14,14 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
   const tRegType = await getTranslations("tenancies");
   const supabase = await createClient();
 
-  const { data: person } = await supabase
+  const { data: person, error: personError } = await supabase
     .from("persons")
     .select(
       "id, given_name, family_name, document_type, document_number, dob, birth_name, birth_place, mothers_name, citizenship, address_card_number, tax_id, phone, contact_email, registered_address, temporary_address",
     )
     .eq("id", id)
     .maybeSingle();
+  assertNoQueryError("persons/[id]", personError);
   if (!person) notFound();
 
   // Registration type (and the property it's tied to, for the banner)

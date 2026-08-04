@@ -3,17 +3,19 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { StatementDetail } from "@/components/statement-detail";
 import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 
 export default async function AdminStatementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations("statements");
   const supabase = await createClient();
 
-  const { data: statement } = await supabase
+  const { data: statement, error: statementError } = await supabase
     .from("statements")
     .select("id, tenancy_id, period_month, status, due_date, total, issued_at, created_at")
     .eq("id", id)
     .maybeSingle();
+  assertNoQueryError("statements/[id]", statementError);
   if (!statement) notFound();
 
   const { data: lineItemRows } = await supabase
