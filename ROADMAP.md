@@ -37,6 +37,8 @@ Remaining before this phase can be accepted:
 
 **Accept:** a full monthly cycle executed in-app (photo submission → verification → statement → email/WhatsApp → payment), output identical to the sheet; backup zip restores locally; sheet becomes read-only archive.
 
+**This Accept clause is a hard gate, not a checklist nicety: Phase 2 must not start until it passes for real** (real tenant, real prod statement — the 2026-08-04 dev dry-run only proved the mechanics work, it does not satisfy this clause; see `flatlord_dev_dry_run_2026-08-04` memory). This is the concrete instance of the "do not start a phase before its predecessor is accepted" rule in this file's intro and in `CLAUDE.md` — called out explicitly here because it's the gate currently blocking Phase 2.
+
 *(Optional, once this milestone is live: a demo environment becomes worth building — see "Demo environment" in `IDEAS.md` for the in-database `is_demo`-flag approach, seeded via `seed.demo.ts` and served read-only. Not scheduled; pick up opportunistically.)*
 
 ## Phase 2 — Documents, contract, inventory
