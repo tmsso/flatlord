@@ -50,7 +50,7 @@ Loose ideas, deliberately not committed to any phase. Pick up opportunistically 
 
 ## Ops
 
-- Uptime/health check ping (the app becomes the system of record; a dead cron shouldn't go unnoticed for a month).
+- ~~Uptime/health check ping (the app becomes the system of record; a dead cron shouldn't go unnoticed for a month).~~ **Resolved 2026-08-05**: `.github/workflows/health-check.yml` + `src/app/api/health` (every 6h, alerts via GitHub's own workflow-failure email — no Resend secret added, see the workflow's comment).
 - ~~Supabase → self-host escape hatch documentation (data-ownership continuation of the backup story).~~ **Resolved 2026-08-05**: `docs/self-host-escape-hatch.md`.
 - Periodic restore drill reminder (quarterly cron opening an admin task).
 - **Error-swallowing pattern across ~14 detail pages** — **partially resolved 2026-08-04** (PRs [#6](https://github.com/tmsso/flatlord/pull/6), [#7](https://github.com/tmsso/flatlord/pull/7)): the `notFound()`-gating query on all 6 affected pages (`persons/[id]`, `tenancies/[id]`, `meters/[tenancyId]`, `properties/[id]`, `statements/[id]` admin, `home/statements/[id]` tenant) now uses `assertNoQueryError()` (`src/lib/supabase/require-row.ts`) instead of silently dropping `error`. **Still open**: the *secondary* queries on those same pages (occupant rows, line items, payments, schedules, etc.) still destructure only `{ data }` — a follow-up pass should apply `assertNoQueryError` there too. Original note preserved below for context.
