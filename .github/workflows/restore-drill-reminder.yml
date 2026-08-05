@@ -1,0 +1,38 @@
+name: Restore drill reminder
+
+# CLAUDE.md §3.10 / IDEAS.md Ops: the restore procedure in
+# docs/backup-restore.md was tested once (2026-07-23) — this nudges a
+# periodic re-test so it doesn't silently rot as the schema/backup script
+# evolve. Opens a GitHub issue rather than an in-app task/notification:
+# that surface belongs to Phase 3's requests/notices work (not yet
+# built), and a quarterly one-off doesn't need a dedicated in-app entity.
+on:
+  schedule:
+    - cron: "0 9 1 1,4,7,10 *" # 09:00 UTC on Jan/Apr/Jul/Oct 1st
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  open-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open restore-drill issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Quarterly restore drill — $(date -u +%Y-%m-%d)" \
+            --assignee "${{ github.repository_owner }}" \
+            --body "$(cat <<'EOF'
+          Time to re-run the restore procedure in [docs/backup-restore.md](https://github.com/${{ github.repository }}/blob/main/docs/backup-restore.md) against a real recent backup, to confirm it still works as the schema/backup script evolve.
+
+          - [ ] Download the latest release from `tmsso/flatlord-backups`
+          - [ ] Restore `schema.sql` + `data.sql` into a throwaway target, verify row counts match source
+          - [ ] Spot-check `storage cp` round-trip against a real bucket
+          - [ ] Note any drift from the documented procedure and update `docs/backup-restore.md` if the steps changed
+          - [ ] Close this issue once done
+          EOF
+          )"
