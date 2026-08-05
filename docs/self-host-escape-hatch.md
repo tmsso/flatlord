@@ -17,7 +17,7 @@ This app talks to Supabase through three services, each with a different migrati
 
 | Service | Used for | Self-host difficulty |
 |---|---|---|
-| Postgres | all domain data, via Drizzle | Trivial — it's just Postgres. `schema.sql` + `data.sql` from the nightly backup restore into any Postgres 15+ target. |
+| Postgres | all domain data, via Drizzle | Trivial — it's just Postgres. `schema.sql` + `data.sql` from the nightly backup restore into any Postgres 17+ target (matching prod's major version — see [backup-restore.md](./backup-restore.md)'s restore test). |
 | Auth (GoTrue) | login (Google OAuth + magic link, invite-only, no passwords) | Moderate if self-hosting Supabase's own GoTrue; harder if leaving Supabase Auth for a different provider (see below). |
 | Storage | contract/attachment/meter-photo/inventory files | Moderate — Supabase Storage is its own open-source service (S3-compatible internally); either self-host it or swap the app's Storage calls for a different S3-compatible SDK. |
 
@@ -52,8 +52,8 @@ both just point at a different URL and keys, the same way `dev` vs `prod` alread
 A bigger lift, only relevant if Option A's self-hosted Supabase stack itself becomes
 undesirable (not just the hosted free tier):
 
-- **Postgres**: unchanged — any Postgres 15+ host works, including a plain managed
-  Postgres instance with no Supabase involvement at all.
+- **Postgres**: unchanged — any Postgres 17+ host works (matching prod's major version),
+  including a plain managed Postgres instance with no Supabase involvement at all.
 - **Auth**: this app has no passwords to migrate (OAuth + magic link only), which removes
   the usual hardest part of an auth migration. What's still real work: re-registering the
   Google OAuth app against a new auth provider, and replacing `supabase-js`'s auth calls
