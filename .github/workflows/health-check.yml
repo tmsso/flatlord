@@ -1,0 +1,33 @@
+name: Production health check
+
+# The app is the system of record now (billing, meter readings, backups) —
+# a dead deploy or a paused prod Supabase project shouldn't go unnoticed
+# for a month. Hits the public /api/health route (src/app/api/health/
+# route.ts), which does a real Supabase query server-side — a plain
+# homepage ping wouldn't catch "app is up but the database isn't."
+#
+# No secret required: this uses GitHub's own workflow-failure notification
+# (emails the repo owner on a failed scheduled run) rather than a
+# dedicated alerting integration — deliberately, to avoid adding a new
+# external-service credential as a repo secret for this. See
+# docs/self-host-escape-hatch.md's neighbor entry in IDEAS.md for context;
+# revisit if a richer alert (Slack, SMS) is ever wanted.
+on:
+  schedule:
+    - cron: "17 */6 * * *" # every 6 hours, off-the-hour
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production health endpoint
+        run: |
+          status=$(curl -s -o /tmp/health-body.json -w "%{http_code}" \
+            "https://flatlord.vercel.app/api/health")
+          echo "Response: HTTP $status"
+          cat /tmp/health-body.json
+          if [ "$status" != "200" ]; then
+            echo "::error::Production health check failed (HTTP $status) — app may be down or Supabase prod may be unreachable."
+            exit 1
+          fi
