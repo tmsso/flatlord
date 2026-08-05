@@ -9,9 +9,11 @@ name: Production health check
 # No secret required: this uses GitHub's own workflow-failure notification
 # (emails the repo owner on a failed scheduled run) rather than a
 # dedicated alerting integration — deliberately, to avoid adding a new
-# external-service credential as a repo secret for this. See
-# docs/self-host-escape-hatch.md's neighbor entry in IDEAS.md for context;
-# revisit if a richer alert (Slack, SMS) is ever wanted.
+# external-service credential as a repo secret for this. Alert *delivery*
+# (not just detection) depends on the repo owner's GitHub notification
+# settings (Settings > Notifications > Actions) — unverified as of
+# 2026-08-05, see IDEAS.md. Revisit if a richer alert (Slack, SMS) is
+# ever wanted.
 on:
   schedule:
     - cron: "17 */6 * * *" # every 6 hours, off-the-hour
