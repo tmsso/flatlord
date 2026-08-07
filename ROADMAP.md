@@ -18,7 +18,7 @@ Companion to `CLAUDE.md` (domain rules — read first; note the privacy rule §0
 
 ## Phase 1 — Billing core, meter flow, backup (MVP, replaces the Google Sheet)
 
-**Status (2026-08-04): in progress, not yet accepted.** Done and prod-verified: charge model + billing engine, phone-first meter-reading flow, statement lifecycle + payments UI, the Google Sheet importer with golden tests, Backup v1 in full, admin property/tenancy/person CRUD + the field-requirement engine's UI, tenant portal's key-rental-data + own/co-occupant details, charts v1, a dev/staging Supabase keep-alive Action (`.github/workflows/dev-keepalive.yml`, daily REST ping), and a reusable prod-migration mechanism (`.github/workflows/migrate-prod.yml`, `workflow_dispatch`-only) — migrations `0012`–`0014` are now all applied to `flatlord-prod`, not just dev. **Amount-due delivery is built, deployed, and now proven**: `RESEND_API_KEY`/`RESEND_FROM_EMAIL` are set (Vercel prod + preview + `.env.local`), a real smoke-test email delivered successfully, and a full mechanics dry-run against the **dev** project (readings → verification → email → payment) completed end-to-end, DB-confirmed at every step (see project memory `flatlord_dev_dry_run_2026-08-04`). The `wa.me` deep-link path itself is unchanged/still live-verified, though the dry-run's synthetic tenant had no phone on file so that leg wasn't re-exercised this pass.
+**Status (2026-08-04): in progress, not yet accepted.** (See below: as of 2026-08-07 the Phase 1→2 gate is explicitly suppressed — Phase 2 may start — but Phase 1 itself is still open.) Done and prod-verified: charge model + billing engine, phone-first meter-reading flow, statement lifecycle + payments UI, the Google Sheet importer with golden tests, Backup v1 in full, admin property/tenancy/person CRUD + the field-requirement engine's UI, tenant portal's key-rental-data + own/co-occupant details, charts v1, a dev/staging Supabase keep-alive Action (`.github/workflows/dev-keepalive.yml`, daily REST ping), and a reusable prod-migration mechanism (`.github/workflows/migrate-prod.yml`, `workflow_dispatch`-only) — migrations `0012`–`0014` are now all applied to `flatlord-prod`, not just dev. **Amount-due delivery is built, deployed, and now proven**: `RESEND_API_KEY`/`RESEND_FROM_EMAIL` are set (Vercel prod + preview + `.env.local`), a real smoke-test email delivered successfully, and a full mechanics dry-run against the **dev** project (readings → verification → email → payment) completed end-to-end, DB-confirmed at every step (see project memory `flatlord_dev_dry_run_2026-08-04`). The `wa.me` deep-link path itself is unchanged/still live-verified, though the dry-run's synthetic tenant had no phone on file so that leg wasn't re-exercised this pass.
 
 Remaining before this phase can be accepted:
 
@@ -37,7 +37,15 @@ Remaining before this phase can be accepted:
 
 **Accept:** a full monthly cycle executed in-app (photo submission → verification → statement → email/WhatsApp → payment), output identical to the sheet; backup zip restores locally; sheet becomes read-only archive.
 
-**This Accept clause is a hard gate, not a checklist nicety: Phase 2 must not start until it passes for real** (real tenant, real prod statement — the 2026-08-04 dev dry-run only proved the mechanics work, it does not satisfy this clause; see `flatlord_dev_dry_run_2026-08-04` memory). This is the concrete instance of the "do not start a phase before its predecessor is accepted" rule in this file's intro and in `CLAUDE.md` — called out explicitly here because it's the gate currently blocking Phase 2.
+**Gate suppressed 2026-08-07, by explicit admin decision, scoped to this one transition
+only:** Phase 2 may start without waiting for the real prod acceptance run. The run itself
+(real tenant, real prod statement — the 2026-08-04 dev dry-run only proved the mechanics
+work, it does not satisfy this clause; see `flatlord_dev_dry_run_2026-08-04` memory) is
+**deferred, not skipped** — it will happen after fuller delivery rather than gating Phase 2's
+start. Phase 1 is **not** marked Accepted by this change; this Accept clause still has to
+pass for real before Phase 1 itself can be called done. The general "do not start a phase
+before its predecessor is accepted" rule in this file's intro and in `CLAUDE.md` still holds
+for every other phase transition (2→3, 3→4, …) unless the admin says otherwise again.
 
 *(Optional, once this milestone is live: a demo environment becomes worth building — see "Demo environment" in `IDEAS.md` for the in-database `is_demo`-flag approach, seeded via `seed.demo.ts` and served read-only. Not scheduled; pick up opportunistically.)*
 
