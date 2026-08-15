@@ -35,7 +35,7 @@ export function AttachmentsSection({
   entityId,
   attachments,
 }: {
-  entityType: "tenancy" | "person";
+  entityType: "tenancy" | "person" | "inventory_item";
   entityId: string;
   attachments: AttachmentRow[];
 }) {

@@ -21,3 +21,5 @@ export * from "./payments";
 export * from "./contracts";
 export * from "./deposit-transactions";
 export * from "./attachments";
+export * from "./inventory-items";
+export * from "./inventory-reconfirmations";
