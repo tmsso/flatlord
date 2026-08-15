@@ -337,5 +337,22 @@
     "download": "PDF letöltése",
     "activate": "Aktiválás",
     "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
+  },
+  "deposits": {
+    "title": "Kaució",
+    "balanceLabel": "Jelenlegi egyenleg",
+    "empty": "Még nincs kaució-tranzakció.",
+    "addTransaction": "+ Tranzakció rögzítése",
+    "typeLabel": "Típus",
+    "type_paid": "Befizetve",
+    "type_applied": "Felhasználva",
+    "type_retained": "Biztosítékként visszatartva",
+    "type_refunded": "Visszafizetve",
+    "amountLabel": "Összeg",
+    "amountInvalid": "Adjon meg egy egész összeget.",
+    "transactionDateLabel": "Dátum",
+    "transactionDateRequired": "Adjon meg egy dátumot.",
+    "noteLabel": "Megjegyzés",
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
   }
 }

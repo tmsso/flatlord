@@ -78,3 +78,17 @@ export const registrationTypeEnum = pgEnum("registration_type", [
 // tenancies.term_start/term_end/notice_days. superseded: a former active
 // version, kept for the version chain / history, still tenant-visible.
 export const contractStatusEnum = pgEnum("contract_status", ["draft", "active", "superseded"]);
+
+// Deposit ledger (ROADMAP Phase 2, CLAUDE.md §3.2): paid = money received
+// into the deposit; applied = offset against a fee (e.g. a rent-reduction
+// month); refunded = returned to the tenant; retained = an informational
+// marker that the current remaining balance is being held as security
+// (no money movement of its own — see compute-deposit-balance.ts for why
+// it carries no sign). Never edited/deleted once recorded — see
+// deposit-transactions.ts.
+export const depositTransactionTypeEnum = pgEnum("deposit_transaction_type", [
+  "paid",
+  "applied",
+  "retained",
+  "refunded",
+]);

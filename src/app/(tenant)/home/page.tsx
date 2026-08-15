@@ -5,6 +5,7 @@ import { TenantAmountDue } from "@/components/tenant-amount-due";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { TenantContractsList } from "@/components/tenant-contracts-list";
+import { TenantDepositStatus } from "@/components/tenant-deposit-status";
 
 export default async function TenantHomePage() {
   const t = await getTranslations("statements");
@@ -67,6 +68,16 @@ export default async function TenantHomePage() {
     : { data: [] };
   const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
+  // RLS (tenant_scope_deposit_transactions) already restricts this to the
+  // caller's own tenancy — no extra filter here.
+  const { data: depositRows } = tenancy
+    ? await supabase
+        .from("deposit_transactions")
+        .select("id, type, amount, currency, transaction_date, note")
+        .eq("tenancy_id", tenancy.id)
+        .order("transaction_date", { ascending: true })
+    : { data: [] };
+
   return (
     <div className="flex flex-col gap-6">
       {self && (
@@ -113,6 +124,16 @@ export default async function TenantHomePage() {
           termStart: c.term_start,
           termEnd: c.term_end,
           documentUrl: c.document_path ? (contractUrlByPath.get(c.document_path) ?? null) : null,
+        }))}
+      />
+      <TenantDepositStatus
+        transactions={(depositRows ?? []).map((d) => ({
+          id: d.id,
+          type: d.type as "paid" | "applied" | "retained" | "refunded",
+          amount: d.amount,
+          currency: d.currency,
+          transactionDate: d.transaction_date,
+          note: d.note,
         }))}
       />
     </div>

@@ -7,6 +7,7 @@ import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
+import { DepositSection } from "@/components/deposit-section";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -53,6 +54,12 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     ? await supabase.storage.from("contracts").createSignedUrls(contractPaths, 600)
     : { data: [] };
   const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
+
+  const { data: depositRows } = await supabase
+    .from("deposit_transactions")
+    .select("id, type, amount, currency, transaction_date, note")
+    .eq("tenancy_id", id)
+    .order("transaction_date", { ascending: true });
 
   const { consumption, cost, consumptionSeries, meteredSeries } = await getTenancyChartData(
     supabase,
@@ -104,6 +111,17 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           depositCurrency: c.deposit_currency,
           signedAt: c.signed_at,
           documentUrl: c.document_path ? (contractUrlByPath.get(c.document_path) ?? null) : null,
+        }))}
+      />
+      <DepositSection
+        tenancyId={id}
+        transactions={(depositRows ?? []).map((d) => ({
+          id: d.id,
+          type: d.type as "paid" | "applied" | "retained" | "refunded",
+          amount: d.amount,
+          currency: d.currency,
+          transactionDate: d.transaction_date,
+          note: d.note,
         }))}
       />
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}

@@ -19,3 +19,4 @@ export * from "./statements";
 export * from "./statement-line-items";
 export * from "./payments";
 export * from "./contracts";
+export * from "./deposit-transactions";
