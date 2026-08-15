@@ -310,5 +310,28 @@
     "fixedOtherLabel": "Fixed utilities",
     "adjustmentLabel": "Correction",
     "totalLabel": "Total"
+  },
+  "contracts": {
+    "title": "Contracts",
+    "addVersion": "+ Add version",
+    "empty": "No contract versions yet.",
+    "versionLabel": "Version {version}",
+    "status_draft": "Draft",
+    "status_active": "Active",
+    "status_superseded": "Superseded",
+    "fileLabel": "Signed PDF",
+    "fileRequired": "A PDF file is required.",
+    "termStartLabel": "Term start",
+    "termEndLabel": "Term end",
+    "noEndDate": "open-ended",
+    "noticeDaysLabel": "Notice period (days)",
+    "noticeDaysInvalid": "Enter a whole number of days.",
+    "noticeDaysValue": "{days}-day notice",
+    "depositAmountLabel": "Deposit amount",
+    "depositAmountInvalid": "Enter a whole number amount.",
+    "signedAtLabel": "Signed on",
+    "download": "Download PDF",
+    "activate": "Activate",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

@@ -71,3 +71,10 @@ export const registrationTypeEnum = pgEnum("registration_type", [
   "casual",
   "owner_agent",
 ]);
+
+// draft: uploaded, structured terms not yet confirmed onto the tenancy —
+// never shown to the tenant (nothing auto-committed, ROADMAP Phase 2).
+// active: exactly one per tenancy (partial unique index), its terms drive
+// tenancies.term_start/term_end/notice_days. superseded: a former active
+// version, kept for the version chain / history, still tenant-visible.
+export const contractStatusEnum = pgEnum("contract_status", ["draft", "active", "superseded"]);

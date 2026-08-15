@@ -18,3 +18,4 @@ export * from "./meter-readings";
 export * from "./statements";
 export * from "./statement-line-items";
 export * from "./payments";
+export * from "./contracts";

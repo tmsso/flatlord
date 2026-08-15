@@ -310,5 +310,28 @@
     "fixedOtherLabel": "Fix rezsi",
     "adjustmentLabel": "Korrekció",
     "totalLabel": "Összesen"
+  },
+  "contracts": {
+    "title": "Szerződések",
+    "addVersion": "+ Új verzió",
+    "empty": "Még nincs szerződésverzió.",
+    "versionLabel": "{version}. verzió",
+    "status_draft": "Piszkozat",
+    "status_active": "Aktív",
+    "status_superseded": "Lecserélve",
+    "fileLabel": "Aláírt PDF",
+    "fileRequired": "PDF fájl megadása kötelező.",
+    "termStartLabel": "Kezdés",
+    "termEndLabel": "Vége",
+    "noEndDate": "határozatlan",
+    "noticeDaysLabel": "Felmondási idő (nap)",
+    "noticeDaysInvalid": "Adjon meg egy egész számot napokban.",
+    "noticeDaysValue": "{days} napos felmondás",
+    "depositAmountLabel": "Kaució összege",
+    "depositAmountInvalid": "Adjon meg egy egész összeget.",
+    "signedAtLabel": "Aláírás dátuma",
+    "download": "PDF letöltése",
+    "activate": "Aktiválás",
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
   }
 }
