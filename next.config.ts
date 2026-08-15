@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
   // anyway since it's the correct, documented fix for the HMR warning
   // itself.
   allowedDevOrigins: ["intermouse"],
+  // /fonts (vendored IBM Plex Sans TTFs for @react-pdf/renderer, see
+  // src/lib/documents/pdf-fonts.ts) is only ever touched via a runtime
+  // `path.join(process.cwd(), "fonts", ...)` string, which Next's
+  // automatic serverless file-tracing can't statically discover — without
+  // this, the TTFs would work locally but be silently missing from the
+  // deployed Vercel function, breaking PDF generation only in prod.
+  outputFileTracingIncludes: {
+    "/**": ["./fonts/**"],
+  },
 };
 
 export default withNextIntl(nextConfig);

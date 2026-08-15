@@ -9,6 +9,7 @@ import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
 import { DepositSection } from "@/components/deposit-section";
 import { AttachmentsSection } from "@/components/attachments-section";
+import { DeclarationGenerator } from "@/components/declaration-generator";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -150,6 +151,17 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           createdAt: a.created_at,
           downloadUrl: a.storage_path ? (attachmentUrlByPath.get(a.storage_path) ?? null) : null,
         }))}
+      />
+      <DeclarationGenerator
+        tenancyId={id}
+        occupants={[
+          { personId: tenancy.primary_tenant_id, name: primaryTenantName },
+          ...(occupantRows ?? []).map((o) => {
+            const person = o.persons as unknown as PersonRef | PersonRef[] | null;
+            const p = Array.isArray(person) ? person[0] : person;
+            return { personId: o.person_id, name: p ? `${p.given_name} ${p.family_name}` : "—" };
+          }),
+        ]}
       />
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}
       <MonthlyCostChart months={cost} meteredSeries={meteredSeries} />

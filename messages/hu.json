@@ -370,5 +370,13 @@
     "remove": "Eltávolítás",
     "uploadedOn": "Feltöltve: {date}",
     "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
+  },
+  "documents": {
+    "title": "Nyilatkozatok",
+    "addressRegistrationDescription": "Kétnyelvű hozzájáruló nyilatkozatot készít lakcímbejelentéshez (befogadói nyilatkozat), és elmenti a tenancy mellékleteihez.",
+    "occupantLabel": "Kinek",
+    "generate": "PDF létrehozása",
+    "generated": "A nyilatkozat elkészült.",
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
   }
 }
