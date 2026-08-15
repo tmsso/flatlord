@@ -354,5 +354,21 @@
     "transactionDateRequired": "Adjon meg egy dátumot.",
     "noteLabel": "Megjegyzés",
     "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
+  },
+  "attachments": {
+    "title": "Mellékletek",
+    "tenancyTitle": "Bérleti dokumentumok",
+    "personTitle": "Saját dokumentumok",
+    "empty": "Még nincs melléklet.",
+    "upload": "+ Melléklet hozzáadása",
+    "fileLabel": "Fájl",
+    "fileRequired": "Fájl megadása kötelező.",
+    "noteLabel": "Megjegyzés (opcionális)",
+    "unsupportedFileType": "Ez a fájltípus nem támogatott.",
+    "fileTooLarge": "A fájl túl nagy (max. 25 MB).",
+    "download": "Letöltés",
+    "remove": "Eltávolítás",
+    "uploadedOn": "Feltöltve: {date}",
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
   }
 }

@@ -6,10 +6,12 @@ import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { TenantContractsList } from "@/components/tenant-contracts-list";
 import { TenantDepositStatus } from "@/components/tenant-deposit-status";
+import { TenantAttachmentsList } from "@/components/tenant-attachments-list";
 
 export default async function TenantHomePage() {
   const t = await getTranslations("statements");
   const tHome = await getTranslations("tenantProfile");
+  const tAttachments = await getTranslations("attachments");
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
 
@@ -78,6 +80,31 @@ export default async function TenantHomePage() {
         .order("transaction_date", { ascending: true })
     : { data: [] };
 
+  // RLS (tenant_scope_attachments) already restricts these to the
+  // caller's own tenancy / own person record — no extra filter here.
+  const { data: tenancyAttachmentRows } = tenancy
+    ? await supabase
+        .from("attachments")
+        .select("id, file_name, size_bytes, created_at, storage_path")
+        .eq("entity_type", "tenancy")
+        .eq("entity_id", tenancy.id)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+  const { data: personAttachmentRows } = await supabase
+    .from("attachments")
+    .select("id, file_name, size_bytes, created_at, storage_path")
+    .eq("entity_type", "person")
+    .eq("entity_id", profile.personId)
+    .order("created_at", { ascending: false });
+
+  const allAttachmentPaths = [...(tenancyAttachmentRows ?? []), ...(personAttachmentRows ?? [])]
+    .map((a) => a.storage_path)
+    .filter((p): p is string => !!p);
+  const { data: attachmentSignedUrls } = allAttachmentPaths.length
+    ? await supabase.storage.from("attachments").createSignedUrls(allAttachmentPaths, 600)
+    : { data: [] };
+  const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
+
   return (
     <div className="flex flex-col gap-6">
       {self && (
@@ -124,6 +151,26 @@ export default async function TenantHomePage() {
           termStart: c.term_start,
           termEnd: c.term_end,
           documentUrl: c.document_path ? (contractUrlByPath.get(c.document_path) ?? null) : null,
+        }))}
+      />
+      <TenantAttachmentsList
+        title={tAttachments("tenancyTitle")}
+        attachments={(tenancyAttachmentRows ?? []).map((a) => ({
+          id: a.id,
+          fileName: a.file_name,
+          sizeBytes: a.size_bytes,
+          createdAt: a.created_at,
+          downloadUrl: a.storage_path ? (attachmentUrlByPath.get(a.storage_path) ?? null) : null,
+        }))}
+      />
+      <TenantAttachmentsList
+        title={tAttachments("personTitle")}
+        attachments={(personAttachmentRows ?? []).map((a) => ({
+          id: a.id,
+          fileName: a.file_name,
+          sizeBytes: a.size_bytes,
+          createdAt: a.created_at,
+          downloadUrl: a.storage_path ? (attachmentUrlByPath.get(a.storage_path) ?? null) : null,
         }))}
       />
       <TenantDepositStatus
