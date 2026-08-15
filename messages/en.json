@@ -337,5 +337,22 @@
     "download": "Download PDF",
     "activate": "Activate",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "deposits": {
+    "title": "Deposit",
+    "balanceLabel": "Current balance",
+    "empty": "No deposit transactions yet.",
+    "addTransaction": "+ Record transaction",
+    "typeLabel": "Type",
+    "type_paid": "Paid",
+    "type_applied": "Applied",
+    "type_retained": "Retained as security",
+    "type_refunded": "Refunded",
+    "amountLabel": "Amount",
+    "amountInvalid": "Enter a whole number amount.",
+    "transactionDateLabel": "Date",
+    "transactionDateRequired": "Enter a date.",
+    "noteLabel": "Note",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
