@@ -354,5 +354,21 @@
     "transactionDateRequired": "Enter a date.",
     "noteLabel": "Note",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "attachments": {
+    "title": "Attachments",
+    "tenancyTitle": "Tenancy documents",
+    "personTitle": "My documents",
+    "empty": "No attachments yet.",
+    "upload": "+ Add attachment",
+    "fileLabel": "File",
+    "fileRequired": "A file is required.",
+    "noteLabel": "Note (optional)",
+    "unsupportedFileType": "This file type isn't supported.",
+    "fileTooLarge": "File is too large (max 25 MB).",
+    "download": "Download",
+    "remove": "Remove",
+    "uploadedOn": "Uploaded {date}",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

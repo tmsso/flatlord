@@ -8,6 +8,7 @@ import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
 import { DepositSection } from "@/components/deposit-section";
+import { AttachmentsSection } from "@/components/attachments-section";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -60,6 +61,20 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     .select("id, type, amount, currency, transaction_date, note")
     .eq("tenancy_id", id)
     .order("transaction_date", { ascending: true });
+
+  const { data: attachmentRows } = await supabase
+    .from("attachments")
+    .select("id, file_name, size_bytes, note, created_at, storage_path")
+    .eq("entity_type", "tenancy")
+    .eq("entity_id", id)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
+
+  const attachmentPaths = (attachmentRows ?? []).map((a) => a.storage_path).filter((p): p is string => !!p);
+  const { data: attachmentSignedUrls } = attachmentPaths.length
+    ? await supabase.storage.from("attachments").createSignedUrls(attachmentPaths, 600)
+    : { data: [] };
+  const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
   const { consumption, cost, consumptionSeries, meteredSeries } = await getTenancyChartData(
     supabase,
@@ -122,6 +137,18 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           currency: d.currency,
           transactionDate: d.transaction_date,
           note: d.note,
+        }))}
+      />
+      <AttachmentsSection
+        entityType="tenancy"
+        entityId={id}
+        attachments={(attachmentRows ?? []).map((a) => ({
+          id: a.id,
+          fileName: a.file_name,
+          sizeBytes: a.size_bytes,
+          note: a.note,
+          createdAt: a.created_at,
+          downloadUrl: a.storage_path ? (attachmentUrlByPath.get(a.storage_path) ?? null) : null,
         }))}
       />
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}

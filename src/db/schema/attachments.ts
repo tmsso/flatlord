@@ -1,0 +1,40 @@
+import { pgTable, pgEnum, uuid, text, bigint, timestamp } from "drizzle-orm/pg-core";
+import { persons } from "./persons";
+
+// Only the entity types with a real parent table today. 'inventory_item'
+// is added by a follow-up migration once the inventory module ships
+// (ROADMAP Phase 2 item 6, later in this same batch) — Postgres enum
+// values can be appended without touching existing rows/policies.
+export const attachmentEntityTypeEnum = pgEnum("attachment_entity_type", ["tenancy", "person"]);
+
+// Generic attachment, reused across entity types (ROADMAP Phase 2 item 4,
+// CLAUDE.md §3.6). entity_id has no FK — it's polymorphic across whichever
+// table entity_type names, so referential integrity for it is enforced by
+// the RLS policies' own joins (migration file) rather than the schema.
+// property_id is trigger-set only for entity_type = 'tenancy' (denormalized
+// from tenancies.property_id, same pattern as contracts.ts); it stays null
+// for entity_type = 'person' since persons aren't property-scoped — any
+// owner manages every person record (see owner_scope_persons, migration
+// 0001), matching how persons' own RLS already works.
+// Soft-delete only (deleted_at): CLAUDE.md §3.5 "never hard-delete; status
+// flags" applies here too — a removed attachment stays in history.
+export const attachments = pgTable("attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  entityType: attachmentEntityTypeEnum("entity_type").notNull(),
+  entityId: uuid("entity_id").notNull(),
+  propertyId: uuid("property_id"),
+  // Nullable like contracts.documentPath: the row is inserted first (to
+  // get its id), then the file is uploaded to a path keyed by that id, then
+  // this column is updated — same two-step idiom as create-contract.ts.
+  storagePath: text("storage_path"),
+  fileName: text("file_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+  note: text("note"),
+  uploadedBy: uuid("uploaded_by")
+    .notNull()
+    .references(() => persons.id),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PersonForm } from "@/components/person-form";
 import { getFieldRequirements } from "@/server/persons/get-required-fields";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
+import { AttachmentsSection } from "@/components/attachments-section";
 
 type RegistrationType = "main_address" | "temporary" | "casual" | "owner_agent";
 type PropertyRef = { name: string };
@@ -60,6 +61,20 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
     }
   }
 
+  const { data: attachmentRows } = await supabase
+    .from("attachments")
+    .select("id, file_name, size_bytes, note, created_at, storage_path")
+    .eq("entity_type", "person")
+    .eq("entity_id", id)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
+
+  const attachmentPaths = (attachmentRows ?? []).map((a) => a.storage_path).filter((p): p is string => !!p);
+  const { data: attachmentSignedUrls } = attachmentPaths.length
+    ? await supabase.storage.from("attachments").createSignedUrls(attachmentPaths, 600)
+    : { data: [] };
+  const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
+
   const requirements = await getFieldRequirements(supabase, registrationType);
   const requirementLabel = registrationType
     ? propertyName
@@ -96,6 +111,18 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
         }}
       />
       <p className="text-xs text-muted-foreground">{t("auditNote")}</p>
+      <AttachmentsSection
+        entityType="person"
+        entityId={person.id}
+        attachments={(attachmentRows ?? []).map((a) => ({
+          id: a.id,
+          fileName: a.file_name,
+          sizeBytes: a.size_bytes,
+          note: a.note,
+          createdAt: a.created_at,
+          downloadUrl: a.storage_path ? (attachmentUrlByPath.get(a.storage_path) ?? null) : null,
+        }))}
+      />
     </div>
   );
 }
