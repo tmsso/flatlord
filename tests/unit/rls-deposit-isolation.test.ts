@@ -31,6 +31,30 @@ async function asUser(userId: string, fn: (tx: postgres.TransactionSql) => Promi
   });
 }
 
+// deposit_transactions has no UPDATE grant at all (migration 0016) and no
+// UPDATE RLS policy either — real financial history is append-only.
+// Which of those two independent blocks actually fires differs by
+// environment: a from-scratch project (CI's `supabase start`) has the
+// strict grant defaults, so the missing GRANT denies first with a thrown
+// "permission denied" error. This repo's shared dev-cloud project
+// predates that default (see migration 0006's own comment) and still
+// carries a legacy blanket grant, so the query is grant-permitted and
+// RLS is what silently filters it to 0 affected rows instead. Both are
+// the correct security outcome — a mutation never lands — just shaped
+// differently, so this asserts the outcome, not the mechanism.
+async function expectUpdateDenied(userId: string, query: (tx: postgres.TransactionSql) => Promise<{ count: number }>) {
+  let count: number | undefined;
+  try {
+    await asUser(userId, async (tx) => {
+      count = (await query(tx)).count;
+    });
+  } catch (err) {
+    expect(String(err)).toMatch(/permission denied/i);
+    return;
+  }
+  expect(count).toBe(0);
+}
+
 beforeAll(async () => {
   houseId = randomUUID();
   await adminSql`
@@ -124,11 +148,11 @@ describe("RLS: deposit_transactions isolation (migration 0016)", () => {
     ).rejects.toThrow(/row-level security|permission denied/i);
   });
 
-  it("a tenant's update to a deposit transaction silently affects no rows (no tenant UPDATE policy)", async () => {
-    await asUser(userAId, async (tx) => {
-      const result = await tx`update deposit_transactions set note = 'tampered' where id = ${paidTransactionAId}`;
-      expect(result.count).toBe(0);
-    });
+  it("a tenant's update to a deposit transaction is denied, however this environment enforces it", async () => {
+    await expectUpdateDenied(
+      userAId,
+      (tx) => tx`update deposit_transactions set note = 'tampered' where id = ${paidTransactionAId}`,
+    );
     const [after] = await adminSql`select note from deposit_transactions where id = ${paidTransactionAId}`;
     expect(after.note).toBeNull();
   });
@@ -160,14 +184,15 @@ describe("RLS: deposit_transactions isolation (migration 0016)", () => {
     await adminSql`delete from deposit_transactions where id = ${insertedId!}`;
   });
 
-  // No owner UPDATE policy exists either (owner_scope_deposit_transactions
-  // is SELECT-only) — real financial history is append-only for owner and
-  // tenant alike, a correction is a new offsetting row, never an edit.
-  it("even the owning owner's update to a deposit transaction silently affects no rows", async () => {
-    await asUser(ownerUserId, async (tx) => {
-      const result = await tx`update deposit_transactions set amount = 1 where id = ${paidTransactionAId}`;
-      expect(result.count).toBe(0);
-    });
+  // Same denial as the tenant case above, same environment caveat — no
+  // UPDATE policy exists for the owner either, real financial history is
+  // append-only for owner and tenant alike, a correction is a new
+  // offsetting row, never an edit.
+  it("even the owning owner's update to a deposit transaction is denied, however this environment enforces it", async () => {
+    await expectUpdateDenied(
+      ownerUserId,
+      (tx) => tx`update deposit_transactions set amount = 1 where id = ${paidTransactionAId}`,
+    );
     const [after] = await adminSql`select amount from deposit_transactions where id = ${paidTransactionAId}`;
     expect(Number(after.amount)).toBe(440000);
   });
