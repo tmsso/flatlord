@@ -6,6 +6,7 @@ import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
+import { ContractsSection } from "@/components/contracts-section";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -40,6 +41,18 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     .order("move_in");
 
   const { data: persons } = await supabase.from("persons").select("id, given_name, family_name").order("family_name");
+
+  const { data: contractRows } = await supabase
+    .from("contracts")
+    .select("id, version, status, term_start, term_end, notice_days, deposit_amount, deposit_currency, signed_at, document_path")
+    .eq("tenancy_id", id)
+    .order("version", { ascending: false });
+
+  const contractPaths = (contractRows ?? []).map((c) => c.document_path).filter((p): p is string => !!p);
+  const { data: contractSignedUrls } = contractPaths.length
+    ? await supabase.storage.from("contracts").createSignedUrls(contractPaths, 600)
+    : { data: [] };
+  const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
   const { consumption, cost, consumptionSeries, meteredSeries } = await getTenancyChartData(
     supabase,
@@ -77,6 +90,21 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           };
         })}
         persons={(persons ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
+      />
+      <ContractsSection
+        tenancyId={id}
+        contracts={(contractRows ?? []).map((c) => ({
+          id: c.id,
+          version: c.version,
+          status: c.status as "draft" | "active" | "superseded",
+          termStart: c.term_start,
+          termEnd: c.term_end,
+          noticeDays: c.notice_days,
+          depositAmount: c.deposit_amount,
+          depositCurrency: c.deposit_currency,
+          signedAt: c.signed_at,
+          documentUrl: c.document_path ? (contractUrlByPath.get(c.document_path) ?? null) : null,
+        }))}
       />
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}
       <MonthlyCostChart months={cost} meteredSeries={meteredSeries} />
