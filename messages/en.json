@@ -370,5 +370,13 @@
     "remove": "Remove",
     "uploadedOn": "Uploaded {date}",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "documents": {
+    "title": "Declarations",
+    "addressRegistrationDescription": "Generates a bilingual consent statement for address registration (accommodation-provider consent), saved to this tenancy's attachments.",
+    "occupantLabel": "For",
+    "generate": "Generate PDF",
+    "generated": "Declaration generated.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
