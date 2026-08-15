@@ -7,6 +7,7 @@ import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { TenantContractsList } from "@/components/tenant-contracts-list";
 import { TenantDepositStatus } from "@/components/tenant-deposit-status";
 import { TenantAttachmentsList } from "@/components/tenant-attachments-list";
+import { TenantInventorySection } from "@/components/tenant-inventory-section";
 
 export default async function TenantHomePage() {
   const t = await getTranslations("statements");
@@ -19,7 +20,7 @@ export default async function TenantHomePage() {
 
   const { data: tenancy } = await supabase
     .from("tenancies")
-    .select("id, properties(name, address_line)")
+    .select("id, unit_id, properties(name, address_line)")
     .eq("primary_tenant_id", profile.personId)
     .eq("status", "active")
     .maybeSingle();
@@ -105,6 +106,52 @@ export default async function TenantHomePage() {
     : { data: [] };
   const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
+  // RLS (tenant_scope_inventory_items) already restricts these to the
+  // active-tenancy's unit — no extra filter here.
+  const { data: inventoryRows } = tenancy
+    ? await supabase
+        .from("inventory_items")
+        .select("id, title, owned_by, condition")
+        .eq("unit_id", tenancy.unit_id)
+        .eq("status", "active")
+        .order("title")
+    : { data: [] };
+
+  const { data: openCampaign } = tenancy
+    ? await supabase
+        .from("inventory_reconfirmations")
+        .select("id, due_date")
+        .eq("tenancy_id", tenancy.id)
+        .eq("status", "open")
+        .order("initiated_at", { ascending: false })
+        .maybeSingle()
+    : { data: null };
+
+  const { data: campaignItemRows } = openCampaign
+    ? await supabase
+        .from("inventory_reconfirmation_items")
+        .select("id, inventory_item_id, status, inventory_items(title)")
+        .eq("reconfirmation_id", openCampaign.id)
+    : { data: [] };
+
+  type InventoryItemTitleRef = { title: string };
+  const activeCampaign = openCampaign
+    ? {
+        id: openCampaign.id,
+        dueDate: openCampaign.due_date,
+        items: (campaignItemRows ?? []).map((ci) => {
+          const ref = ci.inventory_items as unknown as InventoryItemTitleRef | InventoryItemTitleRef[] | null;
+          const invItem = Array.isArray(ref) ? ref[0] : ref;
+          return {
+            id: ci.id,
+            inventoryItemId: ci.inventory_item_id,
+            itemTitle: invItem?.title ?? "—",
+            status: ci.status as "pending" | "confirmed" | "discrepancy",
+          };
+        }),
+      }
+    : null;
+
   return (
     <div className="flex flex-col gap-6">
       {self && (
@@ -182,6 +229,15 @@ export default async function TenantHomePage() {
           transactionDate: d.transaction_date,
           note: d.note,
         }))}
+      />
+      <TenantInventorySection
+        items={(inventoryRows ?? []).map((i) => ({
+          id: i.id,
+          title: i.title,
+          ownedBy: i.owned_by as "owner" | "renter" | "conditional",
+          condition: i.condition,
+        }))}
+        activeCampaign={activeCampaign}
       />
     </div>
   );

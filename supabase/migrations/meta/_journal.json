@@ -127,6 +127,13 @@
       "when": 1786828043869,
       "tag": "0017_phase2-attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1786836977092,
+      "tag": "0018_phase-2-inventory",
+      "breakpoints": true
     }
   ]
 }

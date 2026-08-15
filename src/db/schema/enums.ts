@@ -92,3 +92,33 @@ export const depositTransactionTypeEnum = pgEnum("deposit_transaction_type", [
   "retained",
   "refunded",
 ]);
+
+// Inventory module (ROADMAP Phase 2 item 6, CLAUDE.md §3.9). "conditional"
+// covers the real case cited there: appliance ownership transferring
+// depending on the tenancy's end date — see inventory-items.ts's
+// actionByDate/actionByReason columns for how that's represented.
+export const inventoryOwnedByEnum = pgEnum("inventory_owned_by", ["owner", "renter", "conditional"]);
+
+// Never hard-deleted (CLAUDE.md §3.5) — "removed" and "transferred" are
+// terminal states, not row deletions.
+export const inventoryItemStatusEnum = pgEnum("inventory_item_status", ["active", "removed", "transferred"]);
+
+// A reconfirmation campaign covers either every active item on the unit
+// ('full') or an admin-picked subset ('subset') — see inventory-
+// reconfirmations.ts.
+export const inventoryReconfirmationScopeEnum = pgEnum("inventory_reconfirmation_scope", ["full", "subset"]);
+
+export const inventoryReconfirmationStatusEnum = pgEnum("inventory_reconfirmation_status", ["open", "completed"]);
+
+// pending: tenant hasn't responded yet. confirmed: tenant confirmed
+// condition/presence as expected. discrepancy: tenant flagged a mismatch —
+// CLAUDE.md §3.9 says this should "automatically open requests", but the
+// Requests module is Phase 3 and doesn't exist yet (ROADMAP Phase 2 item 6
+// scope note) — a discrepancy here instead surfaces in an admin "needs
+// review" filter and triggers an owner notification email. Phase 3 can
+// wire the real auto-open request against this same status value later.
+export const inventoryReconfirmationItemStatusEnum = pgEnum("inventory_reconfirmation_item_status", [
+  "pending",
+  "confirmed",
+  "discrepancy",
+]);
