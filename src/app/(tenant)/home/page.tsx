@@ -117,6 +117,12 @@ export default async function TenantHomePage() {
         .order("title")
     : { data: [] };
 
+  // .maybeSingle() errors (silently swallowed by the {data}-only
+  // destructure here) if more than one row comes back — possible in
+  // practice if the admin launches a second campaign before an earlier
+  // one completes. .limit(1) forces the DB to only ever return one row,
+  // so the ordering above deterministically wins instead of the query
+  // failing and the whole reconfirmation section silently vanishing.
   const { data: openCampaign } = tenancy
     ? await supabase
         .from("inventory_reconfirmations")
@@ -124,6 +130,7 @@ export default async function TenantHomePage() {
         .eq("tenancy_id", tenancy.id)
         .eq("status", "open")
         .order("initiated_at", { ascending: false })
+        .limit(1)
         .maybeSingle()
     : { data: null };
 
