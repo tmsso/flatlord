@@ -7,7 +7,7 @@ import { logAudit } from "@/server/audit/log";
 import { storeAttachment } from "@/lib/attachments/store-attachment";
 
 const UploadAttachmentSchema = z.object({
-  entityType: z.enum(["tenancy", "person", "inventory_item", "request"]),
+  entityType: z.enum(["tenancy", "person", "inventory_item", "request", "notice"]),
   entityId: z.string().uuid(),
   note: z.string().trim().min(1).nullable().optional(),
 });

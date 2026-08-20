@@ -14,7 +14,7 @@ import { persons } from "./persons";
 // text + a CHECK constraint instead — CHECK constraints have no such
 // restriction, and this keeps the entity-type list open to app-layer
 // extension going forward without ever hitting this wall again.
-export const ATTACHMENT_ENTITY_TYPES = ["tenancy", "person", "inventory_item", "request"] as const;
+export const ATTACHMENT_ENTITY_TYPES = ["tenancy", "person", "inventory_item", "request", "notice"] as const;
 export type AttachmentEntityType = (typeof ATTACHMENT_ENTITY_TYPES)[number];
 
 // Generic attachment, reused across entity types (ROADMAP Phase 2 item 4,
@@ -27,7 +27,9 @@ export type AttachmentEntityType = (typeof ATTACHMENT_ENTITY_TYPES)[number];
 // root property_id, migration 0019); it stays null for entity_type =
 // 'person' since persons aren't property-scoped — any owner manages every
 // person record (see owner_scope_persons, migration 0001), matching how
-// persons' own RLS already works.
+// persons' own RLS already works. entity_type = 'notice' denormalizes
+// from notices' own property_id (migration 0020), same shape as
+// 'inventory_item' and 'request'.
 // Soft-delete only (deleted_at): CLAUDE.md §3.5 "never hard-delete; status
 // flags" applies here too — a removed attachment stays in history.
 export const attachments = pgTable("attachments", {
@@ -52,6 +54,6 @@ export const attachments = pgTable("attachments", {
 }, (table) => [
   check(
     "attachments_entity_type_check",
-    sql`${table.entityType} in ('tenancy', 'person', 'inventory_item', 'request')`,
+    sql`${table.entityType} in ('tenancy', 'person', 'inventory_item', 'request', 'notice')`,
   ),
 ]);
