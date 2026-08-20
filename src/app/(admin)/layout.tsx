@@ -12,6 +12,7 @@ const navKeys = [
   "statements",
   "meters",
   "requests",
+  "notices",
   "settings",
 ] as const;
 
@@ -38,7 +39,9 @@ export default async function AdminLayout({
                       ? "/meters"
                       : key === "requests"
                         ? "/requests"
-                        : key === "properties"
+                        : key === "notices"
+                          ? "/notices"
+                          : key === "properties"
                           ? "/properties"
                           : key === "tenancies"
                             ? "/tenancies"

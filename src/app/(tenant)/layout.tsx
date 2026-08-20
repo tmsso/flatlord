@@ -9,6 +9,7 @@ const tabKeys = [
   "meters",
   "statements",
   "requests",
+  "notices",
   "settings",
 ] as const;
 
@@ -28,7 +29,7 @@ export default async function TenantLayout({
         </div>
       </header>
       <main className="flex-1 p-4 pb-20">{children}</main>
-      <nav className="fixed bottom-0 inset-x-0 border-t border-border bg-card grid grid-cols-5">
+      <nav className="fixed bottom-0 inset-x-0 border-t border-border bg-card grid grid-cols-6">
         {tabKeys.map((key) => (
           <Link
             key={key}
@@ -43,7 +44,9 @@ export default async function TenantLayout({
                       ? "/home/settings"
                       : key === "requests"
                         ? "/home/requests"
-                        : "#"
+                        : key === "notices"
+                          ? "/home/notices"
+                          : "#"
             }
             className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-11 text-[12px] font-medium text-muted-foreground hover:text-foreground"
           >
