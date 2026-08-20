@@ -14,7 +14,7 @@ import { persons } from "./persons";
 // text + a CHECK constraint instead — CHECK constraints have no such
 // restriction, and this keeps the entity-type list open to app-layer
 // extension going forward without ever hitting this wall again.
-export const ATTACHMENT_ENTITY_TYPES = ["tenancy", "person", "inventory_item"] as const;
+export const ATTACHMENT_ENTITY_TYPES = ["tenancy", "person", "inventory_item", "request"] as const;
 export type AttachmentEntityType = (typeof ATTACHMENT_ENTITY_TYPES)[number];
 
 // Generic attachment, reused across entity types (ROADMAP Phase 2 item 4,
@@ -52,6 +52,6 @@ export const attachments = pgTable("attachments", {
 }, (table) => [
   check(
     "attachments_entity_type_check",
-    sql`${table.entityType} in ('tenancy', 'person', 'inventory_item')`,
+    sql`${table.entityType} in ('tenancy', 'person', 'inventory_item', 'request')`,
   ),
 ]);

@@ -41,7 +41,9 @@ export default async function TenantLayout({
                     ? "/home/meters"
                     : key === "settings"
                       ? "/home/settings"
-                      : "#"
+                      : key === "requests"
+                        ? "/home/requests"
+                        : "#"
             }
             className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-11 text-[12px] font-medium text-muted-foreground hover:text-foreground"
           >
