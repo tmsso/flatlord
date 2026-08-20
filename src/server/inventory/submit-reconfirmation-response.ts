@@ -6,6 +6,8 @@ import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { logAudit } from "@/server/audit/log";
 import { storeAttachment } from "@/lib/attachments/store-attachment";
 import { sendInventoryDiscrepancyEmail } from "@/server/notifications/send-inventory-discrepancy-email";
+import { notifyRequestEvent } from "@/server/notifications/notify-request-event";
+import { getTranslations } from "next-intl/server";
 
 const SubmitReconfirmationResponseSchema = z.object({
   reconfirmationItemId: z.string().uuid(),
@@ -34,7 +36,9 @@ export async function submitReconfirmationResponse(
   // items RLS) if this row isn't actually the caller's own.
   const { data: reconfirmationItem, error: fetchError } = await supabase
     .from("inventory_reconfirmation_items")
-    .select("id, inventory_item_id, inventory_items(title, property_id)")
+    .select(
+      "id, inventory_item_id, inventory_items(title, property_id), inventory_reconfirmations(tenancy_id)",
+    )
     .eq("id", parsed.reconfirmationItemId)
     .maybeSingle();
   if (fetchError) throw new Error(fetchError.message);
@@ -44,6 +48,14 @@ export async function submitReconfirmationResponse(
   const itemRef = reconfirmationItem.inventory_items as unknown as ItemRef | ItemRef[] | null;
   const item = Array.isArray(itemRef) ? itemRef[0] : itemRef;
   if (!item) throw new Error("Not found");
+
+  type ReconfirmationRef = { tenancy_id: string };
+  const reconfirmationRef = reconfirmationItem.inventory_reconfirmations as unknown as
+    | ReconfirmationRef
+    | ReconfirmationRef[]
+    | null;
+  const reconfirmation = Array.isArray(reconfirmationRef) ? reconfirmationRef[0] : reconfirmationRef;
+  if (!reconfirmation) throw new Error("Not found");
 
   if (photo) {
     await storeAttachment(
@@ -76,10 +88,37 @@ export async function submitReconfirmationResponse(
     after: { status: parsed.status },
   });
 
-  // Scoped-down stand-in for "discrepancies open requests automatically"
-  // (see send-inventory-discrepancy-email.ts's own comment) — best-effort,
-  // never blocks the response above from having already been recorded.
+  // Real "discrepancies open requests automatically" (CLAUDE.md §3.9),
+  // wired up now that the Requests module exists (ROADMAP Phase 2's
+  // handoff note to Phase 3) — the owner-notification email above stays
+  // as a fast heads-up, this creates the actual trackable request in the
+  // same admin dashboard/queue every other request lands in.
   if (parsed.status === "discrepancy") {
+    const t = await getTranslations("requests");
+    const { data: request, error: requestError } = await supabase
+      .from("requests")
+      .insert({
+        tenancy_id: reconfirmation.tenancy_id,
+        category: "inventory",
+        title: item.title,
+        description: [t("inventoryDiscrepancyPrefix", { item: item.title }), parsed.tenantNote].filter(Boolean).join(" "),
+        initiated_by: profile.personId,
+      })
+      .select("id")
+      .single();
+    if (requestError) {
+      console.error("submitReconfirmationResponse: auto-open request failed", requestError.message);
+    } else {
+      await logAudit(supabase, {
+        entityType: "request",
+        entityId: request.id,
+        actorId: profile.personId,
+        action: "create",
+        after: { category: "inventory", title: item.title },
+      });
+      await notifyRequestEvent({ requestId: request.id, event: "opened", actorRole: "tenant" });
+    }
+
     await sendInventoryDiscrepancyEmail({
       propertyId: item.property_id,
       itemTitle: item.title,
