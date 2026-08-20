@@ -511,6 +511,6 @@
     "immutableNote": "A kiküldött értesítések nem szerkeszthetők és nem vonhatók vissza.",
     "errorGeneric": "Hiba történt. Kérjük, próbáld újra.",
     "notify_issuedSubject": "Új értesítés: {title}",
-    "notify_issuedBody": "A bérbeadó új {type} értesítést küldött: „{title}”. A részletekért nézd meg a portált."
+    "notify_issuedBody": "A bérbeadó új értesítést küldött: „{title}”. A részletekért nézd meg a portált."
   }
 }
