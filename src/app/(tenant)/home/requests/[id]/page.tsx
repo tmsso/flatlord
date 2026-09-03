@@ -15,7 +15,7 @@ export default async function TenantRequestDetailPage({ params }: { params: Prom
 
   const { data: request, error: requestError } = await supabase
     .from("requests")
-    .select("id, category, status, title, description, external_case_ref, appointment_date, created_at")
+    .select("id, category, status, title, description, external_case_ref, appointment_date, created_at, change_payload")
     .eq("id", id)
     .maybeSingle();
   assertNoQueryError("home/requests/[id]", requestError);
@@ -50,6 +50,7 @@ export default async function TenantRequestDetailPage({ params }: { params: Prom
     externalCaseRef: request.external_case_ref,
     appointmentDate: request.appointment_date,
     createdAt: request.created_at,
+    changePayload: request.change_payload as RequestDetail["changePayload"],
   };
 
   const messages: RequestMessageRow[] = (messageRows ?? []).map((m) => ({

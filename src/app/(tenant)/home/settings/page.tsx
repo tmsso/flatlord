@@ -2,9 +2,16 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { maskId } from "@/lib/format/mask-id";
+import { getFieldPolicyMap, resolveFieldPolicy } from "@/server/field-editability/get-field-policy-map";
+import { PERSON_EDITABLE_FIELDS, PERSON_SENSITIVE_FIELD_KEYS } from "@/lib/field-editability/person-fields";
+import { EditablePersonField } from "@/components/field-editability/editable-person-field";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type PropertyRef = { name: string; address_line: string | null };
+
+const SELF_SELECT_COLUMNS = ["given_name", "family_name", "document_type", ...PERSON_EDITABLE_FIELDS.map((f) => f.key)]
+  .filter((v, i, arr) => arr.indexOf(v) === i)
+  .join(", ");
 
 export default async function TenantProfilePage() {
   const t = await getTranslations("tenantProfile");
@@ -22,11 +29,8 @@ export default async function TenantProfilePage() {
     .eq("status", "active")
     .maybeSingle();
 
-  const { data: self } = await supabase
-    .from("persons")
-    .select("given_name, family_name, document_type, document_number, dob, phone, contact_email")
-    .eq("id", profile.personId)
-    .maybeSingle();
+  const { data: self } = await supabase.from("persons").select(SELF_SELECT_COLUMNS).eq("id", profile.personId).maybeSingle();
+  const selfRow = self as unknown as Record<string, string | null> | null;
 
   const { data: occupantRows } = tenancy
     ? await supabase
@@ -35,6 +39,24 @@ export default async function TenantProfilePage() {
         .eq("tenancy_id", tenancy.id)
         .is("move_out", null)
     : { data: [] };
+
+  const policyMap = await getFieldPolicyMap(supabase, "person");
+
+  // One open approval_required request per field at a time (enforced in
+  // submit-field-edit.ts) — fetch them all up front so each field row can
+  // show its own pending state without a query per field.
+  const { data: pendingRequestRows } = await supabase
+    .from("requests")
+    .select("change_payload")
+    .eq("initiated_by", profile.personId)
+    .eq("status", "open")
+    .eq("category", "personal_data_change");
+  type ChangePayload = { fieldName?: string; newValue?: string | null };
+  const pendingByField = new Map<string, string | null>();
+  for (const row of pendingRequestRows ?? []) {
+    const payload = row.change_payload as ChangePayload | null;
+    if (payload?.fieldName) pendingByField.set(payload.fieldName, payload.newValue ?? null);
+  }
 
   const property = tenancy?.properties as unknown as PropertyRef | PropertyRef[] | null;
   const p = Array.isArray(property) ? property[0] : property;
@@ -88,18 +110,28 @@ export default async function TenantProfilePage() {
           <CardTitle>{t("householdTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 px-0 pb-0">
-          {self && (
-            <div className="rounded-md border border-border p-3 text-sm">
-              <p className="font-medium">
-                {self.given_name} {self.family_name} <span className="text-xs text-muted-foreground">({t("you")})</span>
+          {selfRow && (
+            <div className="rounded-md border border-border p-3">
+              <p className="mb-1 text-sm font-medium">
+                {selfRow.given_name} {selfRow.family_name} <span className="text-xs text-muted-foreground">({t("you")})</span>
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {self.document_type ? `${tPerson(`documentType_${self.document_type}`)} · ${maskId(self.document_number)}` : t("noDocumentOnFile")}
-                {self.dob ? ` · ${self.dob}` : ""}
-              </p>
-              {(self.phone || self.contact_email) && (
-                <p className="mt-1 text-xs text-muted-foreground">{[self.phone, self.contact_email].filter(Boolean).join(" · ")}</p>
+              {selfRow.document_type && (
+                <p className="mb-2 text-xs text-muted-foreground">{tPerson(`documentType_${selfRow.document_type}`)}</p>
               )}
+              <div className="divide-y divide-border">
+                {PERSON_EDITABLE_FIELDS.map((field) => (
+                  <EditablePersonField
+                    key={field.key}
+                    fieldKey={field.key}
+                    label={tPerson(field.labelKey)}
+                    value={selfRow[field.key] ?? null}
+                    policy={resolveFieldPolicy(policyMap, field.key)}
+                    inputType={field.inputType}
+                    masked={PERSON_SENSITIVE_FIELD_KEYS.has(field.key)}
+                    pendingNewValue={pendingByField.has(field.key) ? pendingByField.get(field.key) : undefined}
+                  />
+                ))}
+              </div>
             </div>
           )}
           {(occupantRows ?? []).map((o) => {
@@ -119,7 +151,7 @@ export default async function TenantProfilePage() {
               </div>
             );
           })}
-          {!self && (occupantRows ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("noActiveTenancy")}</p>}
+          {!selfRow && (occupantRows ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("noActiveTenancy")}</p>}
         </CardContent>
       </Card>
     </div>

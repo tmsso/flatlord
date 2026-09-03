@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { InviteManager } from "@/components/invite-manager";
 import { BackupExport } from "@/components/backup-export";
+import { FieldPolicyManager } from "@/components/field-editability/field-policy-manager";
+import { getFieldPolicyMap } from "@/server/field-editability/get-field-policy-map";
 
 export default async function AdminSettingsPage() {
   const t = await getTranslations("nav");
@@ -17,6 +19,9 @@ export default async function AdminSettingsPage() {
     .is("revoked_at", null)
     .order("created_at", { ascending: false });
 
+  const personPolicyMap = await getFieldPolicyMap(supabase, "person");
+  const personPolicies = Object.fromEntries(personPolicyMap);
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-lg font-semibold">{t("settings")}</h1>
@@ -28,6 +33,7 @@ export default async function AdminSettingsPage() {
           expiresAt: invite.expires_at,
         }))}
       />
+      <FieldPolicyManager policies={personPolicies} />
       <BackupExport />
     </div>
   );
