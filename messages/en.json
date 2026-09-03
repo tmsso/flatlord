@@ -283,7 +283,10 @@
     "registeredAddressLabel": "Registered address (main)",
     "temporaryAddressLabel": "Temporary address",
     "errorGeneric": "Something went wrong. Please try again.",
-    "auditNote": "All edits are logged."
+    "auditNote": "All edits are logged.",
+    "notifyOwner_fieldEditSubject": "Profile updated: {field}",
+    "notifyOwner_fieldEditBody": "{name} updated their {field}. Review it in the admin persons page.",
+    "changeRequestTitle": "Field change: {field}"
   },
   "tenantProfile": {
     "greeting": "Hi, {name}!",
@@ -473,7 +476,11 @@
     "notifyTenant_resolvedSubject": "Request resolved: {title}",
     "notifyTenant_resolvedBody": "Your request \"{title}\" has been marked resolved.",
     "notifyTenant_rejectedSubject": "Request rejected: {title}",
-    "notifyTenant_rejectedBody": "Your request \"{title}\" has been rejected. Contact the landlord for details."
+    "notifyTenant_rejectedBody": "Your request \"{title}\" has been rejected. Contact the landlord for details.",
+    "changeRequestDiffTitle": "Proposed change: {field}",
+    "changeRequestOld": "Current",
+    "changeRequestNew": "Proposed",
+    "approveChange": "Approve change"
   },
   "notices": {
     "title": "Notices",
@@ -512,5 +519,24 @@
     "errorGeneric": "Something went wrong. Please try again.",
     "notify_issuedSubject": "New notice: {title}",
     "notify_issuedBody": "Your landlord issued a new {type} notice: \"{title}\". Check the portal for details."
+  },
+  "fieldEditability": {
+    "policyManagerTitle": "Field editability",
+    "policyManagerHint": "Controls what a tenant can change themselves on their own personal record.",
+    "fieldColumn": "Field",
+    "policyColumn": "Policy",
+    "policy_read_only": "Read only",
+    "policy_approval_required": "Requires approval",
+    "policy_free": "Free to edit",
+    "policySaved": "Policy saved",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "noteLabel": "Note (optional)",
+    "editApplied": "Change applied",
+    "editSubmittedForApproval": "Change submitted for approval",
+    "pendingApproval": "Pending approval",
+    "pendingChangeTooltip": "Proposed: {value}"
   }
 }

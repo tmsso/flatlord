@@ -283,7 +283,10 @@
     "registeredAddressLabel": "Bejelentett (állandó) lakcím",
     "temporaryAddressLabel": "Ideiglenes lakcím",
     "errorGeneric": "Hiba történt. Kérjük, próbálja újra.",
-    "auditNote": "Minden módosítás naplózásra kerül."
+    "auditNote": "Minden módosítás naplózásra kerül.",
+    "notifyOwner_fieldEditSubject": "Profil frissítve: {field}",
+    "notifyOwner_fieldEditBody": "{name} frissítette a következőt: {field}. Tekintsd meg az admin személyek oldalon.",
+    "changeRequestTitle": "Mezőváltoztatás: {field}"
   },
   "tenantProfile": {
     "greeting": "Szia, {name}!",
@@ -473,7 +476,11 @@
     "notifyTenant_resolvedSubject": "Kérés megoldva: {title}",
     "notifyTenant_resolvedBody": "A(z) „{title}” kérésed megoldottként lett megjelölve.",
     "notifyTenant_rejectedSubject": "Kérés elutasítva: {title}",
-    "notifyTenant_rejectedBody": "A(z) „{title}” kérésedet elutasították. A részletekért keresd a bérbeadót."
+    "notifyTenant_rejectedBody": "A(z) „{title}” kérésedet elutasították. A részletekért keresd a bérbeadót.",
+    "changeRequestDiffTitle": "Javasolt módosítás: {field}",
+    "changeRequestOld": "Jelenlegi",
+    "changeRequestNew": "Javasolt",
+    "approveChange": "Módosítás jóváhagyása"
   },
   "notices": {
     "title": "Értesítések",
@@ -512,5 +519,24 @@
     "errorGeneric": "Hiba történt. Kérjük, próbáld újra.",
     "notify_issuedSubject": "Új értesítés: {title}",
     "notify_issuedBody": "A bérbeadó új értesítést küldött: „{title}”. A részletekért nézd meg a portált."
+  },
+  "fieldEditability": {
+    "policyManagerTitle": "Mezők szerkeszthetősége",
+    "policyManagerHint": "Meghatározza, mit módosíthat a bérlő saját maga a személyes adatain.",
+    "fieldColumn": "Mező",
+    "policyColumn": "Szabály",
+    "policy_read_only": "Csak olvasható",
+    "policy_approval_required": "Jóváhagyás szükséges",
+    "policy_free": "Szabadon szerkeszthető",
+    "policySaved": "Szabály mentve",
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra.",
+    "edit": "Szerkesztés",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "noteLabel": "Megjegyzés (opcionális)",
+    "editApplied": "A módosítás alkalmazva",
+    "editSubmittedForApproval": "A módosítás jóváhagyásra vár",
+    "pendingApproval": "Jóváhagyásra vár",
+    "pendingChangeTooltip": "Javasolt: {value}"
   }
 }

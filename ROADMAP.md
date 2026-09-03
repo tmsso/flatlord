@@ -67,12 +67,14 @@ for every other phase transition (2→3, 3→4, …) unless the admin says other
 
 ## Phase 3 — Workflows: requests, notices, editability
 
-- Requests: category + attachments → threaded conversation → resolve/reject/withdraw; external case ref + appointment date; admin dashboard with filters.
-- Notices/announcements per CLAUDE.md §3.8 incl. formal warnings citing contract clauses with sequence; acknowledgement tracking; immutable archive.
-- Field-level editability: 3-way policy admin UI; `free` edits (apply + history + notify); `approval_required` change-request flow; before/after audit views.
+**Status (2026-09-03):** items 1-3 shipped and live in prod (migrations `0019`-`0021`). Item 4 (notification centre) not yet started.
+
+- ~~Requests: category + attachments → threaded conversation → resolve/reject/withdraw; external case ref + appointment date; admin dashboard with filters.~~ **Shipped** (migration `0019`) — threaded conversation, admin dashboard, inventory-discrepancy auto-open wired to the `discrepancy` status value Phase 2 left for this.
+- ~~Notices/announcements per CLAUDE.md §3.8 incl. formal warnings citing contract clauses with sequence; acknowledgement tracking; immutable archive.~~ **Shipped** (migration `0020`).
+- ~~Field-level editability: 3-way policy admin UI; `free` edits (apply + history + notify); `approval_required` change-request flow; before/after audit views.~~ **Shipped, scoped down** (migration `0021`): `entityType = 'person'` only (the concrete real case per CLAUDE.md §3.2) — `document_type` excluded from v1's editable set (it's an enum; the plain-text editor doesn't fit it, stays `read_only` until a future batch adds enum-select support). The `approval_required` path reuses the existing `requests` table's reserved `change_payload` column rather than a separate table (schema comment from migration 0019 anticipated exactly this). Before/after audit views: document-number/mothersName/taxId/addressCardNumber/birthName/birthPlace/citizenship stay `"[redacted]"` in the audit trail for every viewer including admin — `logAudit()`'s existing `NEVER_LOG_KEYS` redaction (src/server/audit/log.ts) was kept as-is rather than special-cased, by explicit admin decision (2026-09-03) after the conflict was surfaced; non-sensitive person fields do show raw before/after to admin.
 - Notification centre (in-app) + email fan-out; per-user notification preferences.
 
-**Accept:** tenant edits a free field (admin notified), a protected field change requires approval, a formal warning is issued and acknowledged — all with audit trail.
+**Accept:** tenant edits a free field (admin notified) ✅, a protected field change requires approval ✅, a formal warning is issued and acknowledged ✅ — all with audit trail ✅ (all four legs end-to-end verified against dev; sensitive-field audit rows show `"[redacted]"` by design, see above). Phase 3 is **not** yet marked Accepted — that's an explicit admin decision, same precedent as Phases 1-2 — and item 4 (notification centre) is still open.
 
 ## Phase 4 — Automation & polish
 

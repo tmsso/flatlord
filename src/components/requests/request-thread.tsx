@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { addRequestMessage } from "@/server/requests/add-request-message";
 import { withdrawRequest } from "@/server/requests/withdraw-request";
 import { updateRequest } from "@/server/requests/update-request";
+import { approveFieldChange } from "@/server/field-editability/approve-field-change";
+import { PERSON_EDITABLE_FIELDS, PERSON_SENSITIVE_FIELD_KEYS } from "@/lib/field-editability/person-fields";
+import { maskId } from "@/lib/format/mask-id";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +26,14 @@ export interface RequestMessageRow {
   isOwnMessage: boolean;
 }
 
+export interface FieldChangePayload {
+  entityType: "person";
+  entityId: string;
+  fieldName: string;
+  oldValue: string | null;
+  newValue: string | null;
+}
+
 export interface RequestDetail {
   id: string;
   category: RequestCategory;
@@ -32,6 +43,10 @@ export interface RequestDetail {
   externalCaseRef: string | null;
   appointmentDate: string | null;
   createdAt: string;
+  // Present only for a change request auto-created by the field-editability
+  // approval_required path (ROADMAP Phase 3 item 3) — a plain
+  // tenant-opened request never has this.
+  changePayload?: FieldChangePayload | null;
 }
 
 const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructive"> = {
@@ -55,6 +70,7 @@ export function RequestThread({
 }) {
   const t = useTranslations("requests");
   const tc = useTranslations("common");
+  const tPersonLabels = useTranslations("persons");
   const format = useFormatter();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -105,6 +121,34 @@ export function RequestThread({
     });
   }
 
+  // A field-change request must never go through the generic "resolve"
+  // transition above — that would mark it done without ever writing the
+  // value. This is the only path that applies changePayload to the target
+  // entity (see approve-field-change.ts).
+  function handleApprove() {
+    startTransition(async () => {
+      try {
+        await approveFieldChange(request.id);
+        toast.success(tc("save"));
+        router.refresh();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      }
+    });
+  }
+
+  function handleRejectChange() {
+    startTransition(async () => {
+      try {
+        await updateRequest({ id: request.id, status: "rejected" });
+        toast.success(tc("save"));
+        router.refresh();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      }
+    });
+  }
+
   function handleMetaSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
@@ -123,8 +167,14 @@ export function RequestThread({
     });
   }
 
-  const canWithdraw = role === "tenant" && request.status === "open";
-  const canResolveOrReject = role === "owner" && request.status === "open";
+  const canWithdraw = role === "tenant" && request.status === "open" && !request.changePayload;
+  const canResolveOrReject = role === "owner" && request.status === "open" && !request.changePayload;
+  const canApproveOrReject = role === "owner" && request.status === "open" && !!request.changePayload;
+
+  const changePayload = request.changePayload;
+  const changeFieldDef = changePayload ? PERSON_EDITABLE_FIELDS.find((f) => f.key === changePayload.fieldName) : undefined;
+  const changeFieldLabel = changePayload ? (changeFieldDef ? tPersonLabels(changeFieldDef.labelKey) : changePayload.fieldName) : "";
+  const isSensitiveChange = changePayload ? PERSON_SENSITIVE_FIELD_KEYS.has(changePayload.fieldName) : false;
 
   return (
     <div className="flex flex-col gap-4">
@@ -139,6 +189,21 @@ export function RequestThread({
           <Badge variant={STATUS_VARIANT[request.status]}>{t(`status_${request.status}`)}</Badge>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {changePayload && (
+            <div className="rounded-md border border-border p-3 text-sm">
+              <p className="mb-1 font-medium">{t("changeRequestDiffTitle", { field: changeFieldLabel })}</p>
+              {/* Owner view is the CLAUDE.md §6 "admin detail view" masking
+                  exception — shows raw values. Tenant view (their own
+                  request) still masks, same as the rest of their profile
+                  page. */}
+              <p className="text-xs text-muted-foreground">
+                {t("changeRequestOld")}: {isSensitiveChange && role === "tenant" ? (maskId(changePayload.oldValue) ?? "—") : (changePayload.oldValue ?? "—")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("changeRequestNew")}: {isSensitiveChange && role === "tenant" ? (maskId(changePayload.newValue) ?? "—") : (changePayload.newValue ?? "—")}
+              </p>
+            </div>
+          )}
           {request.description && <p className="text-sm">{request.description}</p>}
           {role === "owner" ? (
             <form onSubmit={handleMetaSave} className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -175,6 +240,16 @@ export function RequestThread({
                 </Button>
                 <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => handleStatus("resolved")}>
                   {t("resolve")}
+                </Button>
+              </>
+            )}
+            {canApproveOrReject && (
+              <>
+                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={handleRejectChange}>
+                  {t("reject")}
+                </Button>
+                <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={handleApprove}>
+                  {t("approveChange")}
                 </Button>
               </>
             )}
