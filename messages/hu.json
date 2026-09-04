@@ -538,5 +538,17 @@
     "editSubmittedForApproval": "A módosítás jóváhagyásra vár",
     "pendingApproval": "Jóváhagyásra vár",
     "pendingChangeTooltip": "Javasolt: {value}"
+  },
+  "notifications": {
+    "bellLabel": "Értesítések",
+    "empty": "Még nincs értesítés.",
+    "close": "Bezárás",
+    "preferencesTitle": "Email értesítések",
+    "preferencesHint": "Az alkalmazáson belüli értesítések mindig itt jelennek meg; ez csak azt szabályozza, hogy emailben is megkapod-e őket.",
+    "category_request": "Kérések",
+    "category_notice": "Közlemények",
+    "category_inventory": "Leltáreltérések",
+    "category_field_edit": "Profilváltozások",
+    "errorGeneric": "Hiba történt. Kérjük, próbáld újra."
   }
 }

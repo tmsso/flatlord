@@ -538,5 +538,17 @@
     "editSubmittedForApproval": "Change submitted for approval",
     "pendingApproval": "Pending approval",
     "pendingChangeTooltip": "Proposed: {value}"
+  },
+  "notifications": {
+    "bellLabel": "Notifications",
+    "empty": "No notifications yet.",
+    "close": "Close",
+    "preferencesTitle": "Email notifications",
+    "preferencesHint": "In-app notifications always show here; this only controls whether they're also emailed to you.",
+    "category_request": "Requests",
+    "category_notice": "Notices",
+    "category_inventory": "Inventory discrepancies",
+    "category_field_edit": "Profile changes",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

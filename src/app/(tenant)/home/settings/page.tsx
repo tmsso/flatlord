@@ -5,6 +5,8 @@ import { maskId } from "@/lib/format/mask-id";
 import { getFieldPolicyMap, resolveFieldPolicy } from "@/server/field-editability/get-field-policy-map";
 import { PERSON_EDITABLE_FIELDS, PERSON_SENSITIVE_FIELD_KEYS } from "@/lib/field-editability/person-fields";
 import { EditablePersonField } from "@/components/field-editability/editable-person-field";
+import { NotificationPreferences } from "@/components/notifications/notification-preferences";
+import { TENANT_NOTIFICATION_CATEGORIES } from "@/lib/notifications/notification-categories";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type PropertyRef = { name: string; address_line: string | null };
@@ -31,6 +33,8 @@ export default async function TenantProfilePage() {
 
   const { data: self } = await supabase.from("persons").select(SELF_SELECT_COLUMNS).eq("id", profile.personId).maybeSingle();
   const selfRow = self as unknown as Record<string, string | null> | null;
+
+  const { data: ownProfile } = await supabase.from("profiles").select("notification_prefs").eq("id", profile.userId).maybeSingle();
 
   const { data: occupantRows } = tenancy
     ? await supabase
@@ -154,6 +158,8 @@ export default async function TenantProfilePage() {
           {!selfRow && (occupantRows ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("noActiveTenancy")}</p>}
         </CardContent>
       </Card>
+
+      <NotificationPreferences categories={TENANT_NOTIFICATION_CATEGORIES} prefs={ownProfile?.notification_prefs ?? {}} />
     </div>
   );
 }

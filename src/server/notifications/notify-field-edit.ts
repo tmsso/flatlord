@@ -4,6 +4,8 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
 import { buildFieldEditMessage } from "@/lib/notifications/field-edit-message";
+import { createNotification } from "@/server/notifications/create-notification";
+import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
 
 // `free`-policy person-field edits (CLAUDE.md §3.5: "applies immediately,
 // writes history, notifies admin"). Same service-role rationale as
@@ -33,7 +35,7 @@ export async function notifyFieldEdit(params: { propertyId: string | null; field
 
     const { data: ownerProfiles, error: profileError } = await service
       .from("profiles")
-      .select("id, locale")
+      .select("id, locale, notification_prefs")
       .eq("role", "owner")
       .in(
         "person_id",
@@ -47,13 +49,6 @@ export async function notifyFieldEdit(params: { propertyId: string | null; field
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     for (const profile of ownerProfiles) {
-      const { data: userResult, error: userError } = await service.auth.admin.getUserById(profile.id);
-      const ownerEmail = userResult?.user?.email;
-      if (userError || !ownerEmail) {
-        console.error("notifyFieldEdit: could not resolve owner email", profile.id, userError?.message);
-        continue;
-      }
-
       const locale = isLocale(profile.locale) ? profile.locale : defaultLocale;
       const messages = await loadMessages(locale);
       const { subject, body } = buildFieldEditMessage({
@@ -62,6 +57,18 @@ export async function notifyFieldEdit(params: { propertyId: string | null; field
         fieldLabel: params.fieldLabel,
         personName: params.personName,
       });
+
+      // No entityType/entityId — see migration 0022's comment; the admin
+      // persons detail page isn't a stable per-field deep-link target.
+      await createNotification({ recipientProfileId: profile.id, category: "field_edit", title: subject, body });
+
+      if (!shouldEmailNotification(profile.notification_prefs, "field_edit")) continue;
+      const { data: userResult, error: userError } = await service.auth.admin.getUserById(profile.id);
+      const ownerEmail = userResult?.user?.email;
+      if (userError || !ownerEmail) {
+        console.error("notifyFieldEdit: could not resolve owner email", profile.id, userError?.message);
+        continue;
+      }
 
       const { error: sendError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
