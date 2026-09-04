@@ -549,6 +549,10 @@
     "category_notice": "Notices",
     "category_inventory": "Inventory discrepancies",
     "category_field_edit": "Profile changes",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "overdueSubject": "Statement overdue: {tenant} ({period})",
+    "overdueBody": "{tenant}'s statement for {period} is now overdue. Consider issuing a late-payment notice.",
+    "category_amount_due": "Payment due reminders",
+    "category_overdue": "Overdue statement alerts"
   }
 }
