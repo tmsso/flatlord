@@ -22,12 +22,15 @@ export default async function TenantLayout({
   const supabase = await createClient();
 
   // self_scope_notifications RLS already restricts this to the caller's
-  // own rows — no extra filter needed here.
-  const { data: notificationRows } = await supabase
+  // own rows — no extra filter needed here. Logged, not thrown, on error:
+  // this renders in every page's shell, so a broken notifications query
+  // should degrade to an empty bell, not blank the whole layout.
+  const { data: notificationRows, error: notificationsError } = await supabase
     .from("notifications")
     .select("id, title, body, entity_type, entity_id, read_at, created_at")
     .order("created_at", { ascending: false })
     .limit(20);
+  if (notificationsError) console.error("[TenantLayout] notifications query failed:", notificationsError.message);
   const notifications = (notificationRows ?? []).map((n) => ({
     id: n.id,
     title: n.title,
