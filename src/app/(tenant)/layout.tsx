@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { createClient } from "@/lib/supabase/server";
 
 const tabKeys = [
   "home",
@@ -17,12 +19,31 @@ export default async function TenantLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const t = await getTranslations("nav");
+  const supabase = await createClient();
+
+  // self_scope_notifications RLS already restricts this to the caller's
+  // own rows — no extra filter needed here.
+  const { data: notificationRows } = await supabase
+    .from("notifications")
+    .select("id, title, body, entity_type, entity_id, read_at, created_at")
+    .order("created_at", { ascending: false })
+    .limit(20);
+  const notifications = (notificationRows ?? []).map((n) => ({
+    id: n.id,
+    title: n.title,
+    body: n.body,
+    entityType: n.entity_type,
+    entityId: n.entity_id,
+    readAt: n.read_at,
+    createdAt: n.created_at,
+  }));
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-between px-4">
         <span className="text-[15px] font-semibold">Flatlord</span>
         <div className="flex items-center gap-2">
+          <NotificationBell notifications={notifications} role="tenant" />
           <LocaleSwitcher />
           <ThemeToggle />
           <SignOutButton />

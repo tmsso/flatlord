@@ -4,6 +4,8 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
 import { buildRequestEventMessage } from "@/lib/notifications/request-event-message";
+import { createNotification } from "@/server/notifications/create-notification";
+import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
 
 export type RequestNotificationEvent = "opened" | "message" | "resolved" | "rejected" | "withdrawn";
 
@@ -53,7 +55,7 @@ export async function notifyRequestEvent(params: {
       }
       const { data: ownerProfiles, error: profileError } = await service
         .from("profiles")
-        .select("id, locale")
+        .select("id, locale, notification_prefs")
         .eq("role", "owner")
         .in(
           "person_id",
@@ -65,12 +67,6 @@ export async function notifyRequestEvent(params: {
       }
 
       for (const profile of ownerProfiles) {
-        const { data: userResult, error: userError } = await service.auth.admin.getUserById(profile.id);
-        const ownerEmail = userResult?.user?.email;
-        if (userError || !ownerEmail) {
-          console.error("notifyRequestEvent: could not resolve owner email", profile.id, userError?.message);
-          continue;
-        }
         const locale = isLocale(profile.locale) ? profile.locale : defaultLocale;
         const messages = await loadMessages(locale);
         const { subject, body } = buildRequestEventMessage({
@@ -80,6 +76,23 @@ export async function notifyRequestEvent(params: {
           title: request.title,
           forOwner: true,
         });
+
+        await createNotification({
+          recipientProfileId: profile.id,
+          category: "request",
+          title: subject,
+          body,
+          entityType: "request",
+          entityId: params.requestId,
+        });
+
+        if (!shouldEmailNotification(profile.notification_prefs, "request")) continue;
+        const { data: userResult, error: userError } = await service.auth.admin.getUserById(profile.id);
+        const ownerEmail = userResult?.user?.email;
+        if (userError || !ownerEmail) {
+          console.error("notifyRequestEvent: could not resolve owner email", profile.id, userError?.message);
+          continue;
+        }
         const { error: sendError } = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
           to: ownerEmail,
@@ -104,17 +117,17 @@ export async function notifyRequestEvent(params: {
         .eq("id", tenancy.primary_tenant_id)
         .maybeSingle();
       const tenantEmail = tenant?.contact_email as string | null | undefined;
-      if (!tenantEmail) {
-        console.error("notifyRequestEvent: tenant has no contact email on file", tenancy.primary_tenant_id);
-        return;
-      }
       const { data: tenantProfile } = await service
         .from("profiles")
-        .select("locale")
+        .select("id, locale, notification_prefs")
         .eq("person_id", tenancy.primary_tenant_id)
         .eq("role", "tenant")
         .maybeSingle();
-      const locale = isLocale(tenantProfile?.locale) ? tenantProfile.locale : defaultLocale;
+      if (!tenantProfile) {
+        console.error("notifyRequestEvent: tenant profile not found", tenancy.primary_tenant_id);
+        return;
+      }
+      const locale = isLocale(tenantProfile.locale) ? tenantProfile.locale : defaultLocale;
       const messages = await loadMessages(locale);
       const { subject, body } = buildRequestEventMessage({
         locale,
@@ -123,6 +136,21 @@ export async function notifyRequestEvent(params: {
         title: request.title,
         forOwner: false,
       });
+
+      await createNotification({
+        recipientProfileId: tenantProfile.id,
+        category: "request",
+        title: subject,
+        body,
+        entityType: "request",
+        entityId: params.requestId,
+      });
+
+      if (!tenantEmail) {
+        console.error("notifyRequestEvent: tenant has no contact email on file", tenancy.primary_tenant_id);
+        return;
+      }
+      if (!shouldEmailNotification(tenantProfile.notification_prefs, "request")) return;
       const { error: sendError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
         to: tenantEmail,

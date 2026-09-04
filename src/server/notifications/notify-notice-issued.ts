@@ -4,6 +4,8 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
 import { buildNoticeIssuedMessage } from "@/lib/notifications/notice-issued-message";
+import { createNotification } from "@/server/notifications/create-notification";
+import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
 import type { NoticeType } from "@/db/schema/notices";
 
 // Same service-role rationale as notify-request-event.ts: the admin
@@ -46,18 +48,18 @@ export async function notifyNoticeIssued(params: { noticeId: string }) {
       .eq("id", tenancy.primary_tenant_id)
       .maybeSingle();
     const tenantEmail = tenant?.contact_email as string | null | undefined;
-    if (!tenantEmail) {
-      console.error("notifyNoticeIssued: tenant has no contact email on file", tenancy.primary_tenant_id);
-      return;
-    }
 
     const { data: tenantProfile } = await service
       .from("profiles")
-      .select("locale")
+      .select("id, locale, notification_prefs")
       .eq("person_id", tenancy.primary_tenant_id)
       .eq("role", "tenant")
       .maybeSingle();
-    const locale = isLocale(tenantProfile?.locale) ? tenantProfile.locale : defaultLocale;
+    if (!tenantProfile) {
+      console.error("notifyNoticeIssued: tenant profile not found", tenancy.primary_tenant_id);
+      return;
+    }
+    const locale = isLocale(tenantProfile.locale) ? tenantProfile.locale : defaultLocale;
     const messages = await loadMessages(locale);
     const { subject, body } = buildNoticeIssuedMessage({
       locale,
@@ -65,6 +67,21 @@ export async function notifyNoticeIssued(params: { noticeId: string }) {
       type: notice.type as NoticeType,
       title: notice.title,
     });
+
+    await createNotification({
+      recipientProfileId: tenantProfile.id,
+      category: "notice",
+      title: subject,
+      body,
+      entityType: "notice",
+      entityId: params.noticeId,
+    });
+
+    if (!tenantEmail) {
+      console.error("notifyNoticeIssued: tenant has no contact email on file", tenancy.primary_tenant_id);
+      return;
+    }
+    if (!shouldEmailNotification(tenantProfile.notification_prefs, "notice")) return;
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error: sendError } = await resend.emails.send({
