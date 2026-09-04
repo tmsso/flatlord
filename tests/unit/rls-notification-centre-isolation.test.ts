@@ -4,7 +4,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Same asUser/adminSql pattern as rls-field-editability-isolation.test.ts,
 // extended to the notifications table + profiles.notification_prefs
-// self-update policy (migration 0022).
+// self-update (migration 0022 — needs BOTH a column-level GRANT and an
+// RLS WITH CHECK, see that migration's comment: CI's fresh instance has no
+// baseline UPDATE grant on profiles at all, while the hosted dev/prod
+// Supabase Cloud projects carry a permanent default ACL that grants
+// `authenticated` table-level UPDATE on every column regardless of what
+// this migration grants — this suite runs against dev, so it's really
+// only exercising the WITH CHECK half; the GRANT half is what makes the
+// legitimate update possible at all on a fresh CI instance).
 const adminSql = postgres(process.env.SUPABASE_DB_URL!, { prepare: false });
 
 let personAId: string;

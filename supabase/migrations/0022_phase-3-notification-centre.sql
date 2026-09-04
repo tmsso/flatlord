@@ -63,21 +63,34 @@ GRANT SELECT, UPDATE ON notifications TO authenticated;
 ALTER TABLE profiles ADD COLUMN notification_prefs jsonb NOT NULL DEFAULT '{}'::jsonb;
 --> statement-breakpoint
 
--- A column-level GRANT UPDATE (notification_prefs) was tried first and
--- verified NOT to work on this platform: Supabase's permanent default ACL
--- already grants `authenticated` table-level UPDATE on every column of
--- profiles (confirmed by querying information_schema.column_privileges
--- against dev — see project memory flatlord_authenticated_role_grants,
--- "an absent GRANT doesn't deny either"; the same is true here of an
--- absent *column* GRANT, since the broader table-level one already
--- covers it). REVOKE would fight that same permanent ACL rather than
--- override it cleanly, so the real gate has to be RLS's WITH CHECK
--- instead: it compares `role`/`person_id` against their own
--- already-stored values via a self-referencing subquery (verified against
--- dev to see the pre-update row, not the in-flight one, under normal
--- Postgres statement-snapshot visibility), so a client can change
--- notification_prefs but not smuggle a role/person_id change into the
--- same UPDATE.
+-- Needs BOTH a column-level GRANT and an RLS WITH CHECK — neither alone is
+-- safe/sufficient across every environment this app runs on, discovered by
+-- testing this migration against two different Postgres instances that
+-- disagree about profiles' baseline privileges:
+--   - CI's fresh local instance (plain `supabase db start`, no migrations
+--     beyond this repo's) has NO existing UPDATE grant on profiles at all
+--     (0006 only ever granted SELECT) — without an explicit GRANT here,
+--     even the legitimate notification_prefs update fails outright
+--     ("permission denied for table profiles").
+--   - The hosted dev/prod Supabase Cloud projects carry a permanent
+--     project-level default ACL that already grants `authenticated`
+--     table-level UPDATE on *every* column of profiles, REGARDLESS of what
+--     this migration grants — confirmed by querying
+--     information_schema.column_privileges against dev (same family as
+--     project memory flatlord_authenticated_role_grants' "an absent GRANT
+--     doesn't deny either"). A narrower column-level GRANT here doesn't
+--     shrink that pre-existing broader ACL, so on these projects the
+--     column GRANT alone is redundant, not a real restriction.
+-- The GRANT below satisfies CI's clean baseline (and is harmless/redundant
+-- on cloud); the WITH CHECK below is what actually stops a client from
+-- smuggling a role/person_id change into the same UPDATE on cloud (and is
+-- harmless/redundant on CI, where the GRANT already blocks touching those
+-- columns before RLS is even evaluated). Verified against dev directly:
+-- the self-referencing subquery sees the pre-update row, not the in-flight
+-- one, under normal Postgres statement-snapshot visibility.
+GRANT UPDATE (notification_prefs) ON profiles TO authenticated;
+--> statement-breakpoint
+
 CREATE POLICY self_update_profiles ON profiles
   FOR UPDATE USING (id = auth.uid())
   WITH CHECK (
