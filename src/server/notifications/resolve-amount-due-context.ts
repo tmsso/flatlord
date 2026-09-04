@@ -59,7 +59,7 @@ export async function resolveAmountDueContext(supabase: SupabaseClient, statemen
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("locale")
+    .select("id, locale")
     .eq("person_id", tenancy.primary_tenant_id)
     .eq("role", "tenant")
     .maybeSingle();
@@ -92,5 +92,6 @@ export async function resolveAmountDueContext(supabase: SupabaseClient, statemen
     body,
     tenantEmail: tenant.contact_email as string | null,
     tenantPhone: tenant.phone as string | null,
+    tenantProfileId: profile?.id as string | undefined,
   };
 }

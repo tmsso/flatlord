@@ -549,6 +549,10 @@
     "category_notice": "Közlemények",
     "category_inventory": "Leltáreltérések",
     "category_field_edit": "Profilváltozások",
-    "errorGeneric": "Hiba történt. Kérjük, próbáld újra."
+    "errorGeneric": "Hiba történt. Kérjük, próbáld újra.",
+    "overdueSubject": "Lejárt számla: {tenant} ({period})",
+    "overdueBody": "{tenant} {period} időszakra szóló számlája lejárt. Fontold meg egy késedelmi felszólítás kiküldését.",
+    "category_amount_due": "Fizetési határidő emlékeztetők",
+    "category_overdue": "Lejárt számla riasztások"
   }
 }
