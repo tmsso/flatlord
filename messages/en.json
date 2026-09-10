@@ -584,5 +584,23 @@
     "draftsAwaitingCta": "Go to statements",
     "draftsNoneBody": "No draft statements are waiting. New drafts appear here once the month closes and meter readings are verified.",
     "placeholder": "Properties, tenancies and billing data land here as later phases ship."
+  },
+  "analytics": {
+    "ledgerTitle": "Billed vs received",
+    "ledgerEmpty": "Nothing billed or received on this tenancy yet.",
+    "ledgerOutstandingNow": "Outstanding now: {amount}",
+    "billedLabel": "Billed (cumulative)",
+    "receivedLabel": "Received (cumulative)",
+    "outstandingLabel": "Outstanding",
+    "timelineTitle": "Activity timeline",
+    "timelineEmpty": "No recorded activity on this tenancy yet.",
+    "event_statement_issued": "Statement issued",
+    "event_payment_recorded": "Payment recorded",
+    "event_request_opened": "Request opened",
+    "event_notice_issued": "Notice issued",
+    "eventStatementDetail": "{period} — {total}",
+    "eventPaymentDetail": "{amount} · {method}",
+    "eventRequestDetail": "{title} — {category} · {status}",
+    "eventNoticeDetail": "{title} — {type}"
   }
 }
