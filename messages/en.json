@@ -553,6 +553,17 @@
     "overdueSubject": "Statement overdue: {tenant} ({period})",
     "overdueBody": "{tenant}'s statement for {period} is now overdue. Consider issuing a late-payment notice.",
     "category_amount_due": "Payment due reminders",
-    "category_overdue": "Overdue statement alerts"
+    "category_overdue": "Overdue statement alerts",
+    "category_meter_reading": "Meter reading reminders",
+    "category_contract": "Contract expiry alerts",
+    "category_rate_review": "Rate review alerts",
+    "meterReadingSubject": "Time to submit your meter readings — {property}",
+    "meterReadingBody": "The meter-reading window for {property} is about to open. Please take a photo of each meter and enter the values in the app.",
+    "contractExpirySubject": "Contract ends in {days} days: {tenant}",
+    "contractExpiryBody": "{tenant}'s contract term ends on {date} ({days} days away). Decide whether to renew, renegotiate, or serve notice.",
+    "rateReviewSubject": "Rate review due: {charge} ({tenant})",
+    "rateReviewBody": "The {charge} rate for {tenant} is scheduled to end on {date} ({days} days away). Set the next effective-dated rate before it lapses.",
+    "inventoryActionBySubject": "Inventory action due: {title}",
+    "inventoryActionByBody": "The inventory item \"{title}\" has an action-by date of {date} ({days} days away). Reason: {reason}."
   }
 }
