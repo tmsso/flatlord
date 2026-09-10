@@ -144,11 +144,21 @@ export function StatementDetail({ statement, lineItems, payments, today, waLink,
           </h1>
           <StatementStatusBadge status={displayStatus} label={t(`status${capitalize(displayStatus)}`)} />
         </div>
-        {statement.status === "draft" && (
-          <Button type="button" onClick={handleIssue} disabled={isIssuing}>
-            {t("issue")}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<a href={`/api/statements/${statement.id}/pdf`} />}
+          >
+            {t("downloadPdf")}
           </Button>
-        )}
+          {statement.status === "draft" && (
+            <Button type="button" onClick={handleIssue} disabled={isIssuing}>
+              {t("issue")}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-md border border-border bg-card p-4">

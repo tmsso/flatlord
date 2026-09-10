@@ -40,11 +40,17 @@ export function TenantStatementDetail({ statement, lineItems, payments, today }:
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold">
           {format.dateTime(new Date(`${statement.periodMonth}T00:00:00Z`), { year: "numeric", month: "long", timeZone: "UTC" })}
         </h1>
         <StatementStatusBadge status={displayStatus} label={t(`status${capitalize(displayStatus)}`)} />
+        <a
+          href={`/api/statements/${statement.id}/pdf`}
+          className="ml-auto inline-flex items-center rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
+          {t("downloadPdf")}
+        </a>
       </div>
 
       <StatementLineItemsTable lineItems={lineItems} />

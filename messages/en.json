@@ -74,6 +74,7 @@
     },
     "quantityAtRate": "{quantity} × {rate}",
     "notCharged": "Not charged",
+    "downloadPdf": "Download PDF",
     "howCalculated": "How this amount is calculated",
     "amountDue": "Amount due",
     "remainingBalance": "Remaining balance",

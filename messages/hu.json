@@ -74,6 +74,7 @@
     },
     "quantityAtRate": "{quantity} × {rate}",
     "notCharged": "Nem számlázott",
+    "downloadPdf": "PDF letöltése",
     "howCalculated": "Hogyan számoltuk ki ezt az összeget",
     "amountDue": "Fizetendő összeg",
     "remainingBalance": "Hátralévő összeg",
