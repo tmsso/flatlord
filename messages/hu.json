@@ -565,6 +565,19 @@
     "rateReviewSubject": "Díjfelülvizsgálat esedékes: {charge} ({tenant})",
     "rateReviewBody": "{tenant} {charge} díja a tervek szerint {date} napon szűnik meg ({days} nap múlva). Állítsd be a következő, dátum szerinti díjat, mielőtt lejár.",
     "inventoryActionBySubject": "Leltári teendő esedékes: {title}",
-    "inventoryActionByBody": "A(z) „{title}” leltári tétel teendő-határideje {date} ({days} nap múlva). Ok: {reason}."
+    "inventoryActionByBody": "A(z) „{title}” leltári tétel teendő-határideje {date} ({days} nap múlva). Ok: {reason}.",
+    "category_statement_drafted": "Számlatervezet elkészült",
+    "category_statement_draft_blocked": "Automatikus tervezet-készítés akadályai",
+    "statementDraftedSubject": "Kiállításra kész számlatervezet: {tenant} ({period})",
+    "statementDraftedBody": "A(z) {period} időszakra szóló számlatervezet automatikusan elkészült {tenant} részére. Nézd át, és a számla oldalán egy kattintással kiállíthatod.",
+    "statementDraftBlockedSubject": "Nem sikerült automatikusan elkészíteni a(z) {period} számlatervezetet: {tenant}",
+    "statementDraftBlockedBody": "A(z) {period} időszakra szóló számla {tenant} részére nem készült el automatikusan — az alábbi mérőórákhoz még nincs ellenőrzött leolvasás: {meters}. Ellenőrizd a leolvasásokat, majd a számla oldalán hozd létre a tervezetet."
+  },
+  "dashboard": {
+    "draftsAwaitingTitle": "Kiállításra váró számlák",
+    "draftsAwaitingBody": "{count, plural, one {# számlatervezet készen áll az áttekintésre és kiállításra.} other {# számlatervezet készen áll az áttekintésre és kiállításra.}}",
+    "draftsAwaitingCta": "Ugrás a számlákhoz",
+    "draftsNoneBody": "Nincs kiállításra váró számlatervezet. Az új tervezetek itt jelennek meg, miután a hónap lezárult és a mérőóra-állásokat ellenőrizték.",
+    "placeholder": "Az ingatlanok, bérletek és számlázási adatok a későbbi fázisok bevezetésével kerülnek ide."
   }
 }

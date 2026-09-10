@@ -18,14 +18,16 @@ export interface NotificationRow {
   createdAt: string;
 }
 
-// Deep-link targets only exist for request/notice/statement today (see
-// migration 0022's comment) — inventory/field_edit notifications render
-// without a link.
+// Deep-link targets only exist for request/notice/statement and (owner-
+// only) tenancy today — inventory/field_edit notifications render without
+// a link. The tenancy link backs Phase 4a's statement_draft_blocked
+// alert, which has no statement row to point at.
 function entityHref(row: NotificationRow, role: "owner" | "tenant"): string | null {
   if (!row.entityId) return null;
   if (row.entityType === "request") return role === "owner" ? `/requests/${row.entityId}` : `/home/requests/${row.entityId}`;
   if (row.entityType === "notice") return role === "owner" ? `/notices/${row.entityId}` : `/home/notices/${row.entityId}`;
   if (row.entityType === "statement") return role === "owner" ? `/statements/${row.entityId}` : `/home/statements/${row.entityId}`;
+  if (row.entityType === "tenancy") return role === "owner" ? `/tenancies/${row.entityId}` : null;
   return null;
 }
 

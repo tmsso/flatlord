@@ -78,7 +78,12 @@ export function StatementDetail({ statement, lineItems, payments, today, waLink,
   const [isIssuing, startIssuing] = useTransition();
   const [isSendingEmail, startSendingEmail] = useTransition();
 
-  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(statement.status, statement.dueDate, today);
+  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(
+    statement.status,
+    statement.dueDate,
+    today,
+    statement.issuedAt,
+  );
   const paidSum = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = statement.total - paidSum;
 

@@ -11,6 +11,9 @@
 // notifications.category is `text` with no CHECK (migration 0022), so a
 // new value needs no migration — only this list and its i18n
 // category_<name> label keys.
+// ...and two more from Phase 4a's statement auto-draft: `statement_drafted`
+// (owner "a draft statement is ready to issue") and `statement_draft_blocked`
+// (owner "couldn't auto-draft — verified readings still missing").
 export const NOTIFICATION_CATEGORIES = [
   "request",
   "notice",
@@ -21,6 +24,8 @@ export const NOTIFICATION_CATEGORIES = [
   "meter_reading",
   "contract",
   "rate_review",
+  "statement_drafted",
+  "statement_draft_blocked",
 ] as const;
 export type NotificationCategory = (typeof NOTIFICATION_CATEGORIES)[number];
 
@@ -34,6 +39,8 @@ export const OWNER_NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
   "overdue",
   "contract",
   "rate_review",
+  "statement_drafted",
+  "statement_draft_blocked",
 ];
 export const TENANT_NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
   "request",

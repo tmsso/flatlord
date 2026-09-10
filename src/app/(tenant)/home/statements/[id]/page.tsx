@@ -43,6 +43,7 @@ export default async function TenantStatementDetailPage({ params }: { params: Pr
           periodMonth: statement.period_month,
           status: statement.status,
           dueDate: statement.due_date,
+          issuedAt: statement.issued_at,
           total: statement.total,
         }}
         lineItems={(lineItemRows ?? []).map((li) => ({

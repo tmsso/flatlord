@@ -565,6 +565,19 @@
     "rateReviewSubject": "Rate review due: {charge} ({tenant})",
     "rateReviewBody": "The {charge} rate for {tenant} is scheduled to end on {date} ({days} days away). Set the next effective-dated rate before it lapses.",
     "inventoryActionBySubject": "Inventory action due: {title}",
-    "inventoryActionByBody": "The inventory item \"{title}\" has an action-by date of {date} ({days} days away). Reason: {reason}."
+    "inventoryActionByBody": "The inventory item \"{title}\" has an action-by date of {date} ({days} days away). Reason: {reason}.",
+    "category_statement_drafted": "Draft statement ready",
+    "category_statement_draft_blocked": "Auto-draft blocked alerts",
+    "statementDraftedSubject": "Draft statement ready to issue: {tenant} ({period})",
+    "statementDraftedBody": "A draft statement for {tenant} covering {period} was created automatically. Review it and issue it in one click from the statement page.",
+    "statementDraftBlockedSubject": "Couldn't auto-draft the {period} statement: {tenant}",
+    "statementDraftBlockedBody": "The {period} statement for {tenant} couldn't be drafted automatically — these meters still have no verified reading: {meters}. Verify the readings, then create the draft from the statement page."
+  },
+  "dashboard": {
+    "draftsAwaitingTitle": "Statements awaiting issue",
+    "draftsAwaitingBody": "{count, plural, one {# draft statement is ready to review and issue.} other {# draft statements are ready to review and issue.}}",
+    "draftsAwaitingCta": "Go to statements",
+    "draftsNoneBody": "No draft statements are waiting. New drafts appear here once the month closes and meter readings are verified.",
+    "placeholder": "Properties, tenancies and billing data land here as later phases ship."
   }
 }

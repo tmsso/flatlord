@@ -20,7 +20,7 @@ export default async function TenantStatementsPage() {
   const { data: statements } = tenancy
     ? await supabase
         .from("statements")
-        .select("id, period_month, status, due_date, total")
+        .select("id, period_month, status, due_date, issued_at, total")
         .eq("tenancy_id", tenancy.id)
         .order("period_month", { ascending: false })
     : { data: [] };
@@ -35,6 +35,7 @@ export default async function TenantStatementsPage() {
           periodMonth: s.period_month,
           status: s.status,
           dueDate: s.due_date,
+          issuedAt: s.issued_at,
           total: s.total,
         }))}
       />

@@ -9,7 +9,14 @@ import { deriveStatementDisplayStatus, type StoredStatementStatus } from "@/lib/
 import { cn } from "@/lib/utils";
 
 interface TenantAmountDueProps {
-  statement: { id: string; periodMonth: string; status: StoredStatementStatus; dueDate: string | null; total: number } | null;
+  statement: {
+    id: string;
+    periodMonth: string;
+    status: StoredStatementStatus;
+    dueDate: string | null;
+    issuedAt: string | null;
+    total: number;
+  } | null;
   paidSum: number;
   lineItems: StatementLineItemDisplay[];
   today: string;
@@ -39,7 +46,12 @@ export function TenantAmountDue({ statement, paidSum, lineItems, today }: Tenant
   // statement with payments against it would otherwise show double what's
   // actually owed (see the M6 plan's own note on this).
   const amountDue = statement.total - paidSum;
-  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(statement.status, statement.dueDate, today);
+  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(
+    statement.status,
+    statement.dueDate,
+    today,
+    statement.issuedAt,
+  );
 
   return (
     <div className="flex flex-col gap-3">

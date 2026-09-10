@@ -11,6 +11,7 @@ interface StatementRow {
   periodMonth: string;
   status: StoredStatementStatus;
   dueDate: string | null;
+  issuedAt: string | null;
   total: number;
 }
 
@@ -36,7 +37,12 @@ export function TenantStatementsList({ statements, today }: { statements: Statem
       </TableHeader>
       <TableBody>
         {statements.map((s) => {
-          const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(s.status, s.dueDate, today);
+          const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(
+            s.status,
+            s.dueDate,
+            today,
+            s.issuedAt,
+          );
           return (
             <TableRow key={s.id}>
               <TableCell>

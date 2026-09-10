@@ -1,3 +1,7 @@
+// Relative (not "@/") import: this module has a DB-free unit test and
+// vitest.config.ts resolves no path aliases.
+import { isStatementOverdue } from "../../lib/billing/is-statement-overdue";
+
 // Pure decision logic for the daily cron (ROADMAP Phase 4 item 1, scoped
 // to payment-due reminders + overdue detection this batch — meter-reading,
 // contract-expiry/rent-review, inventory action_by, and scheduled
@@ -33,9 +37,16 @@ export function isPaymentDueReminderDay(dueDate: string, leadDays: number, today
 
 export type StatementStatus = "draft" | "issued" | "partially_paid" | "paid" | "overdue";
 
-// Mirrors deriveStatementDisplayStatus's own overdue rule exactly
-// (src/lib/billing/derive-statement-display-status.ts) rather than
-// re-deriving a slightly different boundary condition.
-export function isOverdue(status: StatementStatus, dueDate: string | null, today: string): boolean {
-  return (status === "issued" || status === "partially_paid") && dueDate != null && dueDate < today;
+// Delegates to the shared predicate so the cron alert and the UI badge
+// (deriveStatementDisplayStatus) can't drift. `issuedAt` is threaded
+// through from the cron's statement query: it's what keeps a freshly
+// issued retroactive statement from tripping a false overdue alert the
+// same day it's issued (see is-statement-overdue.ts).
+export function isOverdue(
+  status: StatementStatus,
+  dueDate: string | null,
+  today: string,
+  issuedAt: string | null = null,
+): boolean {
+  return isStatementOverdue({ status, dueDate, issuedAt, today });
 }
