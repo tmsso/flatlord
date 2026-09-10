@@ -24,6 +24,7 @@ import { notifyMeterReadingReminder } from "@/server/notifications/notify-meter-
 import { notifyContractExpiry } from "@/server/notifications/notify-contract-expiry";
 import { notifyRateReview } from "@/server/notifications/notify-rate-review";
 import { notifyInventoryActionBy } from "@/server/notifications/notify-inventory-action-by";
+import { runStatementAutoDraft } from "@/server/reminders/run-statement-auto-draft";
 
 export const runtime = "nodejs";
 
@@ -33,13 +34,14 @@ export const runtime = "nodejs";
 // cron-security pattern). If CRON_SECRET isn't set, every request is
 // rejected (fail-closed), not silently unauthenticated.
 //
-// ROADMAP Phase 4. The first batch shipped payment-due reminders +
-// overdue detection. This batch adds four lead-time reminder shapes:
-// meter-reading-window nudge (tenant), contract-expiry alert (owner),
-// fixed-charge rate-review alert (owner), and inventory action_by alert
-// (owner). Still deferred: scheduled inventory-reconfirmation *triggers*
-// (they create campaign rows, not just notifications — their own piece)
-// and statement auto-draft (blocked on a billing-semantics decision).
+// ROADMAP Phase 4. Batches so far: payment-due reminders + overdue
+// detection; then four lead-time reminder shapes (meter-reading-window
+// nudge, contract-expiry, fixed-charge rate-review, inventory action_by);
+// then this one — statement auto-draft on month close (runStatementAutoDraft
+// below), plus a retroactive-issue grace on the overdue rule so a
+// freshly-issued statement no longer trips a false alert the same day.
+// Still deferred: scheduled inventory-reconfirmation *triggers* (they
+// create campaign rows, not just notifications — their own piece).
 //
 // Every notify-*.ts call is best-effort/never-throws; every reminder
 // predicate fires on exactly one calendar day, so the per-day
@@ -57,8 +59,9 @@ export async function GET(request: Request) {
 
   const statements = await runStatementReminders(service, today);
   const leadReminders = await runLeadReminders(service, today);
+  const autoDraft = await runStatementAutoDraft(service, today);
 
-  return NextResponse.json({ ok: true, ...statements, ...leadReminders });
+  return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft });
 }
 
 // Has an in-app notification row for this entity+category already been
@@ -85,7 +88,7 @@ async function alreadyNotifiedToday(
 async function runStatementReminders(service: SupabaseClient, today: string) {
   const { data: statements, error } = await service
     .from("statements")
-    .select("id, tenancy_id, status, due_date")
+    .select("id, tenancy_id, status, due_date, issued_at")
     .in("status", ["issued", "partially_paid"])
     .not("due_date", "is", null);
   if (error) {
@@ -120,7 +123,10 @@ async function runStatementReminders(service: SupabaseClient, today: string) {
       remindersSent++;
     }
 
-    if (!alreadySent.has("overdue") && isOverdue(statement.status as StatementStatus, statement.due_date, today)) {
+    if (
+      !alreadySent.has("overdue") &&
+      isOverdue(statement.status as StatementStatus, statement.due_date, today, statement.issued_at)
+    ) {
       await notifyOverdueStatement({ statementId: statement.id });
       overdueAlertsSent++;
     }

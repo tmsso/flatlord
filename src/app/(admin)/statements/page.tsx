@@ -12,7 +12,9 @@ export default async function AdminStatementsPage() {
   // never silently blank.
   const { data: statements } = await supabase
     .from("statements")
-    .select("id, tenancy_id, period_month, status, due_date, total, tenancies(primary_tenant_id, persons(given_name, family_name))")
+    .select(
+      "id, tenancy_id, period_month, status, due_date, issued_at, total, tenancies(primary_tenant_id, persons(given_name, family_name))",
+    )
     .order("period_month", { ascending: false });
 
   const { data: tenancies } = await supabase
@@ -36,6 +38,7 @@ export default async function AdminStatementsPage() {
             periodMonth: s.period_month,
             status: s.status,
             dueDate: s.due_date,
+            issuedAt: s.issued_at,
             total: s.total,
             tenantName: person ? `${person.given_name} ${person.family_name}` : "—",
           };

@@ -50,4 +50,13 @@ describe("isOverdue", () => {
   it("is false when there's no due date", () => {
     expect(isOverdue("issued", null, "2026-09-02")).toBe(false);
   });
+
+  it("does not fire on a freshly-issued retroactive statement (grace window via issuedAt)", () => {
+    // August statement, issued 2026-09-08, nominal due 2026-08-05.
+    expect(isOverdue("issued", "2026-08-05", "2026-09-10", "2026-09-08T07:00:00Z")).toBe(false);
+  });
+
+  it("fires once the retroactive grace window has elapsed", () => {
+    expect(isOverdue("issued", "2026-08-05", "2026-09-20", "2026-09-08T07:00:00Z")).toBe(true);
+  });
 });

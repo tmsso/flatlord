@@ -6,7 +6,14 @@ import { StatementLineItemsTable, type StatementLineItemDisplay } from "@/compon
 import { deriveStatementDisplayStatus, type StoredStatementStatus } from "@/lib/billing/derive-statement-display-status";
 
 interface TenantStatementDetailProps {
-  statement: { id: string; periodMonth: string; status: StoredStatementStatus; dueDate: string | null; total: number };
+  statement: {
+    id: string;
+    periodMonth: string;
+    status: StoredStatementStatus;
+    dueDate: string | null;
+    issuedAt: string | null;
+    total: number;
+  };
   lineItems: StatementLineItemDisplay[];
   payments: { id: string; amount: number; paidAt: string; method: string }[];
   today: string;
@@ -29,7 +36,12 @@ export function TenantStatementDetail({ statement, lineItems, payments, today }:
 
   const paidSum = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = statement.total - paidSum;
-  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(statement.status, statement.dueDate, today);
+  const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(
+    statement.status,
+    statement.dueDate,
+    today,
+    statement.issuedAt,
+  );
 
   function formatMoney(amount: number) {
     return format.number(amount, { style: "currency", currency: "HUF", maximumFractionDigits: 0 });
