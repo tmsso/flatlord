@@ -26,6 +26,7 @@ export const NOTIFICATION_CATEGORIES = [
   "rate_review",
   "statement_drafted",
   "statement_draft_blocked",
+  "reconfirmation",
 ] as const;
 export type NotificationCategory = (typeof NOTIFICATION_CATEGORIES)[number];
 
@@ -41,12 +42,14 @@ export const OWNER_NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
   "rate_review",
   "statement_drafted",
   "statement_draft_blocked",
+  "reconfirmation",
 ];
 export const TENANT_NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
   "request",
   "notice",
   "amount_due",
   "meter_reading",
+  "reconfirmation",
 ];
 
 // profiles.notification_prefs shape: { [category]: { email: boolean } }.
