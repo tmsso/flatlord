@@ -553,6 +553,17 @@
     "overdueSubject": "Lejárt számla: {tenant} ({period})",
     "overdueBody": "{tenant} {period} időszakra szóló számlája lejárt. Fontold meg egy késedelmi felszólítás kiküldését.",
     "category_amount_due": "Fizetési határidő emlékeztetők",
-    "category_overdue": "Lejárt számla riasztások"
+    "category_overdue": "Lejárt számla riasztások",
+    "category_meter_reading": "Mérőóra-leolvasási emlékeztetők",
+    "category_contract": "Szerződés lejárati riasztások",
+    "category_rate_review": "Díjfelülvizsgálati riasztások",
+    "meterReadingSubject": "Ideje beküldeni a mérőóra-állásokat — {property}",
+    "meterReadingBody": "A(z) {property} mérőóra-leolvasási időszaka hamarosan megnyílik. Kérjük, fényképezd le minden mérőórát, és add meg az értékeket az alkalmazásban.",
+    "contractExpirySubject": "A szerződés {days} nap múlva lejár: {tenant}",
+    "contractExpiryBody": "{tenant} szerződésének futamideje {date} napon jár le ({days} nap múlva). Döntsd el, hogy meghosszabbítod, újratárgyalod, vagy felmondod.",
+    "rateReviewSubject": "Díjfelülvizsgálat esedékes: {charge} ({tenant})",
+    "rateReviewBody": "{tenant} {charge} díja a tervek szerint {date} napon szűnik meg ({days} nap múlva). Állítsd be a következő, dátum szerinti díjat, mielőtt lejár.",
+    "inventoryActionBySubject": "Leltári teendő esedékes: {title}",
+    "inventoryActionByBody": "A(z) „{title}” leltári tétel teendő-határideje {date} ({days} nap múlva). Ok: {reason}."
   }
 }
