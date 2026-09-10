@@ -571,7 +571,12 @@
     "statementDraftedSubject": "Draft statement ready to issue: {tenant} ({period})",
     "statementDraftedBody": "A draft statement for {tenant} covering {period} was created automatically. Review it and issue it in one click from the statement page.",
     "statementDraftBlockedSubject": "Couldn't auto-draft the {period} statement: {tenant}",
-    "statementDraftBlockedBody": "The {period} statement for {tenant} couldn't be drafted automatically — these meters still have no verified reading: {meters}. Verify the readings, then create the draft from the statement page."
+    "statementDraftBlockedBody": "The {period} statement for {tenant} couldn't be drafted automatically — these meters still have no verified reading: {meters}. Verify the readings, then create the draft from the statement page.",
+    "category_reconfirmation": "Inventory reconfirmation",
+    "reconfirmationScheduledTenantSubject": "Please reconfirm your inventory",
+    "reconfirmationScheduledTenantBody": "A scheduled inventory reconfirmation has started. Please go through each item and confirm it's present and in the recorded condition by {date}.",
+    "reconfirmationScheduledOwnerSubject": "Scheduled inventory reconfirmation launched",
+    "reconfirmationScheduledOwnerBody": "The recurring inventory reconfirmation schedule fired: a full campaign was created and the tenant asked to respond by {date}."
   },
   "dashboard": {
     "draftsAwaitingTitle": "Statements awaiting issue",

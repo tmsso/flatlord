@@ -25,6 +25,7 @@ import { notifyContractExpiry } from "@/server/notifications/notify-contract-exp
 import { notifyRateReview } from "@/server/notifications/notify-rate-review";
 import { notifyInventoryActionBy } from "@/server/notifications/notify-inventory-action-by";
 import { runStatementAutoDraft } from "@/server/reminders/run-statement-auto-draft";
+import { runScheduledReconfirmation } from "@/server/reminders/run-scheduled-reconfirmation";
 
 export const runtime = "nodejs";
 
@@ -37,11 +38,12 @@ export const runtime = "nodejs";
 // ROADMAP Phase 4. Batches so far: payment-due reminders + overdue
 // detection; then four lead-time reminder shapes (meter-reading-window
 // nudge, contract-expiry, fixed-charge rate-review, inventory action_by);
-// then this one — statement auto-draft on month close (runStatementAutoDraft
-// below), plus a retroactive-issue grace on the overdue rule so a
-// freshly-issued statement no longer trips a false alert the same day.
-// Still deferred: scheduled inventory-reconfirmation *triggers* (they
-// create campaign rows, not just notifications — their own piece).
+// then statement auto-draft on month close (runStatementAutoDraft) plus a
+// retroactive-issue grace on the overdue rule; and now the last shape —
+// scheduled inventory-reconfirmation triggers (runScheduledReconfirmation),
+// which unlike the others create campaign rows, opt-in per tenancy via
+// reminder_lead_days.reconfirmation.intervalMonths. Every deferred cron
+// shape from ROADMAP Phase 4 is now shipped.
 //
 // Every notify-*.ts call is best-effort/never-throws; every reminder
 // predicate fires on exactly one calendar day, so the per-day
@@ -60,8 +62,9 @@ export async function GET(request: Request) {
   const statements = await runStatementReminders(service, today);
   const leadReminders = await runLeadReminders(service, today);
   const autoDraft = await runStatementAutoDraft(service, today);
+  const reconfirmation = await runScheduledReconfirmation(service, today);
 
-  return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft });
+  return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft, ...reconfirmation });
 }
 
 // Has an in-app notification row for this entity+category already been

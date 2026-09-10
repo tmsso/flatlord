@@ -18,16 +18,20 @@ export interface NotificationRow {
   createdAt: string;
 }
 
-// Deep-link targets only exist for request/notice/statement and (owner-
-// only) tenancy today — inventory/field_edit notifications render without
-// a link. The tenancy link backs Phase 4a's statement_draft_blocked
-// alert, which has no statement row to point at.
+// Deep-link targets exist for request/notice/statement, (owner-only)
+// tenancy, and (tenant-only) inventory_reconfirmation today —
+// inventory/field_edit notifications render without a link. The tenancy
+// link backs Phase 4a's statement_draft_blocked alert (owner → the
+// tenancy page); the inventory_reconfirmation link sends the tenant to
+// their home dashboard, where the reconfirmation checklist lives (there's
+// no per-campaign tenant page).
 function entityHref(row: NotificationRow, role: "owner" | "tenant"): string | null {
   if (!row.entityId) return null;
   if (row.entityType === "request") return role === "owner" ? `/requests/${row.entityId}` : `/home/requests/${row.entityId}`;
   if (row.entityType === "notice") return role === "owner" ? `/notices/${row.entityId}` : `/home/notices/${row.entityId}`;
   if (row.entityType === "statement") return role === "owner" ? `/statements/${row.entityId}` : `/home/statements/${row.entityId}`;
   if (row.entityType === "tenancy") return role === "owner" ? `/tenancies/${row.entityId}` : null;
+  if (row.entityType === "inventory_reconfirmation") return role === "tenant" ? "/home" : null;
   return null;
 }
 
