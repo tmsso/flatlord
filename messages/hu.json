@@ -584,5 +584,23 @@
     "draftsAwaitingCta": "Ugrás a számlákhoz",
     "draftsNoneBody": "Nincs kiállításra váró számlatervezet. Az új tervezetek itt jelennek meg, miután a hónap lezárult és a mérőóra-állásokat ellenőrizték.",
     "placeholder": "Az ingatlanok, bérletek és számlázási adatok a későbbi fázisok bevezetésével kerülnek ide."
+  },
+  "analytics": {
+    "ledgerTitle": "Kiszámlázott és befolyt összeg",
+    "ledgerEmpty": "Ehhez a bérlethez még nincs kiszámlázott vagy befolyt összeg.",
+    "ledgerOutstandingNow": "Jelenlegi kintlévőség: {amount}",
+    "billedLabel": "Kiszámlázott (halmozott)",
+    "receivedLabel": "Befolyt (halmozott)",
+    "outstandingLabel": "Kintlévőség",
+    "timelineTitle": "Eseménynapló",
+    "timelineEmpty": "Ehhez a bérlethez még nincs rögzített esemény.",
+    "event_statement_issued": "Számla kiállítva",
+    "event_payment_recorded": "Befizetés rögzítve",
+    "event_request_opened": "Kérés megnyitva",
+    "event_notice_issued": "Közlemény kiadva",
+    "eventStatementDetail": "{period} — {total}",
+    "eventPaymentDetail": "{amount} · {method}",
+    "eventRequestDetail": "{title} — {category} · {status}",
+    "eventNoticeDetail": "{title} — {type}"
   }
 }
