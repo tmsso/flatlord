@@ -2,6 +2,8 @@
 
 Loose ideas, deliberately not committed to any phase. Pick up opportunistically or promote to ROADMAP.md when concrete.
 
+> **Triaged 2026-09-10 (admin-approved):** the five 2026-08-03 owner-raised items — nav wayfinding, landlord analytics v2, ad-hoc notes, avatars, owner tax-calc breakdown — are now folded into **ROADMAP.md Phase 4b** (reporting & owner tools), with their open decisions recorded there. Their entries below are kept for the detailed spec; ROADMAP is now the sequencing authority for them.
+
 ## Design & UX
 
 - **Nav feels flat, needs a stronger "where am I" signal** (project owner feedback, 2026-08-03): the current admin/tenant shell nav has no strong current-location affordance beyond default active-link styling. Two candidate directions, not yet designed: (a) subtle icon/emoji glyphs per nav item for faster visual scanning — should read as functional wayfinding, not decoration, consistent with CLAUDE.md §5's "not the borderless all-white look" reference; (b) a distinct accent/border color per top-level section (properties/tenancies/statements/etc.) so the current screen is identifiable at a glance without reading the label. (b) is in real tension with CLAUDE.md §5's "one confident accent colour" rule — needs a real design pass to reconcile (e.g. one accent used positionally/tinted per section vs. a genuinely new multi-accent system), not a quick styling tweak. **Flagged for triage into ROADMAP.md by a high-tier model (Opus or above) — not yet scoped or sequenced.**
