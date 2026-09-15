@@ -1,0 +1,48 @@
+# BACKLOG.md — triaged, sized work items
+
+Concrete items with a verification bar, ordered by priority. `ROADMAP.md` says *when* (phase); this file says *what exactly* and *how you know it's done*. Loose ideas without a spec stay in `IDEAS.md`. IDs are stable (`B-nn`) so sessions, PRs and memory can reference them; keep the ID when an item ships and move it to the "Shipped" list at the bottom.
+
+Sizes: S = under half a batch item · M = one batch item · L = more than one.
+
+## P1 — next one or two batches
+
+| ID | Item | Size | Origin |
+|---|---|---|---|
+| B-01 | **Domain purchase + wiring.** Admin buys a domain — **at Cloudflare Registrar or Porkbun, not Vercel** (Vercel's first-year price roughly doubles at renewal; Cloudflare sells at wholesale with flat renewals, ~$10.5/yr for a `.com`; neither offers `.hu`, a `.com`/`.eu`/`.app` is fine). Keep DNS at the registrar; the Vercel `A`/`CNAME` records must have Cloudflare's proxy switched **off** (Vercel terminates TLS; double-proxying loops). Session wires it as the Vercel custom domain, verifies it in Resend (DKIM/SPF), updates Supabase Auth site/redirect URLs and `NEXT_PUBLIC_APP_URL`. **Done means:** a tenant-addressed email from prod lands in a non-account inbox; the app answers on the new host; magic links redirect there. | S (after purchase) | Review 2026-09-15 — Resend sandbox is the root blocker of Phase 1 acceptance |
+| B-02 | **Parallelise per-page Supabase queries.** Pages issue 7–14 sequential `await supabase…` calls (tenant home 14, `properties/[id]` 11, `tenancies/[id]` 8, `meters/[tenancyId]` 7, plus the layout's notifications query). Group independent queries with `Promise.all` in ≤3 stages (identity → tenancy → everything else). **Done means:** a timing script (Playwright `page.goto` wall-clock on dev, before/after in the PR body) shows the drop; Playwright click-through clean. | M | Review — 0 `Promise.all` in `src/` today |
+| B-03 | **Middleware auth without network calls.** `updateSession` calls `auth.getUser()` (a Supabase Auth HTTP call) plus a `profiles` query on **every** request. Switch to `getClaims()` (local JWT verification; needs the project's asymmetric JWT signing keys enabled in the Supabase dashboard — admin toggle, both projects) and carry `role` in the JWT via a custom access-token hook, so the proxy does zero round-trips for a valid session. Keep `getUser()` in server actions (defence in depth). **Done means:** proxy makes no network call on a warm session (log/trace); invite-revoke and sign-out paths regression-tested; RLS tests unchanged. | M | Review |
+| B-04 | **Sentry free tier** (client + server + edge), DSN env already reserved in `.env.example`. Both users are non-developers; today errors only reach Vercel logs. **Done means:** a deliberate test error appears in Sentry from prod; PII scrubbing confirmed for person fields. | S | CLAUDE.md §2 — planned, never installed |
+| B-05 | **Draft statement delete / regenerate.** A draft created from incomplete data wedges the `(tenancy_id, period_month)` unique slot; no admin action can clear it. Add "discard draft" (soft: status `void`, or hard delete of drafts only — decide at build; issued statements stay immutable) and "regenerate". **Done means:** admin can discard and recreate a draft for the same month; audit row written. | S–M | Known gap since Phase 1, re-flagged by auto-draft |
+| B-06 | **Statement due-date semantics** — D-05 decided (b): `due_date` = tenancy `due_day` of the month *after* the issue date. Touches `issue-statement.ts`, the auto-draft, `isStatementOverdue`, the tenant hero, the PDF. Golden importer untouched (historical months keep the sheet's dates). **Done means:** a statement issued today shows a due date that is in the future; overdue cron and badge agree; golden tests still pass. | S | Review — conceptual issue |
+| B-07 | **Historical charge names at render time.** Issued statements store raw machine names ("Rent", "electricity (electricity)") in `statement_line_items.description`. Instead of editing issued rows (immutability), resolve a display label at render time from `charge_types.code` via the i18n catalog when the line item's charge type has a standard code; fall back to the stored description. D-07 decided. **Done means:** the HU UI shows "Bérleti díj" on a 2025 statement; PDF too; `compute-statement` untouched. | S | Memory `flatlord_charge_type_i18n_gap` |
+| B-08 | **Committed Playwright smoke test.** `tests/e2e/smoke.spec.ts` + `playwright.config.ts`: log in as both roles via `auth.admin.generateLink`, visit every route, assert no `pageerror`, no console errors, no horizontal overflow at 390px for tenant routes. Run on `workflow_dispatch` + nightly against the **dev** project (secrets in GitHub), not in the PR CI (no Auth service there). **Done means:** workflow green on dev; the ad-hoc scripts sessions keep rewriting become unnecessary. | M | Review — `tests/e2e/` is empty; every session re-invents the login script |
+
+## P2 — soon, when adjacent work touches the area
+
+| ID | Item | Size | Origin |
+|---|---|---|---|
+| B-09 | **Supabase generated types.** `supabase gen types typescript` into `src/lib/supabase/database.types.ts`, wire into the three client factories. Removes the 26 `as unknown as` casts on joined selects and catches column typos at compile time. **Done means:** zero `as unknown as` in `src/`, typecheck green, generation command documented. | M | Review |
+| B-10 | **Indexes on FK / RLS-subquery columns.** Only 4 indexes exist across 24 migrations (two of them on `properties`, one GIN, one unique). Add btree indexes on every `*_id` FK (`tenancy_id`, `statement_id`, `property_id`, `meter_id`, `recipient_profile_id`, `person_id`) and on `(entity_type, entity_id)` for `attachments`/`notifications`/`audit_log`. Harmless at today's size, cheap insurance. **Done means:** one migration, applied to dev via `db:migrate` and prod via `migrate-prod.yml`. | S | Review |
+| B-11 | **`assertNoQueryError` on secondary queries.** 74 `const { data } = await supabase…` sites still drop `error`; a failing secondary query renders an empty section instead of surfacing. Apply the existing helper (`src/lib/supabase/require-row.ts`). **Done means:** grep count of `{ data } = await supabase` in `src/app` is zero. | M | IDEAS.md (moved here) |
+| B-12 | **Migration-drift check.** Add a read-only step to `health-check.yml` that compares `select count(*) from drizzle.__drizzle_migrations` on prod (secret already exists for backups) with the file count under `supabase/migrations/`, failing the workflow on mismatch. Drift has recurred twice. **Done means:** a deliberate mismatch fails the run. | S | Memory `flatlord_dev_prod_migration_drift` |
+| B-13 | **Move-in / move-out snapshots + handover protocol** (CLAUDE.md §3.9): a snapshot freezes inventory state + meter baselines with photos at tenancy start/end; PDF via the existing template pattern. Deferred from Phase 2, tracked nowhere until now. | M | Phase 2 scope cut |
+| B-14 | **Termination mechanics & permissions lifecycle** (CLAUDE.md §3.2): notice periods both ways, immediate-termination triggers, holdover charge multiple, owner-granted permissions with revoke-at-termination — not modelled. Decide whether it's needed before Phase 5 contract drafting or stays a document-only concern. | L | Review — requirement never scheduled |
+| B-15 | **Structured logging.** 84 `console.error/log` sites; once B-04 lands, route through one `log()` helper that also reports to Sentry and never logs `NEVER_LOG_KEYS` fields. | S | Review |
+| B-16 | **Contract full-text search UI.** `contracts.search_vector` (GIN) exists; verify a search box exposes it in the admin contracts section; add one if not. | S | Review — index without a consumer |
+| B-17 | **Dependency hygiene.** `@tanstack/react-query` is installed but unused (server components + server actions cover today's needs) — remove, or adopt deliberately for client-side refresh in the notification bell. Also review `xlsx` (importer-only, dev). | S | Review |
+| B-18 | **`maxDuration` for heavy routes.** Backup export and PDF routes run on Hobby's default function timeout; set `export const maxDuration = 60` on `/api/admin/backup` and the PDF route and confirm a full export with assets completes from prod. | S | Review |
+| B-19 | **Admin shell below `md`.** The sidebar is `hidden md:flex` with no replacement — the admin on a phone has no navigation. Add a sheet/drawer nav or a compact top bar. | S–M | Review (screenshot) |
+
+## P3 — later / opportunistic
+
+| ID | Item | Size | Origin |
+|---|---|---|---|
+| B-20 | Tenant "More" tab (design/02 has 5 tabs with "Egyéb"): only if the header gets crowded again; today Settings is a header gear. | S | PR #34 |
+| B-21 | `getUserMedia` live-preview capture (CLAUDE.md §3.4 "upgrade if worthwhile"); the `capture` attribute flow is in place. | M | Phase 1 |
+| B-22 | Field editability for enum fields (`document_type` stays `read_only` until a select editor exists). | S | Phase 3 scope cut |
+| B-23 | Rebuild-dev-DB note: dev's `0022` was hand-patched; a from-scratch replay of `supabase/migrations/` on dev is unverified. Do a clean rebuild of dev once, then delete this item. | S | Memory 2026-09-04 |
+| B-24 | Unified `getCurrentProfile` use in the older server actions that still inline `getUser()` + `profiles` (11 call sites). | S | Code comment in `current-profile.ts` |
+
+## Shipped from this list
+
+_(none yet — the list was created 2026-09-15)_
