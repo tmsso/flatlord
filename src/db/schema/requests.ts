@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { persons } from "./persons";
@@ -58,6 +58,8 @@ export const requests = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    index("requests_tenancy_id_idx").on(table.tenancyId),
+    index("requests_initiated_by_idx").on(table.initiatedBy),
     check(
       "requests_category_check",
       sql`${table.category} in ('repair', 'contract_change', 'personal_data_change', 'inventory', 'billing_question', 'other')`,
@@ -69,14 +71,21 @@ export const requests = pgTable(
 // Threaded conversation (§3.7). No per-message attachments — documents
 // attach at the request level via the generic `attachments` table
 // (entity_type = 'request'), same idiom as every other entity there.
-export const requestMessages = pgTable("request_messages", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  requestId: uuid("request_id")
-    .notNull()
-    .references(() => requests.id),
-  authorId: uuid("author_id")
-    .notNull()
-    .references(() => persons.id),
-  body: text("body").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const requestMessages = pgTable(
+  "request_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => requests.id),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => persons.id),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("request_messages_request_id_idx").on(table.requestId),
+    index("request_messages_author_id_idx").on(table.authorId),
+  ],
+);

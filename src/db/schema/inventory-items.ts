@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, date, timestamp, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { properties } from "./properties";
 import { inventoryOwnedByEnum, inventoryItemStatusEnum } from "./enums";
@@ -17,23 +17,27 @@ import { inventoryOwnedByEnum, inventoryItemStatusEnum } from "./enums";
 // item 4) with entity_type = 'inventory_item', entity_id = this row's id
 // — see migration 0018/0019 for the enum extension + RLS. No separate
 // photo column here.
-export const inventoryItems = pgTable("inventory_items", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  unitId: uuid("unit_id")
-    .notNull()
-    .references(() => properties.id),
-  propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  description: text("description"),
-  ownedBy: inventoryOwnedByEnum("owned_by").notNull().default("owner"),
-  condition: text("condition"),
-  notes: text("notes"),
-  // Conditional-ownership real case (CLAUDE.md §3.9): an appliance whose
-  // ownership transfers depending on the tenancy's end date.
-  // actionByDate presence *is* the flag — no separate boolean needed.
-  actionByDate: date("action_by_date"),
-  actionByReason: text("action_by_reason"),
-  status: inventoryItemStatusEnum("status").notNull().default("active"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const inventoryItems = pgTable(
+  "inventory_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    unitId: uuid("unit_id")
+      .notNull()
+      .references(() => properties.id),
+    propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
+    title: text("title").notNull(),
+    description: text("description"),
+    ownedBy: inventoryOwnedByEnum("owned_by").notNull().default("owner"),
+    condition: text("condition"),
+    notes: text("notes"),
+    // Conditional-ownership real case (CLAUDE.md §3.9): an appliance whose
+    // ownership transfers depending on the tenancy's end date.
+    // actionByDate presence *is* the flag — no separate boolean needed.
+    actionByDate: date("action_by_date"),
+    actionByReason: text("action_by_reason"),
+    status: inventoryItemStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("inventory_items_unit_id_idx").on(table.unitId)],
+);

@@ -1,4 +1,4 @@
-import { pgTable, uuid, bigint, char, date, text, timestamp, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, bigint, char, date, text, timestamp, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { statements } from "./statements";
@@ -45,5 +45,10 @@ export const depositTransactions = pgTable(
       .references(() => persons.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [check("deposit_transactions_amount_nonnegative", sql`${table.amount} >= 0`)],
+  (table) => [
+    index("deposit_transactions_tenancy_id_idx").on(table.tenancyId),
+    index("deposit_transactions_applied_to_statement_id_idx").on(table.appliedToStatementId),
+    index("deposit_transactions_recorded_by_idx").on(table.recordedBy),
+    check("deposit_transactions_amount_nonnegative", sql`${table.amount} >= 0`),
+  ],
 );

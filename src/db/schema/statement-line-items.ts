@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, bigint, boolean, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, bigint, boolean, integer, timestamp, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { statements } from "./statements";
 import { chargeTypes } from "./charge-types";
@@ -25,28 +25,40 @@ import { adjustments } from "./adjustments";
 //
 // Currency-neutral naming (CLAUDE.md §6): no `currency` column at this
 // granularity, implicitly the parent statement's currency; see IDEAS.md.
-export const statementLineItems = pgTable("statement_line_items", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  statementId: uuid("statement_id")
-    .notNull()
-    .references(() => statements.id),
-  // Denormalized from statements.tenancy_id/property_id, trigger-set.
-  tenancyId: uuid("tenancy_id").notNull().default(sql`gen_random_uuid()`),
-  propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-  chargeTypeId: uuid("charge_type_id")
-    .notNull()
-    .references(() => chargeTypes.id),
-  // Snapshotted label, e.g. "Electricity (Kitchen meter)".
-  description: text("description").notNull(),
-  quantity: numeric("quantity", { precision: 14, scale: 3 }), // meter delta; null for fixed/adjustment
-  unitRate: numeric("unit_rate", { precision: 12, scale: 4 }), // null for fixed/adjustment
-  amount: bigint("amount", { mode: "number" }).notNull(), // rounded per line; see computeStatement (M4)
-  isBillable: boolean("is_billable").notNull().default(true), // false for tracked_only rows
-  chargeScheduleId: uuid("charge_schedule_id").references(() => chargeSchedules.id),
-  meterId: uuid("meter_id").references(() => meters.id),
-  fromReadingId: uuid("from_reading_id").references(() => meterReadings.id),
-  toReadingId: uuid("to_reading_id").references(() => meterReadings.id),
-  adjustmentId: uuid("adjustment_id").references(() => adjustments.id),
-  sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const statementLineItems = pgTable(
+  "statement_line_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    statementId: uuid("statement_id")
+      .notNull()
+      .references(() => statements.id),
+    // Denormalized from statements.tenancy_id/property_id, trigger-set.
+    tenancyId: uuid("tenancy_id").notNull().default(sql`gen_random_uuid()`),
+    propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
+    chargeTypeId: uuid("charge_type_id")
+      .notNull()
+      .references(() => chargeTypes.id),
+    // Snapshotted label, e.g. "Electricity (Kitchen meter)".
+    description: text("description").notNull(),
+    quantity: numeric("quantity", { precision: 14, scale: 3 }), // meter delta; null for fixed/adjustment
+    unitRate: numeric("unit_rate", { precision: 12, scale: 4 }), // null for fixed/adjustment
+    amount: bigint("amount", { mode: "number" }).notNull(), // rounded per line; see computeStatement (M4)
+    isBillable: boolean("is_billable").notNull().default(true), // false for tracked_only rows
+    chargeScheduleId: uuid("charge_schedule_id").references(() => chargeSchedules.id),
+    meterId: uuid("meter_id").references(() => meters.id),
+    fromReadingId: uuid("from_reading_id").references(() => meterReadings.id),
+    toReadingId: uuid("to_reading_id").references(() => meterReadings.id),
+    adjustmentId: uuid("adjustment_id").references(() => adjustments.id),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("statement_line_items_statement_id_idx").on(table.statementId),
+    index("statement_line_items_charge_type_id_idx").on(table.chargeTypeId),
+    index("statement_line_items_charge_schedule_id_idx").on(table.chargeScheduleId),
+    index("statement_line_items_meter_id_idx").on(table.meterId),
+    index("statement_line_items_from_reading_id_idx").on(table.fromReadingId),
+    index("statement_line_items_to_reading_id_idx").on(table.toReadingId),
+    index("statement_line_items_adjustment_id_idx").on(table.adjustmentId),
+  ],
+);

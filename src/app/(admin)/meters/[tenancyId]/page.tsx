@@ -34,55 +34,17 @@ export default async function AdminMeterVerificationPage({
   const periodEnd = nextMonthStart(periodMonth);
   const person = Array.isArray(tenancy.persons) ? tenancy.persons[0] : tenancy.persons;
 
-  const { data: meterRows } = await supabase
-    .from("meters")
-    .select("id, label, base_value, charge_type_id")
-    .eq("unit_id", tenancy.unit_id)
-    .is("removed_at", null);
+  // Stage 1: everything that only needs `tenancy` (already fetched above)
+  // — independent of each other, run concurrently (BACKLOG.md B-02).
+  const [{ data: meterRows }, { data: scheduleRows }] = await Promise.all([
+    supabase.from("meters").select("id, label, base_value, charge_type_id").eq("unit_id", tenancy.unit_id).is("removed_at", null),
+    // Owner has full charge_schedules access — the rate this period's
+    // statement will actually use, via the same pickActiveSchedule rule.
+    supabase.from("charge_schedules").select("id, charge_type_id, amount, rate_per_unit, valid_from, valid_to").eq("tenancy_id", tenancy.id),
+  ]);
   const meters = meterRows ?? [];
   const meterIds = meters.map((m) => m.id);
-
   const chargeTypeIds = [...new Set(meters.map((m) => m.charge_type_id))];
-  const { data: chargeTypeRows } = chargeTypeIds.length
-    ? await supabase.from("charge_types").select("id, unit").in("id", chargeTypeIds)
-    : { data: [] };
-  const unitByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.unit ?? ""]));
-
-  const { data: monthReadingRows } = meterIds.length
-    ? await supabase
-        .from("meter_readings")
-        .select("id, meter_id, entered_value, confirmed_value, ocr_value, ocr_confidence, photo_path, status, created_at")
-        .in("meter_id", meterIds)
-        .gte("reading_date", periodStart)
-        .lt("reading_date", periodEnd)
-    : { data: [] };
-
-  // Previous value = latest verified reading strictly before this period,
-  // falling back to the meter's base_value — same anchor the billing
-  // engine (findFromValue in compute-statement.ts) uses.
-  const { data: priorVerifiedRows } = meterIds.length
-    ? await supabase
-        .from("meter_readings")
-        .select("meter_id, confirmed_value, reading_date")
-        .in("meter_id", meterIds)
-        .eq("status", "verified")
-        .lt("reading_date", periodStart)
-        .order("reading_date", { ascending: false })
-        .order("created_at", { ascending: false })
-    : { data: [] };
-  const previousByMeter = new Map<string, { value: number; date: string }>();
-  for (const r of priorVerifiedRows ?? []) {
-    if (!previousByMeter.has(r.meter_id) && r.confirmed_value != null) {
-      previousByMeter.set(r.meter_id, { value: Number(r.confirmed_value), date: r.reading_date });
-    }
-  }
-
-  // Owner has full charge_schedules access — the rate this period's
-  // statement will actually use, via the same pickActiveSchedule rule.
-  const { data: scheduleRows } = await supabase
-    .from("charge_schedules")
-    .select("id, charge_type_id, amount, rate_per_unit, valid_from, valid_to")
-    .eq("tenancy_id", tenancy.id);
   const schedules: ChargeScheduleInput[] = (scheduleRows ?? []).map((s) => ({
     id: s.id,
     chargeTypeId: s.charge_type_id,
@@ -92,6 +54,41 @@ export default async function AdminMeterVerificationPage({
     validTo: s.valid_to,
   }));
 
+  // Stage 2: depends on stage-1 results (meterIds, chargeTypeIds) —
+  // independent of each other.
+  const [{ data: chargeTypeRows }, { data: monthReadingRows }, { data: priorVerifiedRows }] = await Promise.all([
+    chargeTypeIds.length ? supabase.from("charge_types").select("id, unit").in("id", chargeTypeIds) : Promise.resolve({ data: [] }),
+    meterIds.length
+      ? supabase
+          .from("meter_readings")
+          .select("id, meter_id, entered_value, confirmed_value, ocr_value, ocr_confidence, photo_path, status, created_at")
+          .in("meter_id", meterIds)
+          .gte("reading_date", periodStart)
+          .lt("reading_date", periodEnd)
+      : Promise.resolve({ data: [] }),
+    // Previous value = latest verified reading strictly before this
+    // period, falling back to the meter's base_value — same anchor the
+    // billing engine (findFromValue in compute-statement.ts) uses.
+    meterIds.length
+      ? supabase
+          .from("meter_readings")
+          .select("meter_id, confirmed_value, reading_date")
+          .in("meter_id", meterIds)
+          .eq("status", "verified")
+          .lt("reading_date", periodStart)
+          .order("reading_date", { ascending: false })
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
+  const unitByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.unit ?? ""]));
+
+  const previousByMeter = new Map<string, { value: number; date: string }>();
+  for (const r of priorVerifiedRows ?? []) {
+    if (!previousByMeter.has(r.meter_id) && r.confirmed_value != null) {
+      previousByMeter.set(r.meter_id, { value: Number(r.confirmed_value), date: r.reading_date });
+    }
+  }
+
   const readingsByMeter = new Map<string, typeof monthReadingRows>();
   for (const r of monthReadingRows ?? []) {
     const list = readingsByMeter.get(r.meter_id) ?? [];
@@ -100,6 +97,8 @@ export default async function AdminMeterVerificationPage({
   }
 
   const photoPaths = (monthReadingRows ?? []).map((r) => r.photo_path).filter((p): p is string => p != null);
+
+  // Stage 3: depends on stage-2 results (photoPaths).
   const { data: signedUrls } = photoPaths.length
     ? await supabase.storage.from("meter-photos").createSignedUrls(photoPaths, 600)
     : { data: [] };

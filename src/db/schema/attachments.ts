@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, bigint, timestamp, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, bigint, timestamp, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { persons } from "./persons";
 
@@ -52,6 +52,8 @@ export const attachments = pgTable("attachments", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
+  index("attachments_entity_type_entity_id_idx").on(table.entityType, table.entityId),
+  index("attachments_uploaded_by_idx").on(table.uploadedBy),
   check(
     "attachments_entity_type_check",
     sql`${table.entityType} in ('tenancy', 'person', 'inventory_item', 'request', 'notice')`,

@@ -1,4 +1,4 @@
-import { pgTable, uuid, bigint, text, date, timestamp, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, bigint, text, date, timestamp, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { chargeTypes } from "./charge-types";
@@ -42,6 +42,9 @@ export const adjustments = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    index("adjustments_tenancy_id_idx").on(table.tenancyId),
+    index("adjustments_charge_type_id_idx").on(table.chargeTypeId),
+    index("adjustments_created_by_idx").on(table.createdBy),
     check(
       "target_month_end_after_start",
       sql`${table.targetMonthEnd} is null or ${table.targetMonthEnd} >= ${table.targetMonth}`,

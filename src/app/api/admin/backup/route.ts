@@ -4,6 +4,9 @@ import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { buildBackupArchive } from "@/lib/backup/build-backup-archive";
 
 export const runtime = "nodejs";
+// Hobby's default function timeout (10s) isn't enough for a full export
+// with assets streamed as a zip (BACKLOG.md B-18) — 60s is Hobby's max.
+export const maxDuration = 60;
 
 // Highest-value target in the app — returns every row in every table.
 // Middleware already gates /api/admin to owners; this in-handler check is

@@ -169,6 +169,13 @@
       "when": 1788729600000,
       "tag": "0023_fix-tenant-audit-log-insert",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789513880704,
+      "tag": "0024_add-fk-indexes",
+      "breakpoints": true
     }
   ]
 }

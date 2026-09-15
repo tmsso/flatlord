@@ -7,6 +7,7 @@ import {
   jsonb,
   timestamp,
   check,
+  index,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { propertyTypeEnum, tenancyStatusEnum, registrationTypeEnum } from "./enums";
@@ -51,6 +52,8 @@ export const tenancies = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    index("tenancies_unit_id_idx").on(table.unitId),
+    index("tenancies_primary_tenant_id_idx").on(table.primaryTenantId),
     check("due_day_range", sql`${table.dueDay} between 1 and 28`),
     check("unit_type_not_house", sql`${table.unitType} in ('flat', 'room')`),
   ],

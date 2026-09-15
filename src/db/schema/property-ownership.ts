@@ -1,4 +1,4 @@
-import { pgTable, uuid, numeric, unique, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, numeric, unique, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { properties } from "./properties";
 import { persons } from "./persons";
@@ -19,10 +19,14 @@ export const propertyOwnership = pgTable(
     percentage: numeric("percentage", { precision: 5, scale: 2 }).notNull(),
   },
   (table) => [
+    // propertyId is already the leading column of the unique constraint
+    // below, so it's already indexed — only personId (the trailing
+    // column) needs its own index.
     unique("property_ownership_property_person_unique").on(
       table.propertyId,
       table.personId,
     ),
+    index("property_ownership_person_id_idx").on(table.personId),
     check(
       "percentage_range",
       sql`${table.percentage} > 0 and ${table.percentage} <= 100`,

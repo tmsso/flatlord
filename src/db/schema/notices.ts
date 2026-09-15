@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, check, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { persons } from "./persons";
@@ -68,6 +68,9 @@ export const notices = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    index("notices_tenancy_id_idx").on(table.tenancyId),
+    index("notices_acknowledged_by_idx").on(table.acknowledgedBy),
+    index("notices_issued_by_idx").on(table.issuedBy),
     check("notices_type_check", sql`${table.type} in ('info', 'house_rule', 'payment_reminder', 'late_payment', 'formal_warning', 'contract')`),
     check("notices_sequence_check", sql`${table.sequence} is null or ${table.sequence} in ('first', 'second', 'final')`),
   ],
