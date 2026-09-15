@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 import { markNotificationRead } from "@/server/notifications/mark-notification-read";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -58,8 +59,11 @@ export function NotificationBell({ notifications, role }: { notifications: Notif
 
   return (
     <div className="relative">
-      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((v) => !v)} aria-label={t("bellLabel")}>
-        {t("bellLabel")}
+      {/* Icon + label from sm up; icon-only below (the tenant header at
+          390px can't fit the Hungarian label). Accessible name unchanged. */}
+      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((v) => !v)} aria-label={t("bellLabel")} className="max-sm:size-8 max-sm:px-0">
+        <Bell className="size-4" />
+        <span className="max-sm:sr-only">{t("bellLabel")}</span>
         {unreadCount > 0 && (
           <Badge variant="destructive" className="ml-1">
             {unreadCount}
@@ -69,7 +73,9 @@ export function NotificationBell({ notifications, role }: { notifications: Notif
       {open && (
         <>
           <button type="button" aria-label={t("close")} className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-2 max-h-96 w-80 overflow-y-auto rounded-lg border border-border bg-popover p-2 shadow-md">
+          {/* Below sm the panel is pinned to the viewport (full-width under the
+              header) — anchored to the bell it ran off the left edge at 390px. */}
+          <div className="z-50 max-h-96 overflow-y-auto rounded-lg border border-border bg-popover p-2 shadow-md max-sm:fixed max-sm:inset-x-3 max-sm:top-16 sm:absolute sm:right-0 sm:mt-2 sm:w-80">
             {notifications.length === 0 ? (
               <p className="p-2 text-sm text-muted-foreground">{t("empty")}</p>
             ) : (
