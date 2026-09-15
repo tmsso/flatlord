@@ -112,7 +112,9 @@ Where a paid tier or a swap would actually help, and where it wouldn't:
 | OpenRouter | pay-as-you-go | Fine for Phase 5; pennies. |
 | Model tiers for sessions | — | Sonnet/Opus batches are fine with the new doc structure; reserve Fable-grade for periodic reviews like this one. |
 
-## Decisions needed (admin)
+## Decisions needed (admin) — answered 2026-09-15
+
+Outcome: D-05 → option (b); D-06 tentatively admin-only + audited, admin wants a design note before it's final; D-07 → yes; D-04/D-08/D-13/D-17/D-19 confirmed; 4c items 1–2 before the rest of 4b (D-21). Domain: buy at Cloudflare Registrar or Porkbun, not Vercel's registrar (renewal markup). The list below is kept as asked.
 
 1. **D-05 due-date semantics** — a statement for August issued on 20 Sep tells the tenant "due 5 Aug". Options: keep; due on `due_day` of the month *after issue* (recommended); issue date + N days. Historical months are untouched either way.
 2. **D-06 ad-hoc notes** — admin-only, or per-note tenant visibility? Audited edits? (Recommended: admin-only v1 with a `visible_to_tenant` flag defaulting false; audited via `logAudit()`.)

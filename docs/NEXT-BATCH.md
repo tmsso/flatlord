@@ -5,7 +5,7 @@ Written 2026-09-15 by the Fable review pass. **Valid while** `git log -1 --forma
 ## Preconditions to check first
 
 1. PR #33 (4b analytics) and PR #34 (review quick wins) should be merged. If either is still open and green, merging is the admin's call (`/ship-pr`), not the batch's first item.
-2. Read `docs/DECISIONS.md`. Items below marked *needs D-nn* are blocked until the admin answers; if unanswered, substitute the named fallback rather than guessing.
+2. Read `docs/DECISIONS.md`. Nothing below is gated on an open decision (the 2026-09-15 review's questions were answered the same day); D-06 (ad-hoc notes) is the only tentative one and is not in this batch.
 3. Confirm ship-autonomy for the batch explicitly, per the `/next-batch` skill.
 
 ## The three
@@ -24,9 +24,9 @@ Restyle `components/ui/*` (button sizes/hover, input borders, table density + ta
 
 ### 3. Billing polish — B-05 draft discard/regenerate, then B-06 due-date semantics and B-07 historical charge names
 
-B-05 needs no decision. B-06 *needs D-05* — fallback if unanswered: implement B-05 and B-07 only, and leave B-06 for the next batch. B-07 *needs D-07* — its recommendation is low-risk (render-time only); proceed unless the admin objects.
+All three are decided (D-05 option b, D-07 render-time labels) — no decision gating this item.
 
-*Done means:* a wedged draft month can be cleared and regenerated; a statement issued today shows a future due date (if D-05 answered); a 2025 statement shows localised charge names in the HU UI and in the PDF; golden tests untouched and green.
+*Done means:* a wedged draft month can be cleared and regenerated; a statement issued today shows a due date in the month after issue; a 2025 statement shows localised charge names in the HU UI and in the PDF; golden tests untouched and green.
 
 ## Alternatives if the admin prefers
 

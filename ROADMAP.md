@@ -14,22 +14,21 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
 | 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) open and green |
-| 4c | **UI fidelity pass** (new, 2026-09-15) | Not started — the design handoff was never ported; owner's top concern |
+| 4c | **UI fidelity pass** (new, 2026-09-15) | Not started — items 1–2 run before the rest of 4b (D-21) |
 | 5 | AI features + expansion | Not started |
 
-## Phase gates → admin checklist (proposal, 2026-09-15)
+## Phase gates → admin checklist (decided 2026-09-15)
 
-The "do not start a phase before its predecessor is accepted" rule was suppressed for every transition so far (1→2 on 2026-08-07, 3→4 on 2026-09-04, 4a/4b split on 2026-09-10) and no phase has ever been formally Accepted. Proposal (`docs/DECISIONS.md` D-04): drop the gate ritual; a phase is *closed* when its rows in the checklist below are ticked. Sessions treat the checklist as the operative list and never block on gates. **Awaiting the admin's confirmation** — until then this is the working rule.
+The "do not start a phase before its predecessor is accepted" rule was suppressed for every transition so far (1→2 on 2026-08-07, 3→4 on 2026-09-04, 4a/4b split on 2026-09-10) and no phase has ever been formally Accepted. Decided (`docs/DECISIONS.md` D-04, admin 2026-09-15): the gate ritual is dropped; a phase is *closed* when its rows in the checklist below are ticked. Sessions treat the checklist as the operative list and never block on gates.
 
 ### Admin actions pending (only the admin can do these — sessions must not)
 
 - [ ] **Set `CRON_SECRET`** in Vercel (prod + preview). Before flipping: the overdue query has no date floor, so the first authenticated run alerts once on every historical statement still `issued`/`partially_paid` past due — count them in the Supabase dashboard first (the 2026-09-10 retroactive-issue grace removes most). Tenant-addressed reminders won't deliver until Resend leaves sandbox (next item).
-- [ ] **Buy a domain** (`BACKLOG.md` B-01) and verify it in Resend. Unblocks real tenant email, the Phase 1 acceptance run, and a non-`vercel.app` URL. The one purchase this review recommends.
+- [ ] **Buy a domain** (`BACKLOG.md` B-01 — Cloudflare Registrar or Porkbun, not Vercel's registrar) and verify it in Resend. Unblocks real tenant email, the Phase 1 acceptance run, and a non-`vercel.app` URL. The one purchase this review recommends.
 - [ ] **Phase 1 real acceptance run**: one real statement walked photo → verification → statement → email/WhatsApp → payment, total identical to the sheet. Confirm-first, real person involved.
 - [ ] **Retire the Google Sheet** to read-only after that run.
 - [ ] **Deposit-ledger real backfill** from `/private` (writes real financial data to prod).
-- [ ] **Merge PR #34** (review quick wins) — includes the Vercel `fra1` region change; takes effect on the next production deploy.
-- [ ] **Answer the open decisions** in `docs/HEALTH-REPORT-2026-09-15.md` §"Decisions needed" (D-05 due-date semantics, D-06 ad-hoc notes, D-07 historical charge names, and confirm D-04/D-08/D-17).
+- [ ] **D-06 ad-hoc notes**: tentatively admin-only + audited; the admin wants a short design note before it's final (see `docs/DECISIONS.md`). Everything else from the 2026-09-15 review is decided.
 
 ## Phase 4a — automation core (code complete)
 
@@ -39,7 +38,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 ## Phase 4b — reporting & owner tools
 
 - **Admin analytics, remainder** (PR #33 shipped the cumulative "billed vs received" ledger + event timeline): yearly cost/consumption comparison; payment-punctuality chart; rate-history overlay on the consumption chart; rent-vs-pass-through split on the billed curve. **Done means:** each chart renders on the admin tenancy page from real dev data; a unit test guards that nothing under `src/app/(tenant)` imports the analytics loaders (tenant never sees cumulative totals — D-15).
-- **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **Blocked on D-06** (admin-only vs per-note tenant-visible; audited edits or not). **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
+- **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **D-06 is tentative** (admin-only + audited) — present a short design note and get a go-ahead before the migration. **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
 - **Owner income breakdown for tax**: admin report with period selector (default last full calendar year), basis toggle (rent-only vs all inbound), manual adjusting items, editable PIT rate (default 15%, reconfirm at build), PDF via `@react-pdf`. Income side only. **Done means:** report totals reconcile to the payments table for the period; PDF renders in both locales.
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).
 - ~~Avatars~~ — moved back to `IDEAS.md` (cost/benefit).
