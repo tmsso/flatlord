@@ -1,0 +1,26 @@
+# Decisions — standing choices, not to be re-litigated
+
+One line each. A session that wants to change one opens it as a question to the admin; it does not quietly pick differently. Status: **decided** / **proposed** (awaiting admin confirmation) / **open** (admin input needed before the dependent work can start).
+
+| ID | Decision | Status | When / where |
+|---|---|---|---|
+| D-01 | **Drizzle for schema-as-code, migrations and the backup dump only; supabase-js for every app read/write** so RLS is always in the path. Don't add Drizzle queries in app code. | decided | Phase 0; confirmed in the 2026-09-15 review |
+| D-02 | **Auth = Google OAuth + emailed magic link, invite-only, no self-signup.** Owner/tenant role on `profiles`. | decided | Design session, Phase 0 |
+| D-03 | **Statements are retroactive by design.** A statement issued on/after its nominal due date isn't overdue until 7 days after issuance (`RETROACTIVE_ISSUE_GRACE_DAYS`). | decided | 2026-09-10, PR #31 |
+| D-04 | **Replace formal phase-Accept gates with the admin-actions checklist in `ROADMAP.md`.** Gates were suppressed at every transition; no phase was ever Accepted. | proposed | 2026-09-15 review |
+| D-05 | **Due-date semantics for newly issued statements.** Today `due_date` = `due_day` of the *period* month, so a statement for August issued on 20 Sep shows "due 5 Aug" to the tenant — legally nominal, practically confusing, and it is what forced D-03. Options: (a) keep as is; (b) `due_date` = `due_day` of the month *after issue* (matches "utilities reimbursed with next month's rent"); (c) `due_date` = issue date + N days. Recommendation: **(b)**. Historical months keep the sheet's dates either way. | **open** | 2026-09-15 review, `BACKLOG.md` B-06 |
+| D-06 | **Ad-hoc notes visibility & audit.** Admin-only, or per-note tenant-visible toggle? Do note edits get before/after audit like person fields? Recommendation: admin-only in v1 with a `visible_to_tenant` boolean defaulting false; edits audited via `logAudit()` (it's free to reuse). | **open** | ROADMAP 4b |
+| D-07 | **Historical statements show raw machine charge names.** Do not edit issued rows. Resolve a display label at render time from `charge_types.code` via the i18n catalog; stored description is the fallback. | proposed | 2026-09-15, `BACKLOG.md` B-07; history in memory `flatlord_charge_type_i18n_gap` |
+| D-08 | **Nav wayfinding = icons + highlighted active item, one accent colour.** Per-section accent colours are dropped — they conflict with CLAUDE.md §5's one-accent rule and the icon/active-state pair already answers "where am I". | proposed | 2026-09-15, PR #34 |
+| D-09 | **Sensitive person fields stay `"[redacted]"` in the audit trail for every viewer, including admin** (`NEVER_LOG_KEYS`). | decided | 2026-09-03 |
+| D-10 | **Demo mode = `is_demo` flag in the production DB, not a second Supabase project.** | decided | IDEAS.md, 2026-08 |
+| D-11 | **Extensible type columns are `text` + `CHECK`, not Postgres enums** (enum extension + use in one migration transaction fails under drizzle's migrator). | decided | Phase 2 |
+| D-12 | **Money columns are currency-neutral** (`amount` + `currency char(3)`), HUF is a default not a name. | decided | CLAUDE.md §6 |
+| D-13 | **Vercel Serverless Functions pinned to `fra1`** to sit next to the Supabase project in `eu-west-1`. Hobby plan allows one region. | proposed (in PR #34) | 2026-09-15 |
+| D-14 | **Prod migrations only through `.github/workflows/migrate-prod.yml`**; never hand-applied. | decided | 2026-08 after two drift incidents |
+| D-15 | **The tenant is never shown a cumulative total-paid-to-date.** Analytics loaders must not be imported under `src/app/(tenant)`. | decided | Owner, 2026-08-03 |
+| D-16 | **Scanned-contract OCR is Phase 5**, not a Phase 2 retrofit; digital-text PDFs parse today. | decided | 2026-08-16 |
+| D-17 | **Keep shadcn v4 base-nova / Base UI primitives; restyle `components/ui/*` toward the design tokens** (borders, shadows, radii, sizes) instead of swapping libraries or buying a UI kit. The design handoff is the spec. | proposed | 2026-09-15, started with `Card` in PR #34 |
+| D-18 | **CI tests run against a real Supabase Postgres** (`supabase db start`) with the repo's migrations and demo seed — no mocks for RLS. | decided | Phase 0/1 |
+| D-19 | **No paid subscriptions for now.** A domain is the one purchase recommended (unlocks Resend). Vercel Pro / Supabase Pro are not needed at this scale; revisit when a second owner/property arrives or a free-tier limit actually bites. | proposed | 2026-09-15 review |
+| D-20 | **Cron never auto-issues.** Auto-draft creates `draft` statements only; issuing, notices and anything with tenant-facing legal weight stay manual. | decided | 2026-09-10, PR #31 (Trust rule) |
