@@ -20,38 +20,64 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   const isRoot = property.parent_id === null;
 
-  const { data: ownershipRows } = isRoot
-    ? await supabase
-        .from("property_ownership")
-        .select("id, person_id, percentage, persons(given_name, family_name)")
-        .eq("property_id", property.root_property_id)
-    : { data: [] };
-
-  const { data: personRows } = await supabase.from("persons").select("id, given_name, family_name").order("family_name");
-
-  const { data: childRows } = await supabase
-    .from("properties")
-    .select("id, name, type, hrsz, active")
-    .eq("parent_id", id)
-    .order("name");
-
-  // Inhabitants of this specific unit: tenancies against it, plus their
-  // occupants — property_id (denormalized root) isn't the right scope
-  // here, unit_id (the actual lettable node) is.
-  const { data: tenanciesForUnit } = await supabase
-    .from("tenancies")
-    .select("id, primary_tenant_id, primary_tenant_registration_type, status, persons(id, given_name, family_name)")
-    .eq("unit_id", id)
-    .neq("status", "terminated");
+  // Stage 1: everything that only needs `property` (already fetched
+  // above) — independent of each other, run concurrently (BACKLOG.md B-02).
+  const [{ data: ownershipRows }, { data: personRows }, { data: childRows }, { data: tenanciesForUnit }, { data: inventoryRows }] =
+    await Promise.all([
+      isRoot
+        ? supabase
+            .from("property_ownership")
+            .select("id, person_id, percentage, persons(given_name, family_name)")
+            .eq("property_id", property.root_property_id)
+        : Promise.resolve({ data: [] }),
+      supabase.from("persons").select("id, given_name, family_name").order("family_name"),
+      supabase.from("properties").select("id, name, type, hrsz, active").eq("parent_id", id).order("name"),
+      // Inhabitants of this specific unit: tenancies against it, plus their
+      // occupants — property_id (denormalized root) isn't the right scope
+      // here, unit_id (the actual lettable node) is.
+      supabase
+        .from("tenancies")
+        .select("id, primary_tenant_id, primary_tenant_registration_type, status, persons(id, given_name, family_name)")
+        .eq("unit_id", id)
+        .neq("status", "terminated"),
+      supabase
+        .from("inventory_items")
+        .select("id, title, description, owned_by, condition, notes, action_by_date, action_by_reason, status")
+        .eq("unit_id", id)
+        .order("created_at", { ascending: false }),
+    ]);
 
   const tenancyIds = (tenanciesForUnit ?? []).map((t) => t.id);
-  const { data: occupantRows } = tenancyIds.length
-    ? await supabase
-        .from("tenancy_occupants")
-        .select("id, tenancy_id, relationship, registration_type, move_out, persons(id, given_name, family_name)")
-        .in("tenancy_id", tenancyIds)
-        .is("move_out", null)
-    : { data: [] };
+  const inventoryIds = (inventoryRows ?? []).map((i) => i.id);
+  const activeTenancyId = tenanciesForUnit?.[0]?.id ?? null;
+
+  // Stage 2: depends on stage-1 results (tenancyIds, inventoryIds,
+  // activeTenancyId) — still independent of each other.
+  const [{ data: occupantRows }, { data: inventoryAttachmentRows }, { data: campaignRows }] = await Promise.all([
+    tenancyIds.length
+      ? supabase
+          .from("tenancy_occupants")
+          .select("id, tenancy_id, relationship, registration_type, move_out, persons(id, given_name, family_name)")
+          .in("tenancy_id", tenancyIds)
+          .is("move_out", null)
+      : Promise.resolve({ data: [] }),
+    inventoryIds.length
+      ? supabase
+          .from("attachments")
+          .select("id, entity_id, file_name, size_bytes, note, created_at, storage_path")
+          .eq("entity_type", "inventory_item")
+          .in("entity_id", inventoryIds)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    activeTenancyId
+      ? supabase
+          .from("inventory_reconfirmations")
+          .select("id, scope, status, initiated_at, due_date, note")
+          .eq("tenancy_id", activeTenancyId)
+          .order("initiated_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
 
   type PersonRef = { id: string; given_name: string; family_name: string };
   const inhabitants: { personId: string; name: string; registrationType: string | null; relationship: string }[] = [];
@@ -80,43 +106,22 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     }
   }
 
-  const { data: inventoryRows } = await supabase
-    .from("inventory_items")
-    .select("id, title, description, owned_by, condition, notes, action_by_date, action_by_reason, status")
-    .eq("unit_id", id)
-    .order("created_at", { ascending: false });
-
-  const inventoryIds = (inventoryRows ?? []).map((i) => i.id);
-  const { data: inventoryAttachmentRows } = inventoryIds.length
-    ? await supabase
-        .from("attachments")
-        .select("id, entity_id, file_name, size_bytes, note, created_at, storage_path")
-        .eq("entity_type", "inventory_item")
-        .in("entity_id", inventoryIds)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-    : { data: [] };
   const inventoryAttachmentPaths = (inventoryAttachmentRows ?? []).map((a) => a.storage_path).filter((p): p is string => !!p);
-  const { data: inventoryAttachmentSignedUrls } = inventoryAttachmentPaths.length
-    ? await supabase.storage.from("attachments").createSignedUrls(inventoryAttachmentPaths, 600)
-    : { data: [] };
-  const inventoryAttachmentUrlByPath = new Map((inventoryAttachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
-
-  const activeTenancyId = tenanciesForUnit?.[0]?.id ?? null;
-  const { data: campaignRows } = activeTenancyId
-    ? await supabase
-        .from("inventory_reconfirmations")
-        .select("id, scope, status, initiated_at, due_date, note")
-        .eq("tenancy_id", activeTenancyId)
-        .order("initiated_at", { ascending: false })
-    : { data: [] };
   const campaignIds = (campaignRows ?? []).map((c) => c.id);
-  const { data: campaignItemRows } = campaignIds.length
-    ? await supabase
-        .from("inventory_reconfirmation_items")
-        .select("id, reconfirmation_id, status, tenant_note, inventory_items(title)")
-        .in("reconfirmation_id", campaignIds)
-    : { data: [] };
+
+  // Stage 3: depends on stage-2 results (path list, campaign ids).
+  const [{ data: inventoryAttachmentSignedUrls }, { data: campaignItemRows }] = await Promise.all([
+    inventoryAttachmentPaths.length
+      ? supabase.storage.from("attachments").createSignedUrls(inventoryAttachmentPaths, 600)
+      : Promise.resolve({ data: [] }),
+    campaignIds.length
+      ? supabase
+          .from("inventory_reconfirmation_items")
+          .select("id, reconfirmation_id, status, tenant_note, inventory_items(title)")
+          .in("reconfirmation_id", campaignIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const inventoryAttachmentUrlByPath = new Map((inventoryAttachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
   type InventoryItemTitleRef = { title: string };
   const campaignsWithItems = (campaignRows ?? []).map((c) => ({

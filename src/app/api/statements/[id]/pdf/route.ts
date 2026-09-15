@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { renderStatementPdf } from "@/server/billing/render-statement-pdf";
 
 export const runtime = "nodejs";
+// Hobby's default function timeout (10s) can be tight for @react-pdf
+// rendering with embedded fonts (BACKLOG.md B-18) — 60s is Hobby's max.
+export const maxDuration = 60;
 
 // Streams a statement as a bilingual PDF (ROADMAP Phase 4 — "PDF statement
 // export"). One route for both roles: RLS on `statements` scopes

@@ -1,4 +1,4 @@
-import { pgTable, uuid, bigint, numeric, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, bigint, numeric, date, timestamp, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { chargeTypes } from "./charge-types";
@@ -16,25 +16,32 @@ import { chargeTypes } from "./charge-types";
 // trg_charge_schedules_validate_kind + the deferred overlap-guard trigger
 // in the M1 follow-up migration (not expressible as a plain CHECK — both
 // need a lookup against charge_types.kind or sibling rows).
-export const chargeSchedules = pgTable("charge_schedules", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  tenancyId: uuid("tenancy_id")
-    .notNull()
-    .references(() => tenancies.id),
-  chargeTypeId: uuid("charge_type_id")
-    .notNull()
-    .references(() => chargeTypes.id),
-  // Denormalized from tenancies.property_id, trigger-set.
-  propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
-  // Currency-neutral naming (CLAUDE.md §6): HUF is the only currency in
-  // practice today, but the column name doesn't bake that in. No `currency`
-  // column at this granularity yet — implicitly the tenancy's single
-  // currency (today always HUF via `statements.currency`); see IDEAS.md
-  // (EUR-based pricing) for what per-schedule currency would require.
-  amount: bigint("amount", { mode: "number" }), // fixed only
-  ratePerUnit: numeric("rate_per_unit", { precision: 12, scale: 4 }), // metered only
-  validFrom: date("valid_from").notNull(),
-  validTo: date("valid_to"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const chargeSchedules = pgTable(
+  "charge_schedules",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenancyId: uuid("tenancy_id")
+      .notNull()
+      .references(() => tenancies.id),
+    chargeTypeId: uuid("charge_type_id")
+      .notNull()
+      .references(() => chargeTypes.id),
+    // Denormalized from tenancies.property_id, trigger-set.
+    propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
+    // Currency-neutral naming (CLAUDE.md §6): HUF is the only currency in
+    // practice today, but the column name doesn't bake that in. No `currency`
+    // column at this granularity yet — implicitly the tenancy's single
+    // currency (today always HUF via `statements.currency`); see IDEAS.md
+    // (EUR-based pricing) for what per-schedule currency would require.
+    amount: bigint("amount", { mode: "number" }), // fixed only
+    ratePerUnit: numeric("rate_per_unit", { precision: 12, scale: 4 }), // metered only
+    validFrom: date("valid_from").notNull(),
+    validTo: date("valid_to"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("charge_schedules_tenancy_id_idx").on(table.tenancyId),
+    index("charge_schedules_charge_type_id_idx").on(table.chargeTypeId),
+  ],
+);

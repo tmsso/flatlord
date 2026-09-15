@@ -9,6 +9,7 @@ import {
   customType,
   timestamp,
   unique,
+  index,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -64,5 +65,10 @@ export const contracts = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [unique("contracts_tenancy_version_unique").on(table.tenancyId, table.version)],
+  (table) => [
+    // tenancyId is already the leading column of the unique constraint
+    // below, so it's already indexed — no separate index needed.
+    unique("contracts_tenancy_version_unique").on(table.tenancyId, table.version),
+    index("contracts_predecessor_contract_id_idx").on(table.predecessorContractId),
+  ],
 );

@@ -40,58 +40,53 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     return p ? `${p.given_name} ${p.family_name}` : "—";
   })();
 
-  const { data: occupantRows } = await supabase
-    .from("tenancy_occupants")
-    .select("id, person_id, relationship, registration_type, move_in, move_out, persons(given_name, family_name)")
-    .eq("tenancy_id", id)
-    .order("move_in");
+  // Stage 1: everything that only needs `id` (already known) — independent
+  // of each other, run concurrently (BACKLOG.md B-02).
+  const [{ data: occupantRows }, { data: persons }, { data: contractRows }, { data: depositRows }, { data: attachmentRows }, chartData, analytics] =
+    await Promise.all([
+      supabase
+        .from("tenancy_occupants")
+        .select("id, person_id, relationship, registration_type, move_in, move_out, persons(given_name, family_name)")
+        .eq("tenancy_id", id)
+        .order("move_in"),
+      supabase.from("persons").select("id, given_name, family_name").order("family_name"),
+      supabase
+        .from("contracts")
+        .select("id, version, status, term_start, term_end, notice_days, deposit_amount, deposit_currency, signed_at, document_path")
+        .eq("tenancy_id", id)
+        .order("version", { ascending: false }),
+      supabase
+        .from("deposit_transactions")
+        .select("id, type, amount, currency, transaction_date, note")
+        .eq("tenancy_id", id)
+        .order("transaction_date", { ascending: true }),
+      supabase
+        .from("attachments")
+        .select("id, file_name, size_bytes, note, created_at, storage_path")
+        .eq("entity_type", "tenancy")
+        .eq("entity_id", id)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false }),
+      getTenancyChartData(supabase, id, 12, new Date().toISOString().slice(0, 10)),
+      // Phase 4b admin analytics — admin-shell only. getTenancyAnalytics /
+      // CumulativeLedgerChart must never be imported under src/app/(tenant):
+      // the cumulative ledger is the running total-paid-to-date IDEAS.md
+      // forbids showing the tenant.
+      getTenancyAnalytics(supabase, id),
+    ]);
 
-  const { data: persons } = await supabase.from("persons").select("id, given_name, family_name").order("family_name");
-
-  const { data: contractRows } = await supabase
-    .from("contracts")
-    .select("id, version, status, term_start, term_end, notice_days, deposit_amount, deposit_currency, signed_at, document_path")
-    .eq("tenancy_id", id)
-    .order("version", { ascending: false });
+  const { consumption, cost, consumptionSeries, meteredSeries } = chartData;
 
   const contractPaths = (contractRows ?? []).map((c) => c.document_path).filter((p): p is string => !!p);
-  const { data: contractSignedUrls } = contractPaths.length
-    ? await supabase.storage.from("contracts").createSignedUrls(contractPaths, 600)
-    : { data: [] };
-  const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
-
-  const { data: depositRows } = await supabase
-    .from("deposit_transactions")
-    .select("id, type, amount, currency, transaction_date, note")
-    .eq("tenancy_id", id)
-    .order("transaction_date", { ascending: true });
-
-  const { data: attachmentRows } = await supabase
-    .from("attachments")
-    .select("id, file_name, size_bytes, note, created_at, storage_path")
-    .eq("entity_type", "tenancy")
-    .eq("entity_id", id)
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false });
-
   const attachmentPaths = (attachmentRows ?? []).map((a) => a.storage_path).filter((p): p is string => !!p);
-  const { data: attachmentSignedUrls } = attachmentPaths.length
-    ? await supabase.storage.from("attachments").createSignedUrls(attachmentPaths, 600)
-    : { data: [] };
+
+  // Stage 2: depends on stage-1 results (the path lists just built above).
+  const [{ data: contractSignedUrls }, { data: attachmentSignedUrls }] = await Promise.all([
+    contractPaths.length ? supabase.storage.from("contracts").createSignedUrls(contractPaths, 600) : Promise.resolve({ data: [] }),
+    attachmentPaths.length ? supabase.storage.from("attachments").createSignedUrls(attachmentPaths, 600) : Promise.resolve({ data: [] }),
+  ]);
+  const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
   const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
-
-  const { consumption, cost, consumptionSeries, meteredSeries } = await getTenancyChartData(
-    supabase,
-    id,
-    12,
-    new Date().toISOString().slice(0, 10),
-  );
-
-  // Phase 4b admin analytics — admin-shell only. getTenancyAnalytics /
-  // CumulativeLedgerChart must never be imported under src/app/(tenant):
-  // the cumulative ledger is the running total-paid-to-date IDEAS.md
-  // forbids showing the tenant.
-  const analytics = await getTenancyAnalytics(supabase, id);
 
   return (
     <div className="flex flex-col gap-4">

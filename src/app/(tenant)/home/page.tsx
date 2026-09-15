@@ -16,130 +16,147 @@ export default async function TenantHomePage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
 
-  const { data: self } = await supabase.from("persons").select("given_name").eq("id", profile.personId).maybeSingle();
-
-  const { data: tenancy } = await supabase
-    .from("tenancies")
-    .select("id, unit_id, properties(name, address_line)")
-    .eq("primary_tenant_id", profile.personId)
-    .eq("status", "active")
-    .maybeSingle();
+  // Stage 1: everything that only needs identity (profile.personId) —
+  // none of these depend on each other, so they run concurrently instead
+  // of one round-trip each (BACKLOG.md B-02).
+  const [{ data: self }, { data: tenancy }, { data: personAttachmentRows }] = await Promise.all([
+    supabase.from("persons").select("given_name").eq("id", profile.personId).maybeSingle(),
+    supabase
+      .from("tenancies")
+      .select("id, unit_id, properties(name, address_line)")
+      .eq("primary_tenant_id", profile.personId)
+      .eq("status", "active")
+      .maybeSingle(),
+    // RLS (tenant_scope_attachments) already restricts these to the
+    // caller's own person record — no extra filter here.
+    supabase
+      .from("attachments")
+      .select("id, file_name, size_bytes, created_at, storage_path")
+      .eq("entity_type", "person")
+      .eq("entity_id", profile.personId)
+      .order("created_at", { ascending: false }),
+  ]);
 
   type PropertyRef = { name: string; address_line: string | null };
   const property = tenancy?.properties as unknown as PropertyRef | PropertyRef[] | null;
   const addressLine = (Array.isArray(property) ? property[0] : property)?.address_line;
 
-  // Outstanding = issued or partially_paid, most recent period first —
-  // "overdue" is derived display state, not a separate stored value.
-  const { data: statement } = tenancy
-    ? await supabase
-        .from("statements")
-        .select("id, period_month, status, due_date, issued_at, total")
-        .eq("tenancy_id", tenancy.id)
-        .in("status", ["issued", "partially_paid"])
-        .order("period_month", { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    : { data: null };
+  // Stage 2: everything that only needs tenancy.id / tenancy.unit_id, once
+  // known — again independent of each other, run concurrently.
+  const [
+    { data: statement },
+    chartData,
+    { data: contractRows },
+    { data: depositRows },
+    { data: tenancyAttachmentRows },
+    { data: inventoryRows },
+    { data: openCampaign },
+  ] = await Promise.all([
+    // Outstanding = issued or partially_paid, most recent period first —
+    // "overdue" is derived display state, not a separate stored value.
+    tenancy
+      ? supabase
+          .from("statements")
+          .select("id, period_month, status, due_date, issued_at, total")
+          .eq("tenancy_id", tenancy.id)
+          .in("status", ["issued", "partially_paid"])
+          .order("period_month", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    tenancy ? getTenancyChartData(supabase, tenancy.id, 6, new Date().toISOString().slice(0, 10)) : Promise.resolve(null),
+    // RLS (tenant_scope_contracts) already restricts this to active/
+    // superseded versions of the caller's own tenancy — no extra filter here.
+    tenancy
+      ? supabase
+          .from("contracts")
+          .select("id, version, status, term_start, term_end, document_path")
+          .eq("tenancy_id", tenancy.id)
+          .order("version", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    // RLS (tenant_scope_deposit_transactions) already restricts this to the
+    // caller's own tenancy — no extra filter here.
+    tenancy
+      ? supabase
+          .from("deposit_transactions")
+          .select("id, type, amount, currency, transaction_date, note")
+          .eq("tenancy_id", tenancy.id)
+          .order("transaction_date", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    // RLS (tenant_scope_attachments) already restricts these to the
+    // caller's own tenancy — no extra filter here.
+    tenancy
+      ? supabase
+          .from("attachments")
+          .select("id, file_name, size_bytes, created_at, storage_path")
+          .eq("entity_type", "tenancy")
+          .eq("entity_id", tenancy.id)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    // RLS (tenant_scope_inventory_items) already restricts these to the
+    // active-tenancy's unit — no extra filter here.
+    tenancy
+      ? supabase
+          .from("inventory_items")
+          .select("id, title, owned_by, condition")
+          .eq("unit_id", tenancy.unit_id)
+          .eq("status", "active")
+          .order("title")
+      : Promise.resolve({ data: [] }),
+    // .maybeSingle() errors (silently swallowed by the {data}-only
+    // destructure here) if more than one row comes back — possible in
+    // practice if the admin launches a second campaign before an earlier
+    // one completes. .limit(1) forces the DB to only ever return one row,
+    // so the ordering above deterministically wins instead of the query
+    // failing and the whole reconfirmation section silently vanishing.
+    tenancy
+      ? supabase
+          .from("inventory_reconfirmations")
+          .select("id, due_date")
+          .eq("tenancy_id", tenancy.id)
+          .eq("status", "open")
+          .order("initiated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
-  const { data: lineItemRows } = statement
-    ? await supabase
-        .from("statement_line_items")
-        .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order")
-        .eq("statement_id", statement.id)
-        .order("sort_order")
-    : { data: [] };
-
-  const { data: paymentRows } = statement
-    ? await supabase.from("payments").select("amount").eq("statement_id", statement.id)
-    : { data: [] };
-
-  const chartData = tenancy ? await getTenancyChartData(supabase, tenancy.id, 6, new Date().toISOString().slice(0, 10)) : null;
-
-  // RLS (tenant_scope_contracts) already restricts this to active/
-  // superseded versions of the caller's own tenancy — no extra filter here.
-  const { data: contractRows } = tenancy
-    ? await supabase
-        .from("contracts")
-        .select("id, version, status, term_start, term_end, document_path")
-        .eq("tenancy_id", tenancy.id)
-        .order("version", { ascending: false })
-    : { data: [] };
   const contractPaths = (contractRows ?? []).map((c) => c.document_path).filter((p): p is string => !!p);
-  const { data: contractSignedUrls } = contractPaths.length
-    ? await supabase.storage.from("contracts").createSignedUrls(contractPaths, 600)
-    : { data: [] };
-  const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
-
-  // RLS (tenant_scope_deposit_transactions) already restricts this to the
-  // caller's own tenancy — no extra filter here.
-  const { data: depositRows } = tenancy
-    ? await supabase
-        .from("deposit_transactions")
-        .select("id, type, amount, currency, transaction_date, note")
-        .eq("tenancy_id", tenancy.id)
-        .order("transaction_date", { ascending: true })
-    : { data: [] };
-
-  // RLS (tenant_scope_attachments) already restricts these to the
-  // caller's own tenancy / own person record — no extra filter here.
-  const { data: tenancyAttachmentRows } = tenancy
-    ? await supabase
-        .from("attachments")
-        .select("id, file_name, size_bytes, created_at, storage_path")
-        .eq("entity_type", "tenancy")
-        .eq("entity_id", tenancy.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-  const { data: personAttachmentRows } = await supabase
-    .from("attachments")
-    .select("id, file_name, size_bytes, created_at, storage_path")
-    .eq("entity_type", "person")
-    .eq("entity_id", profile.personId)
-    .order("created_at", { ascending: false });
-
   const allAttachmentPaths = [...(tenancyAttachmentRows ?? []), ...(personAttachmentRows ?? [])]
     .map((a) => a.storage_path)
     .filter((p): p is string => !!p);
-  const { data: attachmentSignedUrls } = allAttachmentPaths.length
-    ? await supabase.storage.from("attachments").createSignedUrls(allAttachmentPaths, 600)
-    : { data: [] };
+
+  // Stage 3: depends on stage-2 results (statement id, campaign id, the
+  // path lists just built above) — still independent of each other.
+  const [
+    { data: lineItemRows },
+    { data: paymentRows },
+    { data: contractSignedUrls },
+    { data: attachmentSignedUrls },
+    { data: campaignItemRows },
+  ] = await Promise.all([
+    statement
+      ? supabase
+          .from("statement_line_items")
+          .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order")
+          .eq("statement_id", statement.id)
+          .order("sort_order")
+      : Promise.resolve({ data: [] }),
+    statement ? supabase.from("payments").select("amount").eq("statement_id", statement.id) : Promise.resolve({ data: [] }),
+    contractPaths.length ? supabase.storage.from("contracts").createSignedUrls(contractPaths, 600) : Promise.resolve({ data: [] }),
+    allAttachmentPaths.length
+      ? supabase.storage.from("attachments").createSignedUrls(allAttachmentPaths, 600)
+      : Promise.resolve({ data: [] }),
+    openCampaign
+      ? supabase
+          .from("inventory_reconfirmation_items")
+          .select("id, inventory_item_id, status, inventory_items(title)")
+          .eq("reconfirmation_id", openCampaign.id)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
   const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
-
-  // RLS (tenant_scope_inventory_items) already restricts these to the
-  // active-tenancy's unit — no extra filter here.
-  const { data: inventoryRows } = tenancy
-    ? await supabase
-        .from("inventory_items")
-        .select("id, title, owned_by, condition")
-        .eq("unit_id", tenancy.unit_id)
-        .eq("status", "active")
-        .order("title")
-    : { data: [] };
-
-  // .maybeSingle() errors (silently swallowed by the {data}-only
-  // destructure here) if more than one row comes back — possible in
-  // practice if the admin launches a second campaign before an earlier
-  // one completes. .limit(1) forces the DB to only ever return one row,
-  // so the ordering above deterministically wins instead of the query
-  // failing and the whole reconfirmation section silently vanishing.
-  const { data: openCampaign } = tenancy
-    ? await supabase
-        .from("inventory_reconfirmations")
-        .select("id, due_date")
-        .eq("tenancy_id", tenancy.id)
-        .eq("status", "open")
-        .order("initiated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    : { data: null };
-
-  const { data: campaignItemRows } = openCampaign
-    ? await supabase
-        .from("inventory_reconfirmation_items")
-        .select("id, inventory_item_id, status, inventory_items(title)")
-        .eq("reconfirmation_id", openCampaign.id)
-    : { data: [] };
 
   type InventoryItemTitleRef = { title: string };
   const activeCampaign = openCampaign
