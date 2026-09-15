@@ -87,14 +87,12 @@ describe("RLS: field editability isolation (migration 0021)", () => {
   });
 
   it("an owner can insert, update, and delete field_policies", async () => {
-    let insertedId: string;
     await asUser(ownerUserId, async (tx) => {
       const [row] = await tx`
         insert into field_policies (entity_type, field_name, policy, scope) values ('person', 'phone', 'read_only', 'RRI-test-scope')
         returning id
       `;
       expect(row.id).toBeTruthy();
-      insertedId = row.id;
       await tx`update field_policies set policy = 'approval_required' where id = ${row.id}`;
     });
     const [afterUpdate] = await adminSql`select policy from field_policies where entity_type = 'person' and field_name = 'phone' and scope = 'RRI-test-scope'`;

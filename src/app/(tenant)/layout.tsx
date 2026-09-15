@@ -1,19 +1,27 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Settings } from "lucide-react";
+import { TabBarNav, type NavItem } from "@/components/nav-link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
 
-const tabKeys = [
-  "home",
-  "meters",
-  "statements",
-  "requests",
-  "notices",
-  "settings",
+const tabSpec = [
+  { key: "home", href: "/home", icon: "home" },
+  { key: "meters", href: "/home/meters", icon: "gauge" },
+  // "payments", not "statements": the design's tab bar (design/02) uses the
+  // shorter label, and "Elszámolások" clips at 390px in a six-tab bar.
+  { key: "payments", href: "/home/statements", icon: "file" },
+  { key: "requests", href: "/home/requests", icon: "message" },
+  { key: "notices", href: "/home/notices", icon: "bell" },
 ] as const;
+// Settings lives in the header (gear), not the tab bar: five tabs is the
+// most a 390px bar fits without clipping Hungarian labels (design/02 also
+// shows five). The tab bar stays the primary navigation.
 
 export default async function TenantLayout({
   children,
@@ -41,6 +49,8 @@ export default async function TenantLayout({
     createdAt: n.created_at,
   }));
 
+  const tabItems: NavItem[] = tabSpec.map((n) => ({ href: n.href, icon: n.icon, label: t(n.key) }));
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-between px-4">
@@ -49,35 +59,19 @@ export default async function TenantLayout({
           <NotificationBell notifications={notifications} role="tenant" />
           <LocaleSwitcher />
           <ThemeToggle />
+          <Link
+            href="/home/settings"
+            aria-label={t("settings")}
+            title={t("settings")}
+            className={cn(buttonVariants({ variant: "outline", size: "icon" }))}
+          >
+            <Settings className="size-4" />
+          </Link>
           <SignOutButton />
         </div>
       </header>
-      <main className="flex-1 p-4 pb-20">{children}</main>
-      <nav className="fixed bottom-0 inset-x-0 border-t border-border bg-card grid grid-cols-6">
-        {tabKeys.map((key) => (
-          <Link
-            key={key}
-            href={
-              key === "home"
-                ? "/home"
-                : key === "statements"
-                  ? "/home/statements"
-                  : key === "meters"
-                    ? "/home/meters"
-                    : key === "settings"
-                      ? "/home/settings"
-                      : key === "requests"
-                        ? "/home/requests"
-                        : key === "notices"
-                          ? "/home/notices"
-                          : "#"
-            }
-            className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-11 text-[12px] font-medium text-muted-foreground hover:text-foreground"
-          >
-            {t(key)}
-          </Link>
-        ))}
-      </nav>
+      <main className="flex-1 p-4 pb-24">{children}</main>
+      <TabBarNav items={tabItems} rootHref="/home" />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 # CLAUDE.md — Flatlord (working name)
 
-Project brief and domain context for Claude Code. Read this fully before writing any code. `ROADMAP.md` defines build order; `IDEAS.md` holds loose future ideas. Do not start a phase before its predecessor is accepted.
+Project brief and domain context for Claude Code. Read this fully before writing any code.
+
+**Docs map (since the 2026-09-15 review):** `ROADMAP.md` = open work only, phase-sequenced, with a "Done means" per item · `BACKLOG.md` = triaged, sized items incl. tech debt (IDs `B-nn`) · `IDEAS.md` = unscheduled only · `docs/DECISIONS.md` = standing decisions (`D-nn`) — check before re-deciding anything · `docs/DELIVERY-LOG.md` = what shipped, when, with what scope cuts · `docs/NEXT-BATCH.md` = the current recommended next three items · `docs/HEALTH-REPORT-2026-09-15.md` = the latest full review. Shipped history does **not** belong in `ROADMAP.md`; append it to the delivery log instead.
 
 ## Communication with the admin
 
@@ -27,7 +29,9 @@ A private flat-rental management app for a single landlord (the admin) and his t
 
 **Confirmed base:** Next.js (App Router, TypeScript strict) on Vercel · Supabase (Postgres, Auth, Storage, RLS, Edge Functions) · Tailwind + shadcn/ui · recharts · next-intl (hu/en, de-ready) · Resend (email) · Vercel Cron · OpenRouter (AI features).
 
-**Proposed amendments** (good fits; admin is open to new tech — introduce with a one-paragraph rationale in the PR):
+**As actually built (2026-09-15):** Next.js 16 App Router · Supabase via `@supabase/ssr` + supabase-js for every app read/write (RLS-scoped) · **Drizzle is used for schema-as-code, migrations and the backup dump only** (`docs/DECISIONS.md` D-01) · shadcn v4 "base-nova" style on **Base UI** primitives (not Radix), restyled toward the design tokens rather than swapped (D-17) · Tailwind 4 · next-intl · recharts 3 · react-hook-form + zod 4 · @react-pdf/renderer · unpdf · Vitest (unit + RLS tests against a real Supabase Postgres in CI) · Playwright (headless, ad-hoc verification scripts — no committed e2e yet) · Resend (sandbox mode until a domain is verified) · Vercel Cron (one daily target) · Sentry **not yet installed**. TanStack Query is a dependency but currently unused — see `BACKLOG.md`.
+
+**Original proposed amendments** (kept for context):
 
 - **Drizzle ORM** over raw supabase-js for schema-as-code, typed queries and migration diffing (keep supabase-js for Auth/Storage/Realtime). Alternative: supabase-js + generated types if Drizzle feels heavy — decide in Phase 0 and stick with it.
 - **TanStack Query** for client-side data fetching/caching; **react-hook-form + zod** for all forms.
