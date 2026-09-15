@@ -13,7 +13,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 2 | Documents, contract, inventory | Shipped. Scanned-contract OCR → Phase 5; move-in/out snapshots → `BACKLOG.md` B-13 |
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
-| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) open and green |
+| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; remainder open |
 | 4c | **UI fidelity pass** (new, 2026-09-15) | Not started — items 1–2 run before the rest of 4b (D-21) |
 | 5 | AI features + expansion | Not started |
 
@@ -37,7 +37,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ## Phase 4b — reporting & owner tools
 
-- **Admin analytics, remainder** (PR #33 shipped the cumulative "billed vs received" ledger + event timeline): yearly cost/consumption comparison; payment-punctuality chart; rate-history overlay on the consumption chart; rent-vs-pass-through split on the billed curve. **Done means:** each chart renders on the admin tenancy page from real dev data; a unit test guards that nothing under `src/app/(tenant)` imports the analytics loaders (tenant never sees cumulative totals — D-15).
+- **Admin analytics, remainder** (PR #33 merged the cumulative "billed vs received" ledger + event timeline): yearly cost/consumption comparison; payment-punctuality chart; rate-history overlay on the consumption chart; rent-vs-pass-through split on the billed curve. **Done means:** each chart renders on the admin tenancy page from real dev data; a unit test guards that nothing under `src/app/(tenant)` imports the analytics loaders (tenant never sees cumulative totals — D-15).
 - **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **D-06 is tentative** (admin-only + audited) — present a short design note and get a go-ahead before the migration. **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
 - **Owner income breakdown for tax**: admin report with period selector (default last full calendar year), basis toggle (rent-only vs all inbound), manual adjusting items, editable PIT rate (default 15%, reconfirm at build), PDF via `@react-pdf`. Income side only. **Done means:** report totals reconcile to the payments table for the period; PDF renders in both locales.
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).

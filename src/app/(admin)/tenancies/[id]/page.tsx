@@ -5,6 +5,9 @@ import { TenancyDetail } from "@/components/tenancy-detail";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
 import { MonthlyCostChart } from "@/components/monthly-cost-chart";
+import { getTenancyAnalytics } from "@/lib/analytics/get-tenancy-analytics";
+import { CumulativeLedgerChart } from "@/components/analytics/cumulative-ledger-chart";
+import { TenancyTimeline } from "@/components/analytics/tenancy-timeline";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
 import { DepositSection } from "@/components/deposit-section";
@@ -83,6 +86,12 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     12,
     new Date().toISOString().slice(0, 10),
   );
+
+  // Phase 4b admin analytics — admin-shell only. getTenancyAnalytics /
+  // CumulativeLedgerChart must never be imported under src/app/(tenant):
+  // the cumulative ledger is the running total-paid-to-date IDEAS.md
+  // forbids showing the tenant.
+  const analytics = await getTenancyAnalytics(supabase, id);
 
   return (
     <div className="flex flex-col gap-4">
@@ -165,6 +174,8 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
       />
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}
       <MonthlyCostChart months={cost} meteredSeries={meteredSeries} />
+      <CumulativeLedgerChart points={analytics.ledger} />
+      <TenancyTimeline events={analytics.timeline} />
     </div>
   );
 }

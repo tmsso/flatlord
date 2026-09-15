@@ -54,7 +54,7 @@ Append-only history moved out of `ROADMAP.md` on 2026-09-15 so the roadmap stays
 
 ## Phase 4b — Reporting & owner tools (in progress)
 
-- PR #33 (open, CI green at review time): per-tenancy cumulative "billed vs received" ledger chart + admin event timeline, admin shell only.
+- PR #33 (merged 2026-09-16, rebased onto the 2026-09-15 doc restructure): per-tenancy cumulative "billed vs received" ledger chart + admin event timeline, admin shell only.
 
 ## Review pass 2026-09-15 (Fable)
 
