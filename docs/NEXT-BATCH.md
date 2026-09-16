@@ -1,6 +1,14 @@
 # Next batch — recommended next three items
 
-Written 2026-09-15 by the Fable review pass. **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
+Written 2026-09-15 by the Fable review pass; **item 0 added 2026-09-16, superseding priority order below** (Tamas flagged a possible prod auth leak — see `BACKLOG.md` B-25 for the full finding). The original "Valid while" rule below still applies to items 1–3.
+
+Original validity note: **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
+
+## 0. Do first — B-25, auth route-allowlist gap (security)
+
+2026-09-16 finding: Tamas's "prod looks accessible without auth" report traced to a device with a pre-existing logged-in session (confirmed with him directly) — not an actual anonymous-access hole. Verified live against `flatlord.vercel.app` with curl anyway: root and every protected path tested return 307 to `/login`; Storage buckets are all `public: false`. No anonymous leak. Vercel-level deployment protection was considered and declined (not needed — app-level gate already covers anonymous visitors).
+
+**But** the middleware's role-based allow-list is genuinely incomplete, independent of the above: `/properties`, `/persons`, `/tenancies`, `/requests`, `/notices`, `/meters` aren't covered by `isAdminPath` in `src/lib/supabase/middleware.ts`, so an authenticated **tenant** session isn't blocked from loading owner-only pages. Fix before anything else in this file — see B-25 for the exact fix shape (default-deny + explicit per-role allowlist + regression test). Not an active emergency (requires an authenticated tenant to deliberately hit an admin URL), but a real authorization bug worth closing first.
 
 ## Preconditions to check first
 
