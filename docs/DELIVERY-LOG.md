@@ -55,6 +55,7 @@ Append-only history moved out of `ROADMAP.md` on 2026-09-15 so the roadmap stays
 ## Phase 4b — Reporting & owner tools (in progress)
 
 - PR #33 (merged 2026-09-16, rebased onto the 2026-09-15 doc restructure): per-tenancy cumulative "billed vs received" ledger chart + admin event timeline, admin shell only.
+- PR #36 (merged 2026-09-15): `BACKLOG.md` B-02/B-10/B-18 — parallelised the sequential Supabase queries on the six heaviest pages (`Promise.all` in ≤3 dependency stages), added btree indexes on every FK / `(entity_type, entity_id)` pair (migration `0024`, applied to prod 2026-09-17 via `migrate-prod.yml`), and `maxDuration = 60` on the backup + PDF routes.
 
 ## Review pass 2026-09-15 (Fable)
 

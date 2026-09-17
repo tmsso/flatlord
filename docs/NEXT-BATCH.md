@@ -12,17 +12,15 @@ Original validity note: **Valid while** `git log -1 --format=%h -- ROADMAP.md` e
 
 ## Preconditions to check first
 
-1. PR #33 (4b analytics) and PR #34 (review quick wins) should be merged. If either is still open and green, merging is the admin's call (`/ship-pr`), not the batch's first item.
+1. ~~PR #33 (4b analytics) and PR #34 (review quick wins) should be merged.~~ Both merged (`e88bdbf`, `8a9917c`) — no longer a precondition.
 2. Read `docs/DECISIONS.md`. Nothing below is gated on an open decision (the 2026-09-15 review's questions were answered the same day); D-06 (ad-hoc notes) is the only tentative one and is not in this batch.
 3. Confirm ship-autonomy for the batch explicitly, per the `/next-batch` skill.
 
-## The three
+## The three (one shipped since — two remain)
 
-### 1. Performance batch — `BACKLOG.md` B-02 + B-10 (+ B-18)
+### ~~1. Performance batch — `BACKLOG.md` B-02 + B-10 (+ B-18)~~ **Shipped (PR #36, 2026-09-15)**
 
-Parallelise the per-page Supabase queries on the six heaviest pages, add the FK/RLS-subquery index migration, set `maxDuration` on the backup and PDF routes. Measure before/after on dev with a Playwright timing script and put the numbers in the PR body. This is the first thing the owner will feel after the `fra1` region change lands.
-
-*Done means:* each touched page has ≤3 sequential await stages; index migration applied to dev and prod (via `migrate-prod.yml`); timing table in the PR; Playwright pass on all routes.
+Parallelised the per-page Supabase queries on the six heaviest pages, added the FK/RLS-subquery index migration (`0024`, applied to prod 2026-09-17 via `migrate-prod.yml`), set `maxDuration` on the backup and PDF routes. See `docs/DELIVERY-LOG.md`. **Only two items remain from this batch** (below) — the next `/next-batch` session should derive a fresh item 3 rather than assume one is still implied here.
 
 ### 2. Phase 4c item 1 + 2 — component layer to tokens, then the admin dashboard (`design/01`, `design/04`)
 
