@@ -2,6 +2,7 @@
 
 import { useTranslations, useFormatter } from "next-intl";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AttachmentChip } from "@/components/ui/attachment-chip";
 
 export interface TenantAttachmentRow {
   id: string;
@@ -32,21 +33,11 @@ export function TenantAttachmentsList({ title, attachments }: { title: string; a
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-wrap gap-2">
         {attachments.map((a) => (
-          <div key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-            <div className="flex flex-col gap-1 overflow-hidden">
-              <span className="truncate text-sm font-medium">{a.fileName}</span>
-              <span className="text-xs text-muted-foreground">
-                {formatSize(a.sizeBytes)} · {t("uploadedOn", { date: format.dateTime(new Date(a.createdAt)) })}
-              </span>
-            </div>
-            {a.downloadUrl && (
-              <a href={a.downloadUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm text-primary underline">
-                {t("download")}
-              </a>
-            )}
-          </div>
+          <span key={a.id} title={t("uploadedOn", { date: format.dateTime(new Date(a.createdAt)) })}>
+            <AttachmentChip fileName={a.fileName} sizeLabel={formatSize(a.sizeBytes)} href={a.downloadUrl} />
+          </span>
         ))}
       </CardContent>
     </Card>

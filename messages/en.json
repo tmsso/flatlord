@@ -41,7 +41,8 @@
   "theme": {
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "toggle": "Toggle theme"
   },
   "invites": {
     "createTitle": "Invite someone",

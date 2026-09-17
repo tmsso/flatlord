@@ -41,7 +41,8 @@
   "theme": {
     "light": "Világos",
     "dark": "Sötét",
-    "system": "Rendszer"
+    "system": "Rendszer",
+    "toggle": "Téma váltása"
   },
   "invites": {
     "createTitle": "Meghívás",

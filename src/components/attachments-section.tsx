@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AttachmentChip } from "@/components/ui/attachment-chip";
 
 export interface AttachmentRow {
   id: string;
@@ -120,28 +121,22 @@ export function AttachmentsSection({
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-wrap gap-2">
         {attachments.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
         {attachments.map((a) => (
-          <div key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-            <div className="flex flex-col gap-1 overflow-hidden">
-              <span className="truncate text-sm font-medium">{a.fileName}</span>
-              <span className="text-xs text-muted-foreground">
-                {formatSize(a.sizeBytes)} · {t("uploadedOn", { date: format.dateTime(new Date(a.createdAt)) })}
-                {a.note && ` · ${a.note}`}
-              </span>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {a.downloadUrl && (
-                <a href={a.downloadUrl} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
-                  {t("download")}
-                </a>
-              )}
-              <Button type="button" variant="ghost" size="sm" disabled={isDeleting} onClick={() => handleDelete(a.id)}>
-                {t("remove")}
-              </Button>
-            </div>
-          </div>
+          <span
+            key={a.id}
+            title={`${t("uploadedOn", { date: format.dateTime(new Date(a.createdAt)) })}${a.note ? ` · ${a.note}` : ""}`}
+          >
+            <AttachmentChip
+              fileName={a.fileName}
+              sizeLabel={formatSize(a.sizeBytes)}
+              href={a.downloadUrl}
+              onRemove={() => handleDelete(a.id)}
+              removeLabel={t("remove")}
+              removeDisabled={isDeleting}
+            />
+          </span>
         ))}
       </CardContent>
     </Card>
