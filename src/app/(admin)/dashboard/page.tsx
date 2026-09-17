@@ -1,47 +1,32 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getDashboardData } from "@/lib/dashboard/get-dashboard-data";
+import { AdminDashboard } from "@/components/admin-dashboard";
 
-export default async function AdminDashboardPage() {
-  const t = await getTranslations("dashboard");
-  const tNav = await getTranslations("nav");
+function shiftMonth(periodMonth: string, delta: number): string {
+  const [year, month] = periodMonth.split("-").map(Number);
+  const total = year * 12 + (month - 1) + delta;
+  const newYear = Math.floor(total / 12);
+  const newMonth = (total % 12) + 1;
+  return `${newYear}-${String(newMonth).padStart(2, "0")}-01`;
+}
+
+export default async function AdminDashboardPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+  const { month } = await searchParams;
   const supabase = await createClient();
+  const profile = await getCurrentProfile(supabase);
+  const today = new Date().toISOString().slice(0, 10);
+  const viewMonth = month ?? `${today.slice(0, 7)}-01`;
 
-  // owner_scope_statements RLS already limits this to the caller's own
-  // properties. Draft statements are what the auto-draft cron produces
-  // and what "one-click issue" acts on — surfacing the count here saves
-  // the admin hunting through the statements list for them.
-  const { data: drafts } = await supabase.from("statements").select("id").eq("status", "draft");
-  const draftCount = drafts?.length ?? 0;
+  const data = await getDashboardData(supabase, profile.personId, today, viewMonth);
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("draftsAwaitingTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-start gap-3 text-sm">
-          {draftCount > 0 ? (
-            <>
-              <p>{t("draftsAwaitingBody", { count: draftCount })}</p>
-              <Button size="sm" nativeButton={false} render={<Link href="/statements" />}>
-                {t("draftsAwaitingCta")}
-              </Button>
-            </>
-          ) : (
-            <p className="text-muted-foreground">{t("draftsNoneBody")}</p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{tNav("dashboard")}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">{t("placeholder")}</CardContent>
-      </Card>
-    </div>
+    <AdminDashboard
+      data={data}
+      today={today}
+      viewMonth={viewMonth}
+      previousMonthHref={`/dashboard?month=${shiftMonth(viewMonth, -1)}`}
+      nextMonthHref={`/dashboard?month=${shiftMonth(viewMonth, 1)}`}
+    />
   );
 }
