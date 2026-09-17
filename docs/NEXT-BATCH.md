@@ -1,44 +1,41 @@
 # Next batch — recommended next three items
 
-Written 2026-09-15 by the Fable review pass; **item 0 added 2026-09-16, superseding priority order below** (Tamas flagged a possible prod auth leak — see `BACKLOG.md` B-25 for the full finding). The original "Valid while" rule below still applies to items 1–3.
+Rewritten 2026-09-17 after the prior batch fully shipped (PRs #36-39: perf, Phase 4c items 1-2, billing polish B-05/06/07 — all merged, both migrations `0024`/`0025` applied to prod). See `docs/DELIVERY-LOG.md` for detail.
 
-Original validity note: **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
-
-## 0. Do first — B-25, auth route-allowlist gap (security)
-
-2026-09-16 finding: Tamas's "prod looks accessible without auth" report traced to a device with a pre-existing logged-in session (confirmed with him directly) — not an actual anonymous-access hole. Verified live against `flatlord.vercel.app` with curl anyway: root and every protected path tested return 307 to `/login`; Storage buckets are all `public: false`. No anonymous leak. Vercel-level deployment protection was considered and declined (not needed — app-level gate already covers anonymous visitors).
-
-**But** the middleware's role-based allow-list is genuinely incomplete, independent of the above: `/properties`, `/persons`, `/tenancies`, `/requests`, `/notices`, `/meters` aren't covered by `isAdminPath` in `src/lib/supabase/middleware.ts`, so an authenticated **tenant** session isn't blocked from loading owner-only pages. Fix before anything else in this file — see B-25 for the exact fix shape (default-deny + explicit per-role allowlist + regression test). Not an active emergency (requires an authenticated tenant to deliberately hit an admin URL), but a real authorization bug worth closing first.
+**Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. ~~PR #33 (4b analytics) and PR #34 (review quick wins) should be merged.~~ Both merged (`e88bdbf`, `8a9917c`) — no longer a precondition.
-2. Read `docs/DECISIONS.md`. Nothing below is gated on an open decision (the 2026-09-15 review's questions were answered the same day); D-06 (ad-hoc notes) is the only tentative one and is not in this batch.
+1. PRs #36-39 are all merged and live — no longer a precondition for anything below.
+2. Read `docs/DECISIONS.md`. D-06 (ad-hoc notes) is the only tentative decision and is not in this batch.
 3. Confirm ship-autonomy for the batch explicitly, per the `/next-batch` skill.
 
-## The three (one shipped since — two remain)
+## The three
 
-### ~~1. Performance batch — `BACKLOG.md` B-02 + B-10 (+ B-18)~~ **Shipped (PR #36, 2026-09-15)**
+### 0. Do first — B-25, auth route-allowlist gap (security)
 
-Parallelised the per-page Supabase queries on the six heaviest pages, added the FK/RLS-subquery index migration (`0024`, applied to prod 2026-09-17 via `migrate-prod.yml`), set `maxDuration` on the backup and PDF routes. See `docs/DELIVERY-LOG.md`. **Only two items remain from this batch** (below) — the next `/next-batch` session should derive a fresh item 3 rather than assume one is still implied here.
+Still open, still first, carried over unchanged from the prior recommendation — nobody picked it up in the 2026-09-15→17 batch since it wasn't one of the 3 confirmed items. `src/lib/supabase/middleware.ts`'s role-based allow-list doesn't cover `/properties`, `/persons`, `/tenancies`, `/requests`, `/notices`, `/meters`, so an authenticated **tenant** session isn't redirected off owner-only pages. See `BACKLOG.md` B-25 for the fix shape (default-deny, explicit per-role allowlist, regression test).
 
-### 2. Phase 4c item 1 + 2 — component layer to tokens, then the admin dashboard (`design/01`, `design/04`)
+### 1. B-26 — tenant can see draft statements
 
-Restyle `components/ui/*` (button sizes/hover, input borders, table density + tabular figures + row focus, badge, page/section headers, month-picker slot), then build the real dashboard: overdue alert bar, property & term card, billing-cycle stepper, outstanding card, recent statements table, needs-attention queue, the two charts. Every widget from real queries, parallelised from the start.
+New finding from the 2026-09-17 session (advisor-flagged, deliberately deferred since it wasn't one of the 3 confirmed items that session). `tenant_scope_statements` RLS has no `status` restriction, and neither tenant statements query (list or detail) filters out `status = 'draft'` — only `voided_at is null`. A tenant can see a draft statement's full detail/PDF before the admin has issued it. Small: two query filters plus tightening the RLS policy itself as the real backstop. See `BACKLOG.md` B-26.
 
-*Done means:* side-by-side screenshots against the mockups (both themes) in the PR; no regressions on existing routes (Playwright); the owner can sign off visually.
+### 2. Phase 4c item 3 — admin statement detail = `design/05`
 
-### 3. Billing polish — B-05 draft discard/regenerate, then B-06 due-date semantics and B-07 historical charge names
+Natural next step in Phase 4c's own sequencing now that items 1-2 (component tokens, admin dashboard) are shipped. Scope: line items grouped fixed/metered (rate chips, reading deltas)/adjustments, immutability note, payments panel, **delivery log** (email/WhatsApp sends persisted — needs a small schema addition first, so this item likely needs a schema-first sub-step same as B-05 needed migration `0025`), history.
 
-All three are decided (D-05 option b, D-07 render-time labels) — no decision gating this item.
+*Done means:* matches `design/05` at 1440, both themes; delivery log shows real sent-email/WhatsApp rows; immutability note is visible on an issued statement.
 
-*Done means:* a wedged draft month can be cleared and regenerated; a statement issued today shows a due date in the month after issue; a 2025 statement shows localised charge names in the HU UI and in the PDF; golden tests untouched and green.
+## Open from the prior batch, not yet resolved
+
+- **Phase 4c items 1-2 (component tokens, admin dashboard) are built and functionally verified on dev, but still await the owner's visual sign-off against `design/01`/`design/04`.** That sign-off — not the code shipping — is Phase 4c's actual Accept gate. Worth doing before piling item 3 on top.
+- **B-27** (duplicate `MonthPicker` components, `src/components/month-picker.tsx` vs `src/components/ui/month-picker.tsx`) — tech debt, pick up only if adjacent work touches either one.
 
 ## Alternatives if the admin prefers
 
-- Swap item 3 for **B-03 middleware auth** (zero network calls per request) — needs the admin to enable asymmetric JWT signing keys in both Supabase projects first.
-- Swap item 2 for **B-08 committed Playwright smoke** if reliability of verification matters more than looks right now.
+- **B-01** (domain purchase) and **B-03** (middleware `getClaims()`, needs asymmetric JWT keys enabled by the admin in both Supabase projects) are both admin-action-gated, not pure-code items.
+- **B-04** (Sentry) or **B-08** (committed Playwright smoke) if reliability/observability matters more than the security gap or the design pass right now.
 
 ## Session logistics (unchanged)
 
-`/verify` for lint + typecheck (build/tests need the DB; CI covers them) · real verification against **dev** with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test`, login via `auth.admin.generateLink` + `page.goto(action_link)` (rewrite `redirect_to` to `http://localhost:3000/auth/callback`) · Base UI `Switch` = `[data-slot="switch"]` · prod migrations via `migrate-prod.yml` only · `gh run list` after every push · the `rls-requests-isolation` `afterAll` flake is pre-existing, rerun once · `/close-session` to end.
+`/verify` for lint + typecheck (build/tests need the DB; CI covers them) · real verification against **dev** with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test`, login via `auth.admin.generateLink` + `page.goto(action_link)` (rewrite `redirect_to` to `http://localhost:3000/auth/callback`) · Base UI `Switch` = `[data-slot="switch"]` · prod migrations via `migrate-prod.yml` only · `gh run list` after every push · the `rls-requests-isolation` `afterAll` flake is pre-existing, rerun once · SSR hydration-safe client-only reads need `useSyncExternalStore`, not `useState`+`useEffect` (this repo's lint rejects the latter) · don't run `pnpm test` against dev locally, it's CI-only and leaves orphaned fixture rows · `/close-session` to end.

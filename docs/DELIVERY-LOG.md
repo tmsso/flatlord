@@ -56,6 +56,14 @@ Append-only history moved out of `ROADMAP.md` on 2026-09-15 so the roadmap stays
 
 - PR #33 (merged 2026-09-16, rebased onto the 2026-09-15 doc restructure): per-tenancy cumulative "billed vs received" ledger chart + admin event timeline, admin shell only.
 - PR #36 (merged 2026-09-15): `BACKLOG.md` B-02/B-10/B-18 — parallelised the sequential Supabase queries on the six heaviest pages (`Promise.all` in ≤3 dependency stages), added btree indexes on every FK / `(entity_type, entity_id)` pair (migration `0024`, applied to prod 2026-09-17 via `migrate-prod.yml`), and `maxDuration = 60` on the backup + PDF routes.
+- PR #39 (merged 2026-09-17): `BACKLOG.md` B-05/B-06/B-07 — draft statement discard (soft `voided_at`, partial unique index on `(tenancy_id, period_month)` so a voided draft frees the slot for regeneration — migration `0025`, applied to prod 2026-09-17 via `migrate-prod.yml`; fixed the auto-draft cron's existing-draft check to exclude voided rows, else the feature would have been silently defeated), due-date = tenancy `due_day` of the month after issue (D-05 option b), historical charge names resolved to the i18n catalog label at render time across all 3 web read paths + the PDF (D-07). Golden tests untouched, still green.
+
+## Phase 4c — UI fidelity pass (in progress)
+
+- PR #37 (merged 2026-09-17): item 1, component layer to design tokens — button/input/table/badge/section-header/page-header/month-picker/effective-dated-table/audit-drawer/attachment-chip restyled to `design/01`. Fixed a real pre-existing hydration-mismatch bug in `theme-toggle.tsx` found via dark-mode Playwright verification (`aria-label` read `resolvedTheme` with no mounted guard; fixed with a `useSyncExternalStore`-based guard, the only shape that passes this repo's `react-hooks/set-state-in-effect` lint rule). Introduced a second `MonthPicker` component (href-navigation) alongside the pre-existing controlled one — flagged as `BACKLOG.md` B-27, not reconciled in this PR.
+- PR #38 (merged 2026-09-17): item 2, real admin dashboard (`design/04`) — overdue alert, property & term card, billing-cycle stepper, outstanding card, recent statements table, needs-attention queue, both charts, all from real parallelised queries (`src/lib/dashboard/get-dashboard-data.ts`). Verified on dev with real billing data, both themes, zero console errors.
+- Both PRs are functionally verified on dev; **owner visual sign-off against the `design/01`/`design/04` mockups is still open** — that is the Accept gate for Phase 4c, not a formality met by shipping the code.
+- Found and deliberately deferred (not fixed this session, filed to `BACKLOG.md`): B-26 (tenant statement queries + RLS don't exclude `status = 'draft'` — a tenant can see an unissued draft).
 
 ## Review pass 2026-09-15 (Fable)
 

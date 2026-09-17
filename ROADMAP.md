@@ -14,7 +14,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
 | 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; remainder open |
-| 4c | **UI fidelity pass** (new, 2026-09-15) | Not started — items 1–2 run before the rest of 4b (D-21) |
+| 4c | **UI fidelity pass** (new, 2026-09-15) | In progress — items 1–2 shipped 2026-09-17 (PRs #37/#38); items 3–6 open |
 | 5 | AI features + expansion | Not started |
 
 ## Phase gates → admin checklist (decided 2026-09-15)
@@ -47,14 +47,16 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 **Why:** `design/*.dc.html` is a complete, high-fidelity handoff, and the token set was ported faithfully into `globals.css` — but the component layer stayed on shadcn base-nova defaults and the key screens were built as functional stacks, not as the designed pages. The admin dashboard is two placeholder cards against a design of eight widgets. Ordered so that each step makes every later screen cheaper.
 
-1. **Component layer to tokens** — `components/ui/*`: button (36px admin controls / 44–52px tenant primaries, brightness hover), input (design's stronger `--input` border), table (36px rows, 13px text, tabular figures, row focus ring), badge, section header, page header with H1 + month-picker slot, effective-dated table, audit drawer, attachment chips. **Done means:** side-by-side screenshot review against `design/01` in both themes; a headless Playwright pass over every route shows no regressions.
-2. **Admin dashboard = `design/04`**: overdue alert bar with actions, property & term card (renewal countdown), billing-cycle stepper, outstanding card, recent statements table, needs-attention queue (requests, approvals, inventory `action_by`), the two charts. **Done means:** every widget is backed by a real query (parallelised, `BACKLOG.md` B-02), matches the design at 1440, usable at tablet width.
+~~1. Component layer to tokens~~ — shipped PR #37, 2026-09-17: button/input/table/badge/section-header/page-header/month-picker/effective-dated-table/audit-drawer/attachment-chip all restyled to `design/01`. Verified on dev in both themes; **owner visual sign-off against the mockup still open** (functional/no-regression verification is not the same claim). Note: this shipped a second `MonthPicker` component alongside the pre-existing controlled one — `BACKLOG.md` B-27.
+
+~~2. Admin dashboard = `design/04`~~ — shipped PR #38, 2026-09-17: overdue alert, property & term card, billing-cycle stepper, outstanding card, recent statements table, needs-attention queue, both charts, all from real parallelised queries. Verified on dev with real billing data in both themes, zero console errors; **owner visual sign-off against the mockup still open**.
+
 3. **Admin statement detail = `design/05`**: line items grouped fixed / metered (rate chips, reading deltas) / adjustments, immutability note, payments panel, **delivery log** (email/WhatsApp sends persisted), history. Note: delivery log needs a small table — schema first.
 4. **Tenant home + meter flow = `design/02` + `design/03`**: hero card with "how it's calculated" expander, one primary CTA + reading-window hint, secondary CTA, notices strip, consumption mini-chart; meter flow frames including the lower-than-previous error state and "send note to owner" escape.
 5. **Readings verification = `design/06`**: queue + detail, photo viewer with zoom, keyboard shortcuts (↵ verify, E edit, R retake), the AI-proposal slot rendered empty.
 6. **Remaining screens** from `design/09` wireframes at token level; empty states, loading skeletons, error pages; admin shell below `md` gets a real navigation (B-19).
 
-**Accept (4c):** the owner compares each ported screen against its mockup and signs off; both themes; tenant screens at 390px, admin at 1440px.
+**Accept (4c):** the owner compares each ported screen against its mockup and signs off; both themes; tenant screens at 390px, admin at 1440px. Items 1–2 are built and functionally verified but **not yet owner-signed-off** — that sign-off is still the Accept gate for 4c as a whole, not a formality.
 
 ## Phase 5 — AI features + expansion
 
