@@ -135,10 +135,13 @@ export default async function TenantHomePage() {
     { data: attachmentSignedUrls },
     { data: campaignItemRows },
   ] = await Promise.all([
+    // charge_types(code) join is for the D-07 (B-07) render-time label
+    // resolution only — see the admin statement detail page's identical
+    // comment.
     statement
       ? supabase
           .from("statement_line_items")
-          .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order")
+          .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order, charge_types(code)")
           .eq("statement_id", statement.id)
           .order("sort_order")
       : Promise.resolve({ data: [] }),
@@ -199,17 +202,22 @@ export default async function TenantHomePage() {
             : null
         }
         paidSum={(paymentRows ?? []).reduce((sum, p) => sum + p.amount, 0)}
-        lineItems={(lineItemRows ?? []).map((li) => ({
-          id: li.id,
-          description: li.description,
-          quantity: li.quantity == null ? null : Number(li.quantity),
-          unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
-          amount: li.amount,
-          isBillable: li.is_billable,
-          chargeScheduleId: li.charge_schedule_id,
-          meterId: li.meter_id,
-          adjustmentId: li.adjustment_id,
-        }))}
+        lineItems={(lineItemRows ?? []).map((li) => {
+          const chargeType = li.charge_types as unknown as { code: string | null } | { code: string | null }[] | null;
+          const chargeTypeRef = Array.isArray(chargeType) ? chargeType[0] : chargeType;
+          return {
+            id: li.id,
+            description: li.description,
+            quantity: li.quantity == null ? null : Number(li.quantity),
+            unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
+            amount: li.amount,
+            isBillable: li.is_billable,
+            chargeScheduleId: li.charge_schedule_id,
+            meterId: li.meter_id,
+            adjustmentId: li.adjustment_id,
+            chargeTypeCode: chargeTypeRef?.code ?? null,
+          };
+        })}
         today={new Date().toISOString().slice(0, 10)}
       />
       {chartData && chartData.consumptionSeries.length > 0 && (

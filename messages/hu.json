@@ -74,6 +74,14 @@
       "metered": "Mérőóra alapú díjak",
       "adjustments": "Korrekciók"
     },
+    "chargeType": {
+      "rent": "Bérleti díj",
+      "common_cost": "Közös költség",
+      "electricity": "Áram",
+      "gas": "Gáz",
+      "water": "Víz",
+      "internet": "Internet"
+    },
     "quantityAtRate": "{quantity} × {rate}",
     "notCharged": "Nem számlázott",
     "downloadPdf": "PDF letöltése",
@@ -89,6 +97,8 @@
     "listTotal": "Összesen",
     "listDue": "Fizetési határidő",
     "createDraft": "Piszkozat létrehozása",
+    "discardDraft": "Piszkozat elvetése",
+    "discardSuccess": "Piszkozat elvetve",
     "issue": "Elszámolás kiállítása",
     "issuedInputsLocked": "Kiállítva — az adatok zárolva",
     "recordPayment": "Fizetés rögzítése",

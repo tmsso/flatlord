@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 import { issueStatement } from "@/server/billing/issue-statement";
+import { discardDraftStatement } from "@/server/billing/discard-draft-statement";
 import { recordPayment } from "@/server/billing/record-payment";
 import { sendAmountDueEmail } from "@/server/notifications/send-amount-due-email";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,7 @@ export function StatementDetail({ statement, lineItems, payments, today, waLink,
   const router = useRouter();
   const [isIssuing, startIssuing] = useTransition();
   const [isSendingEmail, startSendingEmail] = useTransition();
+  const [isDiscarding, startDiscarding] = useTransition();
 
   const displayStatus: StatementDisplayStatus = deriveStatementDisplayStatus(
     statement.status,
@@ -129,6 +131,18 @@ export function StatementDetail({ statement, lineItems, payments, today, waLink,
     });
   }
 
+  function handleDiscard() {
+    startDiscarding(async () => {
+      try {
+        await discardDraftStatement({ statementId: statement.id });
+        toast.success(t("discardSuccess"));
+        router.push("/statements");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      }
+    });
+  }
+
   function handleSendEmail() {
     startSendingEmail(async () => {
       try {
@@ -159,9 +173,14 @@ export function StatementDetail({ statement, lineItems, payments, today, waLink,
             {t("downloadPdf")}
           </Button>
           {statement.status === "draft" && (
-            <Button type="button" onClick={handleIssue} disabled={isIssuing}>
-              {t("issue")}
-            </Button>
+            <>
+              <Button type="button" variant="destructive" size="sm" onClick={handleDiscard} disabled={isDiscarding || isIssuing}>
+                {t("discardDraft")}
+              </Button>
+              <Button type="button" onClick={handleIssue} disabled={isIssuing || isDiscarding}>
+                {t("issue")}
+              </Button>
+            </>
           )}
         </div>
       </div>

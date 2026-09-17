@@ -1,4 +1,4 @@
-import { pgTable, uuid, bigint, char, date, jsonb, timestamp, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, bigint, char, date, jsonb, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { statementStatusEnum } from "./enums";
@@ -35,8 +35,24 @@ export const statements = pgTable(
     // immutable once issued, this covers everything else.
     issuedSnapshot: jsonb("issued_snapshot"),
     issuedAt: timestamp("issued_at", { withTimezone: true }),
+    // BACKLOG.md B-05: "discard draft" for a wedged/incomplete draft, so
+    // the (tenancy_id, period_month) slot can be regenerated. Same
+    // never-hard-delete idiom as adjustments.voidedAt — only ever set on
+    // a `draft` row (trg_statements_prevent_issued_mutation never
+    // touches this column, and the discard action itself refuses
+    // anything that isn't still a draft). The old row and its line items
+    // stay in place as a record of what was computed; a fresh draft for
+    // the same period is a new row.
+    voidedAt: timestamp("voided_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [unique("statements_tenancy_period_unique").on(table.tenancyId, table.periodMonth)],
+  (table) => [
+    // Partial (not a plain unique constraint): a voided draft must free
+    // its period for a fresh one, but two simultaneously *live* rows for
+    // the same tenancy+period still can't coexist.
+    uniqueIndex("statements_tenancy_period_unique")
+      .on(table.tenancyId, table.periodMonth)
+      .where(sql`voided_at is null`),
+  ],
 );

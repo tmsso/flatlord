@@ -74,6 +74,14 @@
       "metered": "Metered charges",
       "adjustments": "Adjustments"
     },
+    "chargeType": {
+      "rent": "Rent",
+      "common_cost": "Common cost",
+      "electricity": "Electricity",
+      "gas": "Gas",
+      "water": "Water",
+      "internet": "Internet"
+    },
     "quantityAtRate": "{quantity} × {rate}",
     "notCharged": "Not charged",
     "downloadPdf": "Download PDF",
@@ -89,6 +97,8 @@
     "listTotal": "Total",
     "listDue": "Due date",
     "createDraft": "Create draft",
+    "discardDraft": "Discard draft",
+    "discardSuccess": "Draft discarded",
     "issue": "Issue statement",
     "issuedInputsLocked": "Issued — inputs locked",
     "recordPayment": "Record payment",

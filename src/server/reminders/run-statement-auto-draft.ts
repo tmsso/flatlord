@@ -46,10 +46,14 @@ export async function runStatementAutoDraft(service: SupabaseClient, today: stri
   for (const tenancy of tenancies ?? []) {
     try {
       const { data: existing } = await service
+        // voided_at excluded (BACKLOG.md B-05): a discarded draft must
+        // not permanently block this period from ever auto-drafting
+        // again — see discard-draft-statement.ts.
         .from("statements")
         .select("id")
         .eq("tenancy_id", tenancy.id)
         .eq("period_month", period)
+        .is("voided_at", null)
         .maybeSingle();
       if (existing) continue;
 
