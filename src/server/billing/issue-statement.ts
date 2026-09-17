@@ -34,10 +34,26 @@ export async function issueStatement(input: { statementId: string }) {
     .single();
   if (tenancyError) throw new Error(tenancyError.message);
 
-  // periodMonth is always "YYYY-MM-01" and due_day is capped 1-28 (CHECK
-  // due_day_range), so this is always a valid calendar date — no
-  // month-length edge cases to handle.
-  const dueDate = `${statement.period_month.slice(0, 7)}-${String(tenancy.due_day).padStart(2, "0")}`;
+  // D-05 (decided 2026-09-15, option b, BACKLOG.md B-06): due_date is the
+  // tenancy's due_day in the month AFTER the issue date — not the period
+  // month. The old rule (due_day of the period month) meant a statement
+  // for August issued in late September showed "due 5 Aug", already
+  // weeks in the past the moment it existed; this rule instead matches
+  // "utilities reimbursed with next month's rent". Only applies to
+  // statements issued from here on — historical months keep whatever the
+  // sheet importer wrote, untouched (issued statements are immutable
+  // snapshots, corrections are new adjustment lines, never edits).
+  //
+  // due_day is capped 1-28 (CHECK due_day_range), so adding one calendar
+  // month to the issue date and keeping that same day-of-month is always
+  // a valid date — no month-length edge cases to handle. Derived from the
+  // ISO string (always UTC) rather than a Date object's local getters, so
+  // this can't drift with the server's local timezone.
+  const issuedAtIso = new Date().toISOString();
+  const [issueYear, issueMonth] = issuedAtIso.slice(0, 7).split("-").map(Number);
+  const dueYear = issueMonth === 12 ? issueYear + 1 : issueYear;
+  const dueMonth = issueMonth === 12 ? 1 : issueMonth + 1;
+  const dueDate = `${dueYear}-${String(dueMonth).padStart(2, "0")}-${String(tenancy.due_day).padStart(2, "0")}`;
 
   // Kept intentionally small for M4 — richer snapshot content (tenant
   // contact info, etc.) is an M9 email-delivery concern, not this
@@ -54,7 +70,7 @@ export async function issueStatement(input: { statementId: string }) {
     .update({
       status: "issued",
       due_date: dueDate,
-      issued_at: new Date().toISOString(),
+      issued_at: issuedAtIso,
       issued_snapshot: issuedSnapshot,
     })
     .eq("id", parsed.statementId);

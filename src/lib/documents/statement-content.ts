@@ -25,6 +25,19 @@ export const statementCopy = {
     metered: { hu: "Mért díjak", en: "Metered charges" },
     adjustments: { hu: "Korrekciók", en: "Adjustments" },
   },
+  // D-07 (BACKLOG.md B-07), same catalog as messages/{hu,en}.json's
+  // statements.chargeType — kept in sync manually since the PDF carries
+  // its own self-contained copy (see the file-level comment above).
+  // Resolved at render time for line items whose charge type has one of
+  // these standard codes; anything else keeps its stored `description`.
+  chargeType: {
+    rent: { hu: "Bérleti díj", en: "Rent" },
+    common_cost: { hu: "Közös költség", en: "Common cost" },
+    electricity: { hu: "Áram", en: "Electricity" },
+    gas: { hu: "Gáz", en: "Gas" },
+    water: { hu: "Víz", en: "Water" },
+    internet: { hu: "Internet", en: "Internet" },
+  },
   notCharged: { hu: "Nincs kiszámlázva", en: "Not charged" },
   total: { hu: "Fizetendő összesen", en: "Total payable" },
   paymentsTitle: { hu: "Befizetések", en: "Payments" },

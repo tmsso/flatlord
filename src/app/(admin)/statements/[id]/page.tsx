@@ -18,9 +18,13 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
   assertNoQueryError("statements/[id]", statementError);
   if (!statement) notFound();
 
+  // charge_types(code) join is for the D-07 (B-07) render-time label
+  // resolution only — issued line items are immutable, so historical
+  // rows' raw `description` never gets edited, just displayed
+  // differently when the charge type has a standard catalog code.
   const { data: lineItemRows } = await supabase
     .from("statement_line_items")
-    .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order")
+    .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order, charge_types(code)")
     .eq("statement_id", id)
     .order("sort_order");
 
@@ -64,17 +68,22 @@ export default async function AdminStatementDetailPage({ params }: { params: Pro
           issuedAt: statement.issued_at,
           createdAt: statement.created_at,
         }}
-        lineItems={(lineItemRows ?? []).map((li) => ({
-          id: li.id,
-          description: li.description,
-          quantity: li.quantity == null ? null : Number(li.quantity),
-          unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
-          amount: li.amount,
-          isBillable: li.is_billable,
-          chargeScheduleId: li.charge_schedule_id,
-          meterId: li.meter_id,
-          adjustmentId: li.adjustment_id,
-        }))}
+        lineItems={(lineItemRows ?? []).map((li) => {
+          const chargeType = li.charge_types as unknown as { code: string | null } | { code: string | null }[] | null;
+          const chargeTypeRef = Array.isArray(chargeType) ? chargeType[0] : chargeType;
+          return {
+            id: li.id,
+            description: li.description,
+            quantity: li.quantity == null ? null : Number(li.quantity),
+            unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
+            amount: li.amount,
+            isBillable: li.is_billable,
+            chargeScheduleId: li.charge_schedule_id,
+            meterId: li.meter_id,
+            adjustmentId: li.adjustment_id,
+            chargeTypeCode: chargeTypeRef?.code ?? null,
+          };
+        })}
         payments={(paymentRows ?? []).map((p) => ({
           id: p.id,
           amount: p.amount,

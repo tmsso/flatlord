@@ -83,9 +83,11 @@ export async function renderStatementPdf(
       .filter(Boolean)
       .join(", ") || "—";
 
+  // charge_types(code) join is for the D-07 (B-07) render-time label
+  // resolution only — see StatementDocument's use of it below.
   const { data: lineItemRows } = await supabase
     .from("statement_line_items")
-    .select("description, quantity, unit_rate, amount, is_billable, meter_id, adjustment_id, sort_order")
+    .select("description, quantity, unit_rate, amount, is_billable, meter_id, adjustment_id, sort_order, charge_types(code)")
     .eq("statement_id", statementId)
     .order("sort_order");
 
@@ -106,14 +108,19 @@ export async function renderStatementPdf(
     if (isLocale(profile?.locale)) locale = profile.locale;
   }
 
-  const lineItems: StatementPdfLineItem[] = (lineItemRows ?? []).map((li) => ({
-    description: li.description,
-    quantity: li.quantity == null ? null : Number(li.quantity),
-    unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
-    amount: li.amount,
-    isBillable: li.is_billable,
-    group: groupOf(li),
-  }));
+  const lineItems: StatementPdfLineItem[] = (lineItemRows ?? []).map((li) => {
+    const chargeType = li.charge_types as unknown as { code: string | null } | { code: string | null }[] | null;
+    const chargeTypeRef = Array.isArray(chargeType) ? chargeType[0] : chargeType;
+    return {
+      description: li.description,
+      quantity: li.quantity == null ? null : Number(li.quantity),
+      unitRate: li.unit_rate == null ? null : Number(li.unit_rate),
+      amount: li.amount,
+      isBillable: li.is_billable,
+      group: groupOf(li),
+      chargeTypeCode: chargeTypeRef?.code ?? null,
+    };
+  });
 
   const buffer = await renderToBuffer(
     StatementDocument({

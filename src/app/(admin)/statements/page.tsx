@@ -10,11 +10,14 @@ export default async function AdminStatementsPage() {
   // the persons join relies on owner_scope_persons being unconditional for
   // any owner (verified during planning), so the tenant name column is
   // never silently blank.
+  // voided_at excluded (BACKLOG.md B-05): a discarded draft shouldn't
+  // linger in the list — see discard-draft-statement.ts.
   const { data: statements } = await supabase
     .from("statements")
     .select(
       "id, tenancy_id, period_month, status, due_date, issued_at, total, tenancies(primary_tenant_id, persons(given_name, family_name))",
     )
+    .is("voided_at", null)
     .order("period_month", { ascending: false });
 
   const { data: tenancies } = await supabase

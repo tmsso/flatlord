@@ -85,7 +85,9 @@ export async function getDashboardData(
   // Stage 1: only needs personId (already known).
   const [{ data: ownershipRows }, { data: draftRows }] = await Promise.all([
     supabase.from("property_ownership").select("property_id").eq("person_id", personId),
-    supabase.from("statements").select("id").eq("status", "draft"),
+    // voided_at excluded (BACKLOG.md B-05) — a discarded draft must not
+    // inflate the "N drafts awaiting issue" count.
+    supabase.from("statements").select("id").eq("status", "draft").is("voided_at", null),
   ]);
   const rootPropertyIds = (ownershipRows ?? []).map((o) => o.property_id);
   const draftCount = draftRows?.length ?? 0;
@@ -167,16 +169,23 @@ export async function getDashboardData(
       .limit(1)
       .maybeSingle(),
     supabase.from("meters").select("id").eq("unit_id", tenancyRow.unit_id).is("removed_at", null),
+    // voided_at excluded on both (BACKLOG.md B-05) — a discarded draft
+    // shouldn't appear as a phantom row in "recent statements" (the
+    // second query is already status-scoped to issued/partially_paid, so
+    // it could never include a draft anyway; the filter here is just for
+    // consistency, not a behavior fix).
     supabase
       .from("statements")
       .select("id, period_month, status, due_date, issued_at, total")
       .eq("tenancy_id", tenancyRow.id)
+      .is("voided_at", null)
       .order("period_month", { ascending: false })
       .limit(6),
     supabase
       .from("statements")
       .select("id, period_month, status, due_date, issued_at, total")
       .eq("tenancy_id", tenancyRow.id)
+      .is("voided_at", null)
       .in("status", ["issued", "partially_paid"]),
     supabase
       .from("requests")

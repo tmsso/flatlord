@@ -15,6 +15,14 @@ export type StoredStatementStatus = "draft" | "issued" | "partially_paid" | "pai
  * The grace only applies to genuinely retroactive statements
  * (`issuedDate >= dueDate`). A statement issued *before* its due date
  * becomes overdue exactly at `due_date < today`, unchanged.
+ *
+ * D-05 (2026-09-15, BACKLOG.md B-06) changed how `issue-statement.ts`
+ * computes `due_date` going forward — it's now the due_day of the month
+ * *after* issue, so `issuedDate >= dueDate` should essentially never be
+ * true again for a newly-issued statement. This function and the grace
+ * window stay exactly as they are: they're still the correct rule for
+ * every statement issued before that change, and for anything the sheet
+ * importer wrote under the old (period-month) due-date convention.
  */
 export const RETROACTIVE_ISSUE_GRACE_DAYS = 7;
 

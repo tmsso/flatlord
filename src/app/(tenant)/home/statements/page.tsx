@@ -17,11 +17,15 @@ export default async function TenantStatementsPage() {
 
   // RLS already scopes statements to the caller's own tenancy — the
   // tenancy_id filter here is belt-and-suspenders, not the only guard.
+  // voided_at excluded (BACKLOG.md B-05) — a discarded draft is an
+  // admin-side wedge-clearing artifact, never something for the tenant
+  // to see.
   const { data: statements } = tenancy
     ? await supabase
         .from("statements")
         .select("id, period_month, status, due_date, issued_at, total")
         .eq("tenancy_id", tenancy.id)
+        .is("voided_at", null)
         .order("period_month", { ascending: false })
     : { data: [] };
 

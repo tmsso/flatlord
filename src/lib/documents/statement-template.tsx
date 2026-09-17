@@ -35,7 +35,13 @@ export interface StatementPdfLineItem {
   amount: number;
   isBillable: boolean;
   group: "fixed" | "metered" | "adjustments";
+  // D-07 (BACKLOG.md B-07): see statement-line-items-table.tsx's identical
+  // field for the full rationale — resolved at render time, historical
+  // rows' stored `description` is never edited.
+  chargeTypeCode: string | null;
 }
+
+const STANDARD_CHARGE_TYPE_CODES = new Set(Object.keys(C.chargeType));
 
 export interface StatementPdfPayment {
   amount: number;
@@ -97,6 +103,17 @@ export function StatementDocument({ data, locale }: { data: StatementPdfData; lo
   const remaining = data.total - paidSum;
   const statusText = C.statusLabel[data.status] ? bilingual(C.statusLabel[data.status]) : data.status;
 
+  // D-07 (B-07): current-locale label only, matching L()'s use everywhere
+  // else in this file for per-row dynamic content (group titles,
+  // notCharged) — bilingual() is reserved for the static meta labels
+  // above, not per-line-item content.
+  function lineItemLabel(li: StatementPdfLineItem): string {
+    if (li.chargeTypeCode && STANDARD_CHARGE_TYPE_CODES.has(li.chargeTypeCode)) {
+      return L(C.chargeType[li.chargeTypeCode as keyof typeof C.chargeType]);
+    }
+    return li.description;
+  }
+
   const groups = GROUP_ORDER.map((key) => ({
     key,
     items: data.lineItems.filter((li) => li.group === key),
@@ -127,7 +144,7 @@ export function StatementDocument({ data, locale }: { data: StatementPdfData; lo
               {group.items.map((li, i) => (
                 <View key={i} style={styles.lineRow} wrap={false}>
                   <View style={styles.lineDesc}>
-                    <Text>{li.description}</Text>
+                    <Text>{lineItemLabel(li)}</Text>
                     {li.quantity != null && li.unitRate != null && (
                       <Text style={styles.lineSub}>
                         {li.quantity} × {fmtMoney(li.unitRate, data.currency, locale)}
