@@ -36,7 +36,9 @@
     "payments": "Fizetések",
     "contract": "Szerződés",
     "inventory": "Leltár",
-    "persons": "Személyek"
+    "persons": "Személyek",
+    "menu": "Menü",
+    "closeMenu": "Menü bezárása"
   },
   "theme": {
     "light": "Világos",

@@ -33,15 +33,15 @@ export function TenantNoticesList({ notices }: { notices: TenantNoticeRow[] }) {
           <Link
             key={n.id}
             href={`/home/notices/${n.id}`}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-muted"
+            className="flex flex-col items-start gap-2 rounded-lg border border-border p-3 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:gap-3"
           >
-            <div className="flex flex-col gap-1 overflow-hidden">
+            <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto">
               <span className="truncate text-sm font-medium">{n.title}</span>
               <span className="text-xs text-muted-foreground">
                 {t(`type_${n.type}`)} · {format.dateTime(new Date(n.createdAt))}
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
               {n.requiresAcknowledgement && (
                 <Badge variant={n.acknowledgedAt ? "secondary" : "outline"}>
                   {n.acknowledgedAt ? t("acknowledged") : t("acknowledgementRequired")}

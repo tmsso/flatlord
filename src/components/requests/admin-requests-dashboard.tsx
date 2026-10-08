@@ -66,7 +66,7 @@ export function AdminRequestsDashboard({
             <Label htmlFor="filterStatus">{t("statusLabel")}</Label>
             <Select value={status} onValueChange={(v) => v && setStatus(v as RequestStatus | "all")}>
               <SelectTrigger id="filterStatus" className="w-40">
-                <SelectValue />
+                <SelectValue>{(v: string) => (v === "all" ? t("allStatuses") : t(`status_${v}`))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatuses")}</SelectItem>
@@ -82,7 +82,7 @@ export function AdminRequestsDashboard({
             <Label htmlFor="filterCategory">{t("categoryLabel")}</Label>
             <Select value={category} onValueChange={(v) => v && setCategory(v as RequestCategory | "all")}>
               <SelectTrigger id="filterCategory" className="w-48">
-                <SelectValue />
+                <SelectValue>{(v: string) => (v === "all" ? t("allCategories") : t(`category_${v}`))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allCategories")}</SelectItem>
@@ -98,7 +98,7 @@ export function AdminRequestsDashboard({
             <Label htmlFor="filterProperty">{t("propertyFilterLabel")}</Label>
             <Select value={propertyId} onValueChange={(v) => v && setPropertyId(v)}>
               <SelectTrigger id="filterProperty" className="w-48">
-                <SelectValue />
+                <SelectValue>{(v: string) => (v === "all" ? t("allProperties") : (properties.find((p) => p.id === v)?.name ?? v))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allProperties")}</SelectItem>
