@@ -243,6 +243,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // First: delivery rows reference both the statements and the owner's
+  // person row (created_by), which the lines below delete.
+  await adminSql`delete from statement_deliveries where statement_id in (${statementAId}, ${statementBId})`;
   await adminSql`delete from property_ownership where property_id = ${houseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${strangerOwnerUserId})`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${strangerOwnerPersonId})`;
@@ -507,6 +510,64 @@ describe("RLS: billing/meter tenant isolation", () => {
       expect(await tx`select id from adjustments where id = ${adjustmentAId}`).toHaveLength(0);
       expect(await tx`select id from statements where id = ${statementAId}`).toHaveLength(0);
       expect(await tx`select id from payments where id = ${paymentAId}`).toHaveLength(0);
+    });
+  });
+  // statement_deliveries (0028): owner-only, append-only delivery log.
+  it("an owner can log and read a delivery for their own statement; scope is trigger-set", async () => {
+    await asUser(ownerUserId, async (tx) => {
+      const [row] = await tx`
+        insert into statement_deliveries (statement_id, channel, kind, status, created_by)
+        values (${statementAId}, 'email', 'amount_due', 'sent', ${ownerPersonId})
+        returning id, tenancy_id
+      `;
+      expect(row.tenancy_id).toBe(tenancyAId);
+      const visible = await tx`select id from statement_deliveries where id = ${row.id}`;
+      expect(visible).toHaveLength(1);
+    });
+  });
+
+  it("delivery log rows can't be edited, and a bad channel is rejected", async () => {
+    await adminSql`
+      insert into statement_deliveries (statement_id, channel, kind, status)
+      values (${statementAId}, 'whatsapp', 'amount_due', 'prepared')
+    `;
+    // Cloud projects' default ACL grants UPDATE, so the missing UPDATE
+    // policy (silent 0 rows) is the enforcement there; CI's clean stack
+    // throws permission denied instead. Either is correct.
+    let updated: number | "denied" = 0;
+    try {
+      await asUser(ownerUserId, async (tx) => {
+        const res = await tx`update statement_deliveries set status = 'sent' where statement_id = ${statementAId} returning id`;
+        updated = res.length;
+      });
+    } catch (e) {
+      expect(String(e)).toMatch(/permission denied/i);
+      updated = "denied";
+    }
+    expect(updated === 0 || updated === "denied").toBe(true);
+
+    await expect(
+      adminSql`insert into statement_deliveries (statement_id, channel, kind, status) values (${statementAId}, 'sms', 'amount_due', 'sent')`,
+    ).rejects.toThrow(/statement_deliveries_channel_check/);
+  });
+
+  it("a tenant can neither read nor write the delivery log, even for their own statement", async () => {
+    await asUser(userAId, async (tx) => {
+      expect(await tx`select id from statement_deliveries where statement_id = ${statementAId}`).toHaveLength(0);
+    });
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into statement_deliveries (statement_id, channel, kind, status)
+          values (${statementAId}, 'email', 'amount_due', 'sent')
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+  });
+
+  it("an owner who owns nothing can't see the delivery log", async () => {
+    await asUser(strangerOwnerUserId, async (tx) => {
+      expect(await tx`select id from statement_deliveries where statement_id = ${statementAId}`).toHaveLength(0);
     });
   });
 });

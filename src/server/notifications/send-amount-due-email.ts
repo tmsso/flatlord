@@ -5,6 +5,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
+import { logStatementDelivery } from "@/server/billing/log-statement-delivery";
 
 const SendAmountDueEmailSchema = z.object({
   statementId: z.string().uuid(),
@@ -18,7 +19,7 @@ const SendAmountDueEmailSchema = z.object({
 export async function sendAmountDueEmail(input: { statementId: string }) {
   const parsed = SendAmountDueEmailSchema.parse(input);
   const supabase = await createClient();
-  await requireOwnerPersonId(supabase);
+  const { personId } = await requireOwnerPersonId(supabase);
 
   const context = await resolveAmountDueContext(supabase, parsed.statementId);
   if (!context) throw new Error("Nothing outstanding on this statement");
@@ -26,11 +27,22 @@ export async function sendAmountDueEmail(input: { statementId: string }) {
   if (!tenantEmail) throw new Error("Tenant has no contact email on file");
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
     to: tenantEmail,
     subject,
     text: body,
+  });
+  // Logged either way (design/05 delivery log); a failed send is still
+  // worth seeing next to the statement.
+  await logStatementDelivery(supabase, {
+    statementId: parsed.statementId,
+    channel: "email",
+    kind: "amount_due",
+    status: error ? "failed" : "sent",
+    providerMessageId: data?.id ?? null,
+    error: error?.message ?? null,
+    createdBy: personId,
   });
   if (error) throw new Error(error.message);
 
