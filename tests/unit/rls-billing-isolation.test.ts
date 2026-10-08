@@ -243,11 +243,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // First: delivery rows reference both the statements and the owner's
+  // person row (created_by), which the lines below delete.
+  await adminSql`delete from statement_deliveries where statement_id in (${statementAId}, ${statementBId})`;
   await adminSql`delete from property_ownership where property_id = ${houseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${strangerOwnerUserId})`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${strangerOwnerPersonId})`;
   await adminSql`delete from auth.users where id in (${ownerUserId}, ${strangerOwnerUserId})`;
-  await adminSql`delete from statement_deliveries where statement_id in (${statementAId}, ${statementBId})`;
   await adminSql`delete from payments where id = ${paymentAId}`;
   await adminSql`delete from statement_line_items where id = ${lineItemAId}`;
   await adminSql`delete from statements where id in (${statementAId}, ${statementBId})`;
