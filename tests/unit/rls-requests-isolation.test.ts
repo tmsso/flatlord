@@ -149,7 +149,11 @@ afterAll(async () => {
   await adminSql`delete from auth.users where id in (${ownerUserId}, ${strangerOwnerUserId}, ${userAId}, ${userBId})`;
   await adminSql`delete from tenancies where id in (${tenancyAId}, ${tenancyBId})`;
   await adminSql`delete from persons where id in (${personAId}, ${personBId})`;
-  await adminSql`delete from properties where name like 'RRI Test%'`;
+  // Only this file's own ids: vitest runs files concurrently and the
+  // notices/field-editability files also seed "RRI Test …" fixtures, so a
+  // name-pattern sweep raced their still-in-use properties (the recurring
+  // property_ownership FK failure in CI). Same fix as rls-notices-isolation.
+  await adminSql`delete from properties where id in (${houseId}, ${flatAId}, ${flatBId})`;
   await adminSql.end();
 });
 
