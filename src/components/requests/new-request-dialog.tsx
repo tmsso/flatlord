@@ -10,13 +10,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Shared between tenant (no tenancyOptions — server resolves their own
 // active tenancy) and admin (tenancyOptions required — logging a request
 // on a tenant's behalf, e.g. a phone-in repair call).
-export function NewRequestDialog({ tenancyOptions }: { tenancyOptions?: { id: string; label: string }[] }) {
+// `trigger="cta"`: the tenant home's full-width secondary action (design/02).
+export function NewRequestDialog({
+  tenancyOptions,
+  trigger = "compact",
+}: {
+  tenancyOptions?: { id: string; label: string }[];
+  trigger?: "compact" | "cta";
+}) {
   const t = useTranslations("requests");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -58,7 +66,14 @@ export function NewRequestDialog({ tenancyOptions }: { tenancyOptions?: { id: st
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>{t("newRequest")}</DialogTrigger>
+      {trigger === "cta" ? (
+        <DialogTrigger render={<Button type="button" variant="outline" className="h-12 w-full gap-2 text-[15px]" />}>
+          <MessageSquare className="size-4" aria-hidden="true" />
+          {t("newRequestCta")}
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>{t("newRequest")}</DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("newRequest")}</DialogTitle>

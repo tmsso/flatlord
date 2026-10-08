@@ -35,6 +35,18 @@ export interface StatementLineItemDisplay {
 // ad-hoc charge type) falls back to the stored description.
 const STANDARD_CHARGE_TYPE_CODES = new Set(["rent", "common_cost", "electricity", "gas", "water", "internet"]);
 
+/**
+ * Display label for a line item (D-07): the catalog name for standard
+ * charge codes, else the stored description. Exported for the tenant
+ * home's compact "how it's calculated" list.
+ */
+export function lineItemLabel(t: (key: string) => string, li: Pick<StatementLineItemDisplay, "chargeTypeCode" | "description">): string {
+  if (li.chargeTypeCode && STANDARD_CHARGE_TYPE_CODES.has(li.chargeTypeCode)) {
+    return t(`chargeType.${li.chargeTypeCode}`);
+  }
+  return li.description;
+}
+
 // Grouping is derived from which FK the row itself carries — the same
 // distinction compute-statement.ts (M4) makes when building these rows,
 // so no join to charge_types.kind is needed just to group them (the
@@ -73,12 +85,7 @@ export function StatementLineItemsTable({
     return format.number(n, { maximumFractionDigits: 3 });
   }
 
-  function displayLabel(li: StatementLineItemDisplay): string {
-    if (li.chargeTypeCode && STANDARD_CHARGE_TYPE_CODES.has(li.chargeTypeCode)) {
-      return t(`chargeType.${li.chargeTypeCode}`);
-    }
-    return li.description;
-  }
+  const displayLabel = (li: StatementLineItemDisplay) => lineItemLabel(t, li);
 
   // Units are stored as plain ASCII codes ("m3"); show the proper symbol.
   function unitLabel(unit: string | null | undefined): string {

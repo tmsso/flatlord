@@ -8,6 +8,7 @@ import { acknowledgeNotice } from "@/server/notices/acknowledge-notice";
 import type { NoticeType, NoticeSequence } from "@/db/schema/notices";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { NOTICE_TYPE_VARIANT } from "@/lib/notices/notice-type-variant";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface NoticeDetailData {
@@ -21,15 +22,6 @@ export interface NoticeDetailData {
   acknowledgedAt: string | null;
   createdAt: string;
 }
-
-const TYPE_VARIANT: Record<NoticeType, "outline" | "secondary" | "destructive"> = {
-  info: "outline",
-  house_rule: "outline",
-  payment_reminder: "secondary",
-  late_payment: "destructive",
-  formal_warning: "destructive",
-  contract: "secondary",
-};
 
 // No thread, no edit/withdraw actions — unlike RequestThread, a notice is
 // a one-shot immutable admin->tenant announcement (CLAUDE.md §3.8). The
@@ -69,7 +61,7 @@ export function NoticeDetail({ notice, role }: { notice: NoticeDetailData; role:
             {t("issuedOn", { date: format.dateTime(new Date(notice.createdAt)) })}
           </span>
         </div>
-        <Badge variant={TYPE_VARIANT[notice.type]}>{t(`type_${notice.type}`)}</Badge>
+        <Badge variant={NOTICE_TYPE_VARIANT[notice.type]}>{t(`type_${notice.type}`)}</Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-sm whitespace-pre-wrap">{notice.body}</p>

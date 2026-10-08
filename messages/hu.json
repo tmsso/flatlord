@@ -158,7 +158,9 @@
     "historyDrafted": "Piszkozat létrehozva",
     "historyIssued": "Elszámolás kiállítva",
     "historyPayment": "Befizetés rögzítve · {amount}",
-    "historyDelivery": "{what} · {status}"
+    "historyDelivery": "{what} · {status}",
+    "expanderTotal": "Összesen",
+    "paidSoFar": "Már befizetve"
   },
   "backup": {
     "heading": "Biztonsági mentés és exportálás",
@@ -526,7 +528,8 @@
     "changeRequestDiffTitle": "Javasolt módosítás: {field}",
     "changeRequestOld": "Jelenlegi",
     "changeRequestNew": "Javasolt",
-    "approveChange": "Módosítás jóváhagyása"
+    "approveChange": "Módosítás jóváhagyása",
+    "newRequestCta": "Új kérés"
   },
   "notices": {
     "title": "Értesítések",
@@ -696,5 +699,13 @@
     "home": "Vissza a kezdőlapra",
     "notFoundTitle": "Az oldal nem található",
     "notFoundBody": "Ez az oldal nem létezik, vagy nincs hozzáférésed."
+  },
+  "tenantHome": {
+    "submitReadings": "Mérőállás beküldése",
+    "readingWindow": "Leolvasási időszak: {range}",
+    "noticesTitle": "Értesítések",
+    "seeAll": "Összes",
+    "noNotices": "Még nincs értesítés.",
+    "details": "Részletek"
   }
 }
