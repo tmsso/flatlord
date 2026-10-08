@@ -18,6 +18,8 @@ export default async function TenantStatementDetailPage({ params }: { params: Pr
     .from("statements")
     .select("id, period_month, status, due_date, total, issued_at, created_at")
     .eq("id", id)
+    // B-26: a draft 404s for the tenant (RLS 0026 is the backstop).
+    .neq("status", "draft")
     .maybeSingle();
   assertNoQueryError("home/statements/[id]", statementError);
   if (!statement) notFound();
