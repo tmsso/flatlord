@@ -53,6 +53,25 @@ async function asUser(userId: string, fn: (tx: postgres.TransactionSql) => Promi
   });
 }
 
+// Issues statement A inside a transaction that is always rolled back, then
+// runs fn as the tenant. Issuing freezes line items
+// (trg_statement_line_items_prevent_issued_mutation), so the fixture itself
+// must stay a deletable draft for afterAll — the rollback guarantees that.
+async function asUserWithStatementAIssued(userId: string, fn: (tx: postgres.TransactionSql) => Promise<void>) {
+  const rollback = new Error("rollback");
+  await adminSql
+    .begin(async (tx) => {
+      await tx`update statements set status = 'issued', issued_at = now() where id = ${statementAId}`;
+      await tx`set local role authenticated`;
+      await tx`select set_config('request.jwt.claims', ${JSON.stringify({ sub: userId })}, true)`;
+      await fn(tx);
+      throw rollback;
+    })
+    .catch((e) => {
+      if (e !== rollback) throw e;
+    });
+}
+
 beforeAll(async () => {
   houseId = randomUUID();
   await adminSql`
@@ -175,10 +194,10 @@ beforeAll(async () => {
   `;
   adjustmentAId = adjustmentA.id;
 
-  // Deliberately left as 'draft' (not 'issued') — RLS visibility doesn't
-  // depend on status, and 'issued' would permanently freeze the line item
-  // below (trg_statement_line_items_prevent_issued_mutation), making this
-  // fixture impossible to clean up in afterAll.
+  // Left as 'draft': 'issued' would permanently freeze the line item below
+  // (trg_statement_line_items_prevent_issued_mutation), making this fixture
+  // impossible to clean up in afterAll. Tenant visibility of a non-draft
+  // statement is tested via asUserWithStatementAIssued (rolled back).
   const [statementA] = await adminSql`
     insert into statements (tenancy_id, period_month, status, total)
     values (${tenancyAId}, '2026-01-01', 'draft', 250000) returning id
@@ -341,8 +360,8 @@ describe("RLS: billing/meter tenant isolation", () => {
     });
   });
 
-  it("a tenant sees their own statements and line items, not another tenant's", async () => {
-    await asUser(userAId, async (tx) => {
+  it("a tenant sees their own issued statements and line items, not another tenant's", async () => {
+    await asUserWithStatementAIssued(userAId, async (tx) => {
       const own = await tx`select id from statements where id = ${statementAId}`;
       expect(own).toHaveLength(1);
       const other = await tx`select id from statements where id = ${statementBId}`;
@@ -350,6 +369,15 @@ describe("RLS: billing/meter tenant isolation", () => {
 
       const ownLineItems = await tx`select id from statement_line_items where statement_id = ${statementAId}`;
       expect(ownLineItems).toHaveLength(1);
+    });
+  });
+
+  it("a tenant cannot see their own draft statement or its line items (B-26)", async () => {
+    await asUser(userAId, async (tx) => {
+      const own = await tx`select id from statements where id = ${statementAId}`;
+      expect(own).toHaveLength(0);
+      const ownLineItems = await tx`select id from statement_line_items where statement_id = ${statementAId}`;
+      expect(ownLineItems).toHaveLength(0);
     });
   });
 
