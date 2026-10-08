@@ -233,7 +233,21 @@
     "noteSent": "Elküldtük a tulajdonosnak. Ezt a mérőt most kihagyhatod.",
     "skipMeter": "Mérő kihagyása",
     "editMeter": "{meter} szerkesztése",
-    "previousShort": "előző {value}"
+    "previousShort": "előző {value}",
+    "submittedAtBy": "Beküldve: {date} · {name}",
+    "notSubmittedYet": "Ebben a hónapban még nincs beküldött mérőállás",
+    "statusReviewing": "Ellenőrzés alatt",
+    "statusNotSubmitted": "Nincs beküldve",
+    "aiSlotEmpty": "Még nem elérhető",
+    "aiSlotNote": "5. fázis: itt jelenik meg az OCR által javasolt érték a megbízhatósággal. Mindig ember hagyja jóvá — sosem ellenőriz automatikusan.",
+    "deltaTile": "Különbség",
+    "zoomIn": "Nagyítás",
+    "zoomOut": "Kicsinyítés",
+    "zoomReset": "Nagyítás visszaállítása",
+    "noPhoto": "Nincs fotó — a bérlő kihagyta",
+    "prevMonth": "Előző hónap",
+    "nextMonth": "Következő hónap",
+    "atRate": "@ {rate}"
   },
   "properties": {
     "title": "Ingatlanok",

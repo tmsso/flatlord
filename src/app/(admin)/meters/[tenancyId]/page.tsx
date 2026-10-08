@@ -23,7 +23,7 @@ export default async function AdminMeterVerificationPage({
 
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
-    .select("id, unit_id, persons(given_name, family_name)")
+    .select("id, unit_id, persons(given_name, family_name), properties(address_line)")
     .eq("id", tenancyId)
     .maybeSingle();
   assertNoQueryError("meters/[tenancyId]", tenancyError);
@@ -57,7 +57,7 @@ export default async function AdminMeterVerificationPage({
   // Stage 2: depends on stage-1 results (meterIds, chargeTypeIds) —
   // independent of each other.
   const [{ data: chargeTypeRows }, { data: monthReadingRows }, { data: priorVerifiedRows }] = await Promise.all([
-    chargeTypeIds.length ? supabase.from("charge_types").select("id, unit").in("id", chargeTypeIds) : Promise.resolve({ data: [] }),
+    chargeTypeIds.length ? supabase.from("charge_types").select("id, unit, code").in("id", chargeTypeIds) : Promise.resolve({ data: [] }),
     meterIds.length
       ? supabase
           .from("meter_readings")
@@ -81,6 +81,7 @@ export default async function AdminMeterVerificationPage({
       : Promise.resolve({ data: [] }),
   ]);
   const unitByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.unit ?? ""]));
+  const codeByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.code as string | null]));
 
   const previousByMeter = new Map<string, { value: number; date: string }>();
   for (const r of priorVerifiedRows ?? []) {
@@ -114,6 +115,7 @@ export default async function AdminMeterVerificationPage({
       previousValue: previous ? previous.value : Number(m.base_value),
       previousDate: previous ? previous.date : null,
       ratePerUnit: activeSchedule?.ratePerUnit ?? null,
+      kind: codeByChargeType.get(m.charge_type_id) ?? null,
       readings: (readingsByMeter.get(m.id) ?? []).map((r) => ({
         id: r.id,
         enteredValue: Number(r.entered_value),
@@ -127,8 +129,16 @@ export default async function AdminMeterVerificationPage({
     };
   });
 
+  type PropertyRef = { address_line: string | null };
+  const propertyRef = tenancy.properties as unknown as PropertyRef | PropertyRef[] | null;
+  const address = (Array.isArray(propertyRef) ? propertyRef[0] : propertyRef)?.address_line ?? null;
+  // Latest submission time this month, for the header ("Submitted … by …").
+  const submittedAt = (monthReadingRows ?? []).map((r) => r.created_at).sort().at(-1) ?? null;
+
   return (
     <MeterVerificationPanel
+      address={address}
+      submittedAt={submittedAt}
       tenancyId={tenancy.id}
       tenantName={person ? `${person.given_name} ${person.family_name}` : "—"}
       periodMonth={periodMonth}
