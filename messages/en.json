@@ -233,7 +233,21 @@
     "noteSent": "Note sent to the owner. You can skip this meter for now.",
     "skipMeter": "Skip this meter",
     "editMeter": "Edit {meter}",
-    "previousShort": "previous {value}"
+    "previousShort": "previous {value}",
+    "submittedAtBy": "Submitted {date} by {name}",
+    "notSubmittedYet": "Nothing submitted for this month yet",
+    "statusReviewing": "Reviewing",
+    "statusNotSubmitted": "Not submitted",
+    "aiSlotEmpty": "Not available yet",
+    "aiSlotNote": "Phase 5: an OCR-proposed value with confidence appears here. A human always confirms — it never auto-verifies.",
+    "deltaTile": "Delta",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Reset zoom",
+    "noPhoto": "No photo — the tenant skipped it",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "atRate": "@ {rate}"
   },
   "properties": {
     "title": "Properties",
