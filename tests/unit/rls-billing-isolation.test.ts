@@ -313,6 +313,49 @@ describe("RLS: billing/meter tenant isolation", () => {
     ).rejects.toThrow(/row-level security|permission denied/i);
   });
 
+  // 0027: a tenant insert must be a plain submission — the admin's
+  // verification step can't be skipped by writing status/confirmed_* directly.
+  it("a tenant cannot insert an already-verified meter reading (0027)", async () => {
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into meter_readings (meter_id, tenancy_id, reading_date, entered_value, entered_by, status, confirmed_value, confirmed_at)
+          values (${meterAId}, ${tenancyAId}, '2026-03-02', 1, ${personAId}, 'verified', 1, now())
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+  });
+
+  it("a tenant cannot insert a reading with an admin source or OCR values (0027)", async () => {
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into meter_readings (meter_id, tenancy_id, reading_date, entered_value, entered_by, source)
+          values (${meterAId}, ${tenancyAId}, '2026-03-02', 150, ${personAId}, 'admin')
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into meter_readings (meter_id, tenancy_id, reading_date, entered_value, entered_by, ocr_value, ocr_confidence)
+          values (${meterAId}, ${tenancyAId}, '2026-03-02', 150, ${personAId}, 150, 0.99)
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+  });
+
+  it("a tenant cannot submit a reading in someone else's name (0027)", async () => {
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into meter_readings (meter_id, tenancy_id, reading_date, entered_value, entered_by)
+          values (${meterAId}, ${tenancyAId}, '2026-03-02', 150, ${personBId})
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+  });
+
   // Title is specifically about fixed-kind schedules (chargeScheduleAId is
   // rent, 'fixed') — 0011 added a narrow SELECT exception for currently
   // active *metered* schedules (tenant_scope_metered_charge_schedules,
