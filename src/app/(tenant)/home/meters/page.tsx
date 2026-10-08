@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { pickActiveSchedule, type ChargeScheduleInput } from "@/lib/billing/compute-statement";
 import { MeterReadingFlow, type MeterFlowMeter } from "@/components/meter-reading-flow";
+import { resolveMeterReadingWindow } from "@/server/reminders/compute-lead-reminders";
 
 export default async function TenantMetersPage() {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export default async function TenantMetersPage() {
 
   const { data: tenancy } = await supabase
     .from("tenancies")
-    .select("id, unit_id")
+    .select("id, unit_id, meter_reading_config")
     .eq("primary_tenant_id", profile.personId)
     .eq("status", "active")
     .maybeSingle();
@@ -46,7 +47,7 @@ export default async function TenantMetersPage() {
   // Stage 2: depends on stage-1 results (meterIds, chargeTypeIds) —
   // independent of each other.
   const [{ data: chargeTypeRows }, { data: verifiedReadings }, { data: thisMonthReadings }] = await Promise.all([
-    chargeTypeIds.length ? supabase.from("charge_types").select("id, unit").in("id", chargeTypeIds) : Promise.resolve({ data: [] }),
+    chargeTypeIds.length ? supabase.from("charge_types").select("id, unit, code").in("id", chargeTypeIds) : Promise.resolve({ data: [] }),
     // Previous value = latest verified reading's confirmed_value, falling
     // back to the meter's base_value — same anchor submit-meter-reading.ts
     // uses server-side for the ≥previous check, so the display here and the
@@ -69,6 +70,7 @@ export default async function TenantMetersPage() {
       : Promise.resolve({ data: [] }),
   ]);
   const unitByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.unit ?? ""]));
+  const codeByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.code as string | null]));
 
   const latestVerifiedByMeter = new Map<string, { value: number; date: string }>();
   for (const r of verifiedReadings ?? []) {
@@ -91,8 +93,15 @@ export default async function TenantMetersPage() {
       previousDate: verified ? verified.date : null,
       ratePerUnit: activeSchedule?.ratePerUnit ?? null,
       doneThisMonth: doneThisMonth.has(m.id),
+      kind: codeByChargeType.get(m.charge_type_id) ?? null,
     };
   });
 
-  return <MeterReadingFlow tenancyId={tenancy.id} meters={flowMeters} />;
+  return (
+    <MeterReadingFlow
+      tenancyId={tenancy.id}
+      meters={flowMeters}
+      readingWindow={resolveMeterReadingWindow(tenancy.meter_reading_config, today)}
+    />
+  );
 }
