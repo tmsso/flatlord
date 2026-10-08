@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
 const VerifyMeterReadingSchema = z.object({
   readingId: z.string().uuid(),
@@ -17,25 +18,15 @@ export async function verifyMeterReading(input: { readingId: string; confirmedVa
   const parsed = VerifyMeterReadingSchema.parse(input);
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  // Fails fast for a non-owner and resolves confirmed_by (a persons.id).
+  const { personId } = await requireOwnerPersonId(supabase);
 
-  const { data: callerProfile } = await supabase
-    .from("profiles")
-    .select("person_id")
-    .eq("id", user.id)
-    .single();
-  if (!callerProfile?.person_id) throw new Error("Caller has no person record");
-
-  // RLS (owner_update_meter_readings) enforces that only an owner can
-  // reach this update — no manual role check needed.
+  // RLS (owner_update_meter_readings) remains the real enforcement.
   const { error } = await supabase
     .from("meter_readings")
     .update({
       confirmed_value: parsed.confirmedValue,
-      confirmed_by: callerProfile.person_id,
+      confirmed_by: personId,
       confirmed_at: new Date().toISOString(),
       status: "verified",
     })
