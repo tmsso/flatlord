@@ -1,18 +1,29 @@
-import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Camera, Clock } from "lucide-react";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { TenantAmountDue } from "@/components/tenant-amount-due";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
-import { MeterConsumptionChart } from "@/components/meter-consumption-chart";
+import { ConsumptionMiniChart } from "@/components/consumption-mini-chart";
+import { NewRequestDialog } from "@/components/requests/new-request-dialog";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { NOTICE_TYPE_VARIANT } from "@/lib/notices/notice-type-variant";
+import type { NoticeType } from "@/db/schema/notices";
+import { resolveMeterReadingWindow } from "@/server/reminders/compute-lead-reminders";
 import { TenantContractsList } from "@/components/tenant-contracts-list";
 import { TenantDepositStatus } from "@/components/tenant-deposit-status";
 import { TenantAttachmentsList } from "@/components/tenant-attachments-list";
 import { TenantInventorySection } from "@/components/tenant-inventory-section";
 
 export default async function TenantHomePage() {
-  const t = await getTranslations("statements");
   const tHome = await getTranslations("tenantProfile");
   const tAttachments = await getTranslations("attachments");
+  const tHomeCta = await getTranslations("tenantHome");
+  const tNotices = await getTranslations("notices");
+  const format = await getFormatter();
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
 
@@ -23,7 +34,7 @@ export default async function TenantHomePage() {
     supabase.from("persons").select("given_name").eq("id", profile.personId).maybeSingle(),
     supabase
       .from("tenancies")
-      .select("id, unit_id, properties(name, address_line)")
+      .select("id, unit_id, meter_reading_config, properties(name, address_line)")
       .eq("primary_tenant_id", profile.personId)
       .eq("status", "active")
       .maybeSingle(),
@@ -38,6 +49,9 @@ export default async function TenantHomePage() {
   ]);
 
   type PropertyRef = { name: string; address_line: string | null };
+  type ChargeTypeRef = { code: string | null; unit: string | null };
+  const today = new Date().toISOString().slice(0, 10);
+  const readingWindow = resolveMeterReadingWindow(tenancy?.meter_reading_config, today);
   const property = tenancy?.properties as unknown as PropertyRef | PropertyRef[] | null;
   const addressLine = (Array.isArray(property) ? property[0] : property)?.address_line;
 
@@ -51,6 +65,7 @@ export default async function TenantHomePage() {
     { data: tenancyAttachmentRows },
     { data: inventoryRows },
     { data: openCampaign },
+    { data: noticeRows },
   ] = await Promise.all([
     // Outstanding = issued or partially_paid, most recent period first —
     // "overdue" is derived display state, not a separate stored value.
@@ -119,6 +134,14 @@ export default async function TenantHomePage() {
           .limit(1)
           .maybeSingle()
       : Promise.resolve({ data: null }),
+    tenancy
+      ? supabase
+          .from("notices")
+          .select("id, type, title, created_at")
+          .eq("tenancy_id", tenancy.id)
+          .order("created_at", { ascending: false })
+          .limit(2)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const contractPaths = (contractRows ?? []).map((c) => c.document_path).filter((p): p is string => !!p);
@@ -141,7 +164,7 @@ export default async function TenantHomePage() {
     statement
       ? supabase
           .from("statement_line_items")
-          .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order, charge_types(code)")
+          .select("id, description, quantity, unit_rate, amount, is_billable, charge_schedule_id, meter_id, adjustment_id, sort_order, charge_types(code, unit)")
           .eq("statement_id", statement.id)
           .order("sort_order")
       : Promise.resolve({ data: [] }),
@@ -180,14 +203,18 @@ export default async function TenantHomePage() {
     : null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {self && (
-        <div>
-          <p className="text-base font-semibold">{tHome("greeting", { name: self.given_name })}</p>
-          {addressLine && <p className="text-sm text-muted-foreground">{addressLine}</p>}
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-base font-semibold text-primary-foreground" aria-hidden="true">
+            {self.given_name.charAt(0)}
+          </span>
+          <div>
+            <h1 className="text-base font-semibold">{tHome("greeting", { name: self.given_name })}</h1>
+            {addressLine && <p className="text-xs text-muted-foreground">{addressLine}</p>}
+          </div>
         </div>
       )}
-      <h1 className="text-lg font-semibold">{t("amountDue")}</h1>
       <TenantAmountDue
         statement={
           statement
@@ -203,7 +230,7 @@ export default async function TenantHomePage() {
         }
         paidSum={(paymentRows ?? []).reduce((sum, p) => sum + p.amount, 0)}
         lineItems={(lineItemRows ?? []).map((li) => {
-          const chargeType = li.charge_types as unknown as { code: string | null } | { code: string | null }[] | null;
+          const chargeType = li.charge_types as unknown as ChargeTypeRef | ChargeTypeRef[] | null;
           const chargeTypeRef = Array.isArray(chargeType) ? chargeType[0] : chargeType;
           return {
             id: li.id,
@@ -216,12 +243,65 @@ export default async function TenantHomePage() {
             meterId: li.meter_id,
             adjustmentId: li.adjustment_id,
             chargeTypeCode: chargeTypeRef?.code ?? null,
+            unit: chargeTypeRef?.unit ?? null,
           };
         })}
         today={new Date().toISOString().slice(0, 10)}
       />
+      {tenancy && (
+        <div className="flex flex-col gap-2">
+          {/* One primary action per screen (design/02): readings. */}
+          <Link href="/home/meters" className={cn(buttonVariants(), "h-[52px] w-full gap-2 text-base")}>
+            <Camera className="size-5" aria-hidden="true" />
+            {tHomeCta("submitReadings")}
+          </Link>
+          <p className="flex items-center justify-center gap-1.5 text-xs text-warning">
+            <Clock className="size-3.5" aria-hidden="true" />
+            {tHomeCta("readingWindow", {
+              range: format.dateTimeRange(new Date(`${readingWindow.start}T00:00:00Z`), new Date(`${readingWindow.end}T00:00:00Z`), {
+                month: "short",
+                day: "numeric",
+                timeZone: "UTC",
+              }),
+            })}
+          </p>
+          <NewRequestDialog trigger="cta" />
+        </div>
+      )}
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold">{tHomeCta("noticesTitle")}</h2>
+          <Link href="/home/notices" className="text-sm text-primary hover:underline">
+            {tHomeCta("seeAll")}
+          </Link>
+        </div>
+        {(noticeRows ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">{tHomeCta("noNotices")}</p>
+        ) : (
+          <ul className="flex flex-col">
+            {(noticeRows ?? []).map((n, i) => (
+              <li key={n.id} className={i > 0 ? "border-t border-border" : ""}>
+                <Link href={`/home/notices/${n.id}`} className="flex min-h-11 items-start gap-3 py-2.5 hover:bg-muted/50">
+                  <Badge variant={NOTICE_TYPE_VARIANT[n.type as NoticeType]} className="mt-0.5 shrink-0">
+                    {tNotices(`type_${n.type}`)}
+                  </Badge>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-sm">{n.title}</span>
+                    <span className="text-xs text-muted-foreground tabular-figures">{format.dateTime(new Date(n.created_at), { dateStyle: "medium" })}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {chartData && chartData.consumptionSeries.length > 0 && (
-        <MeterConsumptionChart months={chartData.consumption} series={chartData.consumptionSeries} />
+        <ConsumptionMiniChart
+          months={chartData.consumption}
+          chargeTypeId={chartData.consumptionSeries[0].chargeTypeId}
+          label={chartData.consumptionSeries[0].label}
+          unit={chartData.consumptionSeries[0].unit}
+        />
       )}
       <TenantContractsList
         contracts={(contractRows ?? []).map((c) => ({

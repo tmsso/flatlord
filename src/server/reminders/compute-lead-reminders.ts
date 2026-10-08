@@ -132,3 +132,28 @@ export function isMonthlyMeterReading(meterReadingConfig: unknown): boolean {
   const raw = asRecord(meterReadingConfig).frequency;
   return raw == null || raw === "monthly";
 }
+
+/**
+ * The reading window to show the tenant (design/02 hint under the primary
+ * CTA): windowStartDay..windowEndDay of the current month, or of the next
+ * month once this month's window has passed. windowEndDay is optional in
+ * meter_reading_config; without it the window runs to the month's end.
+ * Returns ISO dates (UTC calendar dates, no time component).
+ */
+export function resolveMeterReadingWindow(meterReadingConfig: unknown, today: string): { start: string; end: string } {
+  const startDay = resolveMeterReadingWindowStartDay(meterReadingConfig);
+  const rawEnd = asRecord(meterReadingConfig).windowEndDay;
+  const endDayConfigured = typeof rawEnd === "number" && Number.isFinite(rawEnd) ? Math.trunc(rawEnd) : null;
+
+  const [y, m, d] = today.split("-").map(Number);
+  const windowFor = (year: number, monthIndex: number) => {
+    const lastDay = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+    const endDay = Math.min(Math.max(endDayConfigured ?? lastDay, startDay), lastDay);
+    const iso = (day: number) => new Date(Date.UTC(year, monthIndex, day)).toISOString().slice(0, 10);
+    return { start: iso(startDay), end: iso(endDay), endDay };
+  };
+  const current = windowFor(y, m - 1);
+  if (d <= current.endDay) return { start: current.start, end: current.end };
+  const next = windowFor(m === 12 ? y + 1 : y, m === 12 ? 0 : m);
+  return { start: next.start, end: next.end };
+}

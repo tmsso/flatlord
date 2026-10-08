@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
 import type { NoticeType } from "@/db/schema/notices";
 import { Badge } from "@/components/ui/badge";
+import { NOTICE_TYPE_VARIANT } from "@/lib/notices/notice-type-variant";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface TenantNoticeRow {
@@ -14,15 +15,6 @@ export interface TenantNoticeRow {
   requiresAcknowledgement: boolean;
   acknowledgedAt: string | null;
 }
-
-const TYPE_VARIANT: Record<NoticeType, "outline" | "secondary" | "destructive"> = {
-  info: "outline",
-  house_rule: "outline",
-  payment_reminder: "secondary",
-  late_payment: "destructive",
-  formal_warning: "destructive",
-  contract: "secondary",
-};
 
 // Read-only list — there's no "new notice" affordance here, unlike
 // TenantRequestsList: notices are admin-issued only.
@@ -55,7 +47,7 @@ export function TenantNoticesList({ notices }: { notices: TenantNoticeRow[] }) {
                   {n.acknowledgedAt ? t("acknowledged") : t("acknowledgementRequired")}
                 </Badge>
               )}
-              <Badge variant={TYPE_VARIANT[n.type]}>{t(`type_${n.type}`)}</Badge>
+              <Badge variant={NOTICE_TYPE_VARIANT[n.type]}>{t(`type_${n.type}`)}</Badge>
             </div>
           </Link>
         ))}

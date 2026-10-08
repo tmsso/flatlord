@@ -6,6 +6,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { NOTICE_TYPES, type NoticeType } from "@/db/schema/notices";
 import { IssueNoticeDialog } from "@/components/notices/issue-notice-dialog";
 import { Badge } from "@/components/ui/badge";
+import { NOTICE_TYPE_VARIANT } from "@/lib/notices/notice-type-variant";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -21,15 +22,6 @@ export interface AdminNoticeRow {
   propertyName: string;
   tenantName: string;
 }
-
-const TYPE_VARIANT: Record<NoticeType, "outline" | "secondary" | "destructive"> = {
-  info: "outline",
-  house_rule: "outline",
-  payment_reminder: "secondary",
-  late_payment: "destructive",
-  formal_warning: "destructive",
-  contract: "secondary",
-};
 
 export function AdminNoticesDashboard({
   notices,
@@ -115,7 +107,7 @@ export function AdminNoticesDashboard({
                     {n.acknowledgedAt ? t("acknowledged") : t("acknowledgementRequired")}
                   </Badge>
                 )}
-                <Badge variant={TYPE_VARIANT[n.type]}>{t(`type_${n.type}`)}</Badge>
+                <Badge variant={NOTICE_TYPE_VARIANT[n.type]}>{t(`type_${n.type}`)}</Badge>
               </div>
             </Link>
           ))}

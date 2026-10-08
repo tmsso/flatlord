@@ -158,7 +158,9 @@
     "historyDrafted": "Draft created",
     "historyIssued": "Statement issued",
     "historyPayment": "Payment recorded · {amount}",
-    "historyDelivery": "{what} · {status}"
+    "historyDelivery": "{what} · {status}",
+    "expanderTotal": "Total",
+    "paidSoFar": "Already paid"
   },
   "backup": {
     "heading": "Backup & export",
@@ -526,7 +528,8 @@
     "changeRequestDiffTitle": "Proposed change: {field}",
     "changeRequestOld": "Current",
     "changeRequestNew": "Proposed",
-    "approveChange": "Approve change"
+    "approveChange": "Approve change",
+    "newRequestCta": "New request"
   },
   "notices": {
     "title": "Notices",
@@ -696,5 +699,13 @@
     "home": "Go to home page",
     "notFoundTitle": "Page not found",
     "notFoundBody": "This page doesn't exist, or you don't have access to it."
+  },
+  "tenantHome": {
+    "submitReadings": "Submit meter readings",
+    "readingWindow": "Reading window: {range}",
+    "noticesTitle": "Notices",
+    "seeAll": "See all",
+    "noNotices": "No notices yet.",
+    "details": "Details"
   }
 }
