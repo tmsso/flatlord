@@ -4,6 +4,7 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
 import { createNotification } from "@/server/notifications/create-notification";
 import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
+import { logStatementDelivery } from "@/server/billing/log-statement-delivery";
 
 // Automatic counterpart to send-amount-due-email.ts's admin-triggered
 // one-off send (ROADMAP Phase 4 item 1) — fired by the daily cron, not a
@@ -37,13 +38,21 @@ export async function notifyPaymentDueReminder(params: { statementId: string }) 
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { error: sendError } = await resend.emails.send({
+    const { data: sent, error: sendError } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
       to: context.tenantEmail,
       subject: context.subject,
       text: context.body,
     });
     if (sendError) console.error("notifyPaymentDueReminder: send failed", sendError.message);
+    await logStatementDelivery(service, {
+      statementId: params.statementId,
+      channel: "email",
+      kind: "payment_reminder",
+      status: sendError ? "failed" : "sent",
+      providerMessageId: sent?.id ?? null,
+      error: sendError?.message ?? null,
+    });
   } catch (err) {
     console.error("notifyPaymentDueReminder: unexpected failure", err instanceof Error ? err.message : err);
   }

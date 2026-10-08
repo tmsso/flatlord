@@ -13,25 +13,44 @@ export interface LifecycleStep {
 
 // draft -> issued -> paid, per design doc's three-state stepper
 // (checkmark / current-ring / dashed-pending), each step's date underneath.
-export function LifecycleStepper({ steps }: { steps: LifecycleStep[] }) {
+// `variant="inline"` (design/05's page header): icon, label and date on
+// one line per step, short connectors between — compact enough to sit
+// under the title instead of in its own card.
+export function LifecycleStepper({ steps, variant = "stacked" }: { steps: LifecycleStep[]; variant?: "stacked" | "inline" }) {
+  if (variant === "inline") {
+    return (
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {steps.map((step, i) => (
+          <div key={step.label} className="contents">
+            <div className="flex items-center gap-2 text-xs">
+              <StepIcon state={step.state} />
+              <span
+                className={cn(
+                  "font-semibold",
+                  step.state === "overdue" && "text-destructive",
+                  step.state === "pending" && "font-medium text-muted-foreground",
+                )}
+              >
+                {step.label}
+              </span>
+              {step.dateLabel && (
+                <span className={step.state === "overdue" ? "text-destructive" : "text-muted-foreground"}>{step.dateLabel}</span>
+              )}
+            </div>
+            {i < steps.length - 1 && (
+              <div className={cn("h-0.5 w-12", step.state === "done" ? "bg-success" : "bg-border")} />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="flex items-start">
       {steps.map((step, i) => (
         <div key={step.label} className="contents">
           <div className="flex flex-1 flex-col items-center">
-            <div
-              className={cn(
-                "flex size-6 items-center justify-center rounded-full",
-                step.state === "done" && "bg-success",
-                step.state === "current" && "border-2 border-primary bg-card",
-                step.state === "pending" && "border-2 border-dashed border-input bg-card",
-                step.state === "overdue" && "border-2 border-destructive bg-destructive-bg",
-              )}
-            >
-              {step.state === "done" && <Check className="size-3 text-primary-foreground" />}
-              {step.state === "current" && <div className="size-2 rounded-full bg-primary" />}
-              {step.state === "overdue" && <span className="text-xs font-bold text-destructive">!</span>}
-            </div>
+            <StepIcon state={step.state} />
             <div
               className={cn(
                 "mt-1.5 text-xs",
@@ -52,6 +71,24 @@ export function LifecycleStepper({ steps }: { steps: LifecycleStep[] }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function StepIcon({ state }: { state: LifecycleStep["state"] }) {
+  return (
+    <div
+      className={cn(
+        "flex size-6 shrink-0 items-center justify-center rounded-full",
+        state === "done" && "bg-success",
+        state === "current" && "border-2 border-primary bg-card",
+        state === "pending" && "border-2 border-dashed border-input bg-card",
+        state === "overdue" && "border-2 border-destructive bg-destructive-bg",
+      )}
+    >
+      {state === "done" && <Check className="size-3 text-primary-foreground" />}
+      {state === "current" && <div className="size-2 rounded-full bg-primary" />}
+      {state === "overdue" && <span className="text-xs font-bold text-destructive">!</span>}
     </div>
   );
 }
