@@ -83,6 +83,7 @@ Owner answered "defaults, you can merge"; all PRs below merged and deployed (pro
 - PR #52: **4c item 4b** tenant meter flow = `design/03` + "note to owner" escape (D-26); caught and fixed an `Intl` date-range hydration mismatch.
 - PR #53: **4c item 5** readings verification = `design/06`; fixed the always-empty "confirmed value" box (ref override broke react-hook-form's prefill).
 - PR #54: **B-19** admin phone drawer; `min-w-0` fixed horizontal overflow on 6 of 9 admin pages at 390px; translated filter labels.
+- PR #56: "Ask for retake" was a dead end — the tenant page counted a rejected reading as done, so the month could never reach all-verified (pre-existing; #52 made it bite harder). Rejected now reopens the meter with a "Retake requested" pill; full loop verified on dev.
 - Final smoke on merged `main` against dev: 38 page loads (owner 12 routes @1440, tenant 7 @390, × hu/en) — all 200, no overflow, zero console errors.
 - **Not verified:** the tenant mini-chart (no metered data on dev, B-30); `global-error.tsx` at runtime; a real "sent" email row (no real sends — only the `failed` path via an invalid-key override).
 
