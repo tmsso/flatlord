@@ -57,7 +57,7 @@ export function AdminNoticesDashboard({
             <Label htmlFor="filterType">{t("typeLabel")}</Label>
             <Select value={type} onValueChange={(v) => v && setType(v as NoticeType | "all")}>
               <SelectTrigger id="filterType" className="w-48">
-                <SelectValue />
+                <SelectValue>{(v: string) => (v === "all" ? t("allTypes") : t(`type_${v}`))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allTypes")}</SelectItem>
@@ -73,7 +73,7 @@ export function AdminNoticesDashboard({
             <Label htmlFor="filterProperty">{t("propertyFilterLabel")}</Label>
             <Select value={propertyId} onValueChange={(v) => v && setPropertyId(v)}>
               <SelectTrigger id="filterProperty" className="w-48">
-                <SelectValue />
+                <SelectValue>{(v: string) => (v === "all" ? t("allProperties") : (properties.find((p) => p.id === v)?.name ?? v))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allProperties")}</SelectItem>
@@ -93,15 +93,15 @@ export function AdminNoticesDashboard({
             <Link
               key={n.id}
               href={`/notices/${n.id}`}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-muted"
+              className="flex flex-col items-start gap-2 rounded-lg border border-border p-3 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:gap-3"
             >
-              <div className="flex flex-col gap-1 overflow-hidden">
+              <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto">
                 <span className="truncate text-sm font-medium">{n.title}</span>
                 <span className="text-xs text-muted-foreground">
                   {t(`type_${n.type}`)} · {n.propertyName} · {n.tenantName} · {format.dateTime(new Date(n.createdAt))}
                 </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
                 {n.requiresAcknowledgement && (
                   <Badge variant={n.acknowledgedAt ? "secondary" : "outline"}>
                     {n.acknowledgedAt ? t("acknowledged") : t("acknowledgementRequired")}

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { SidebarNav, type NavItem } from "@/components/nav-link";
+import { AdminMobileNav } from "@/components/admin-mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -65,14 +66,17 @@ export default async function AdminLayout({
         </div>
         <SidebarNav items={navItems} rootHref="/dashboard" />
       </aside>
-      <div className="flex-1 flex flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-end gap-2 px-4">
+          <div className="mr-auto md:hidden">
+            <AdminMobileNav items={navItems} menuLabel={t("menu")} closeLabel={t("closeMenu")} />
+          </div>
           <NotificationBell notifications={notifications} role="owner" />
           <LocaleSwitcher />
           <ThemeToggle />
           <SignOutButton />
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 min-w-0 p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

@@ -36,7 +36,9 @@
     "payments": "Payments",
     "contract": "Contract",
     "inventory": "Inventory",
-    "persons": "Persons"
+    "persons": "Persons",
+    "menu": "Menu",
+    "closeMenu": "Close menu"
   },
   "theme": {
     "light": "Light",
