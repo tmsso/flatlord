@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-09-15)
+## Status at a glance (2026-10-09)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -14,7 +14,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
 | 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; remainder open |
-| 4c | **UI fidelity pass** (new, 2026-09-15) | In progress — items 1–2 shipped 2026-09-17 (PRs #37/#38); items 3–6 open |
+| 4c | **UI fidelity pass** (new, 2026-09-15) | In progress — items 1–5 shipped (PRs #37/#38 2026-09-17; #49/#51/#52/#53 2026-10-08); item 6 partly (error pages #46, admin phone nav #54); owner visual sign-off open for all |
 | 5 | AI features + expansion | Not started |
 
 ## Phase gates → admin checklist (decided 2026-09-15)
@@ -23,6 +23,9 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ### Admin actions pending (only the admin can do these — sessions must not)
 
+- [ ] **Run `migrate-prod.yml` now** (`gh workflow run migrate-prod.yml --ref main`): applies `0026` (tenants can't read drafts — RLS backstop), `0027` (**closes a live hole**: a tenant could insert an already-verified meter reading via the REST API) and `0028` (statement delivery log; until applied the log stays empty and sends still work). Code for all three is already live (2026-10-08).
+- [ ] **After that, one read-only check in the prod SQL editor** that `0027`'s hole was never used — expect zero rows: `select mr.id, mr.reading_date, mr.created_at, mr.confirmed_at from meter_readings mr join profiles ep on ep.person_id = mr.entered_by and ep.role = 'tenant' where mr.status = 'verified' and (mr.confirmed_by is null or mr.source <> 'tenant' or not exists (select 1 from profiles p where p.person_id = mr.confirmed_by and p.role = 'owner') or mr.confirmed_at - mr.created_at < interval '5 seconds');`
+- [ ] **Restore drill** (GitHub issue #40, due 2026-10-01).
 - [ ] **Set `CRON_SECRET`** in Vercel (prod + preview). Before flipping: the overdue query has no date floor, so the first authenticated run alerts once on every historical statement still `issued`/`partially_paid` past due — count them in the Supabase dashboard first (the 2026-09-10 retroactive-issue grace removes most). Tenant-addressed reminders won't deliver until Resend leaves sandbox (next item).
 - [ ] **Buy a domain** (`BACKLOG.md` B-01 — Cloudflare Registrar or Porkbun, not Vercel's registrar) and verify it in Resend. Unblocks real tenant email, the Phase 1 acceptance run, and a non-`vercel.app` URL. The one purchase this review recommends.
 - [ ] **Phase 1 real acceptance run**: one real statement walked photo → verification → statement → email/WhatsApp → payment, total identical to the sheet. Confirm-first, real person involved.
@@ -51,12 +54,15 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ~~2. Admin dashboard = `design/04`~~ — shipped PR #38, 2026-09-17: overdue alert, property & term card, billing-cycle stepper, outstanding card, recent statements table, needs-attention queue, both charts, all from real parallelised queries. Verified on dev with real billing data in both themes, zero console errors; **owner visual sign-off against the mockup still open**.
 
-3. **Admin statement detail = `design/05`**: line items grouped fixed / metered (rate chips, reading deltas) / adjustments, immutability note, payments panel, **delivery log** (email/WhatsApp sends persisted), history. Note: delivery log needs a small table — schema first.
-4. **Tenant home + meter flow = `design/02` + `design/03`**: hero card with "how it's calculated" expander, one primary CTA + reading-window hint, secondary CTA, notices strip, consumption mini-chart; meter flow frames including the lower-than-previous error state and "send note to owner" escape.
-5. **Readings verification = `design/06`**: queue + detail, photo viewer with zoom, keyboard shortcuts (↵ verify, E edit, R retake), the AI-proposal slot rendered empty.
-6. **Remaining screens** from `design/09` wireframes at token level; empty states, loading skeletons, error pages; admin shell below `md` gets a real navigation (B-19).
+~~3. Admin statement detail = `design/05`~~ — shipped PR #49, 2026-10-08, incl. the delivery log (migration `0028`). Deviations: no in-place "+ Add adjustment" on an issued statement (D-24, proposed); history lists events without actors.
 
-**Accept (4c):** the owner compares each ported screen against its mockup and signs off; both themes; tenant screens at 390px, admin at 1440px. Items 1–2 are built and functionally verified but **not yet owner-signed-off** — that sign-off is still the Accept gate for 4c as a whole, not a formality.
+~~4. Tenant home + meter flow = `design/02` + `design/03`~~ — shipped PRs #51/#52, 2026-10-08. The home mini-chart is unverified on dev (dev has no metered statement lines — B-30).
+
+~~5. Readings verification = `design/06`~~ — shipped PR #53, 2026-10-08 (also fixed the always-empty "confirmed value" box). No "detected counter region" / 6-month average — need Phase 5 / history data.
+
+6. **Remaining screens** from `design/09` wireframes at token level (requests, notices, approvals, inventory, contract); empty states, loading skeletons. *Done already:* error/404 pages (PR #46), admin phone navigation + no horizontal overflow at 390px (B-19, PR #54). **Done means:** each `design/09` screen ported at token level, checked at 390px (tenant) / 1440px (admin) in both themes, zero console errors.
+
+**Accept (4c):** the owner compares each ported screen against its mockup and signs off; both themes; tenant screens at 390px, admin at 1440px. Items 1–5 are built and functionally verified on dev but **not yet owner-signed-off** — that sign-off is still the Accept gate for 4c as a whole, not a formality.
 
 ## Phase 5 — AI features + expansion
 
