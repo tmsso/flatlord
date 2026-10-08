@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAllowedForRole } from "@/lib/auth/route-access";
 
 /**
  * Refreshes the Supabase session on every request and enforces the
@@ -75,23 +76,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // /settings (invite management) is owner-only content, but wasn't in
-  // this list until now — a pre-existing gap (any authenticated user could
-  // reach it), closed here alongside adding /statements for the new
-  // statement-lifecycle UI. /home/statements is already covered by the
-  // /home prefix below, no separate entry needed. /api/admin covers the
-  // backup export route — it also has its own in-handler role check
-  // (defense in depth for the single highest-value target in the app).
-  const isAdminPath =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/statements") ||
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/api/admin");
-  const isTenantPath = pathname.startsWith("/home");
-  if (
-    (isAdminPath && profile.role !== "owner") ||
-    (isTenantPath && profile.role !== "tenant")
-  ) {
+  // Default-deny: a path must be explicitly classified for this role in
+  // route-access.ts, otherwise it bounces to the role's home (B-25).
+  // /api/admin's backup route keeps its own in-handler role check as
+  // defence in depth.
+  if (!isAllowedForRole(pathname, profile.role === "owner" ? "owner" : "tenant")) {
     const url = request.nextUrl.clone();
     url.pathname = homeForRole;
     return NextResponse.redirect(url);
