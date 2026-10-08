@@ -1,3 +1,4 @@
+import { getFormatter, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { pickActiveSchedule, type ChargeScheduleInput } from "@/lib/billing/compute-statement";
@@ -97,11 +98,21 @@ export default async function TenantMetersPage() {
     };
   });
 
+  const readingWindow = resolveMeterReadingWindow(tenancy.meter_reading_config, today);
+  const t = await getTranslations("meterReadings");
+  const format = await getFormatter();
+
   return (
     <MeterReadingFlow
       tenancyId={tenancy.id}
       meters={flowMeters}
-      readingWindow={resolveMeterReadingWindow(tenancy.meter_reading_config, today)}
+      readingWindowLabel={t("windowLabel", {
+        range: format.dateTimeRange(new Date(`${readingWindow.start}T00:00:00Z`), new Date(`${readingWindow.end}T00:00:00Z`), {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC",
+        }),
+      })}
     />
   );
 }

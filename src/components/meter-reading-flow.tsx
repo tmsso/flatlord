@@ -92,11 +92,14 @@ function FlowHeader({ title, subtitle, onBack, backHref }: { title: string; subt
 export function MeterReadingFlow({
   tenancyId,
   meters,
-  readingWindow,
+  readingWindowLabel,
 }: {
   tenancyId: string | null;
   meters: MeterFlowMeter[];
-  readingWindow?: { start: string; end: string };
+  // Pre-formatted on the server: Intl date-range output differs in
+  // invisible spacing between Node's ICU and the browser's, which caused
+  // a hydration mismatch when formatted here.
+  readingWindowLabel?: string;
 }) {
   const t = useTranslations("meterReadings");
   const format = useFormatter();
@@ -244,17 +247,7 @@ export function MeterReadingFlow({
       <div className="flex flex-col gap-4">
         <FlowHeader
           title={t("listTitle")}
-          subtitle={
-            readingWindow
-              ? t("windowLabel", {
-                  range: format.dateTimeRange(new Date(`${readingWindow.start}T00:00:00Z`), new Date(`${readingWindow.end}T00:00:00Z`), {
-                    month: "short",
-                    day: "numeric",
-                    timeZone: "UTC",
-                  }),
-                })
-              : undefined
-          }
+          subtitle={readingWindowLabel}
           backHref="/home"
         />
         <div className="flex flex-col gap-2">
