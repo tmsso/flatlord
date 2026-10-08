@@ -6,7 +6,7 @@ Project brief and domain context for Claude Code. Read this fully before writing
 
 ## Communication with the admin
 
-The admin (Tamas) is a non-developer tech lead — comfortable with jargon and technical reasoning generally, but not with the specifics of modern web/JS tooling. When introducing a new technology, library, or tool for the first time (e.g. shadcn/ui, Drizzle, RLS), give a brief one-line explanation of what it is and why it's being used — don't assume familiarity. Skip this for genuinely trivial/universal things (HTML, CSS, plain JavaScript). At the end of a planning session, include a short tabular appendix listing the key technologies introduced or relied on in that plan (name, one-line purpose) — omit anything trivial, keep it a learning reference, not exhaustive.
+The admin is a non-developer tech lead — comfortable with jargon and technical reasoning generally, but not with the specifics of modern web/JS tooling. When introducing a new technology, library, or tool for the first time (e.g. shadcn/ui, Drizzle, RLS), give a brief one-line explanation of what it is and why it's being used — don't assume familiarity. Skip this for genuinely trivial/universal things (HTML, CSS, plain JavaScript). At the end of a planning session, include a short tabular appendix listing the key technologies introduced or relied on in that plan (name, one-line purpose) — omit anything trivial, keep it a learning reference, not exhaustive.
 
 ## 0. Privacy rule (read first)
 
