@@ -2,14 +2,14 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
 const IssueStatementSchema = z.object({
   statementId: z.string().uuid(),
 });
 
-// No statements column needs the caller's identity, so — like
-// create-draft-statement.ts — this relies entirely on RLS
-// (owner_update_statements) for authorization.
+// Owner-only: requireOwnerPersonId fails fast; RLS
+// (owner_update_statements) remains the real enforcement.
 //
 // Known gap, deliberately deferred: no mechanism in this milestone to
 // edit/regenerate a draft before issuing (same missing M7 admin
@@ -18,6 +18,7 @@ const IssueStatementSchema = z.object({
 export async function issueStatement(input: { statementId: string }) {
   const parsed = IssueStatementSchema.parse(input);
   const supabase = await createClient();
+  await requireOwnerPersonId(supabase);
 
   const { data: statement, error: statementError } = await supabase
     .from("statements")

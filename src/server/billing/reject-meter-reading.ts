@@ -2,14 +2,15 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
 const RejectMeterReadingSchema = z.object({
   readingId: z.string().uuid(),
 });
 
-// "Ask for retake" in the admin verification UI. RLS (owner_update_meter_
-// readings) enforces that only an owner can reach this update — no manual
-// role check needed, mirroring verify-meter-reading.ts.
+// "Ask for retake" in the admin verification UI. Owner-only:
+// requireOwnerPersonId fails fast, RLS (owner_update_meter_readings)
+// remains the real enforcement.
 //
 // No rejected_by/rejected_at columns exist on meter_readings (unlike
 // confirmed_by/confirmed_at for verification) — accepted v1 audit-trail
@@ -18,6 +19,7 @@ const RejectMeterReadingSchema = z.object({
 export async function rejectMeterReading(input: { readingId: string }) {
   const parsed = RejectMeterReadingSchema.parse(input);
   const supabase = await createClient();
+  await requireOwnerPersonId(supabase);
 
   const { error } = await supabase
     .from("meter_readings")

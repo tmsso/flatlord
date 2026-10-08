@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
 const RecordPaymentSchema = z.object({
   statementId: z.string().uuid(),
@@ -21,20 +22,10 @@ export async function recordPayment(input: {
   const parsed = RecordPaymentSchema.parse(input);
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  // payments.recorded_by references persons(id), not auth.users(id) —
-  // resolve the caller's own person record via their profile, same
-  // pattern as create-invite.ts.
-  const { data: callerProfile } = await supabase
-    .from("profiles")
-    .select("person_id")
-    .eq("id", user.id)
-    .single();
-  if (!callerProfile?.person_id) throw new Error("Caller has no person record");
+  // Owner-only. RLS (owner_insert_payments) is the real enforcement; this
+  // fails fast and resolves payments.recorded_by (a persons.id, not an
+  // auth user id).
+  const { personId } = await requireOwnerPersonId(supabase);
 
   const { data: statement, error: statementError } = await supabase
     .from("statements")
@@ -58,7 +49,7 @@ export async function recordPayment(input: {
     paid_at: parsed.paidAt,
     method: parsed.method,
     note: parsed.note ?? null,
-    recorded_by: callerProfile.person_id,
+    recorded_by: personId,
   });
   if (error) throw new Error(error.message);
 }

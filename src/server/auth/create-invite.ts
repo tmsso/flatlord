@@ -3,6 +3,7 @@
 import { randomBytes, createHash } from "node:crypto";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
 const CreateInviteSchema = z.object({
   email: z.string().email(),
@@ -29,19 +30,9 @@ export async function createInvite(input: {
   const parsed = CreateInviteSchema.parse(input);
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  // invites.invited_by references persons(id), not auth.users(id) — resolve
-  // the caller's own person record via their profile.
-  const { data: callerProfile } = await supabase
-    .from("profiles")
-    .select("person_id")
-    .eq("id", user.id)
-    .single();
-  if (!callerProfile?.person_id) throw new Error("Caller has no person record");
+  // Owner-only; resolves invites.invited_by (a persons.id, not an auth
+  // user id). RLS (owner_insert_invites) remains the real enforcement.
+  const { personId } = await requireOwnerPersonId(supabase);
 
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(
@@ -56,7 +47,7 @@ export async function createInvite(input: {
     token_hash: hashToken(token),
     role: parsed.role,
     person_id: parsed.personId ?? null,
-    invited_by: callerProfile.person_id,
+    invited_by: personId,
     expires_at: expiresAt,
   });
 
