@@ -65,6 +65,28 @@ Append-only history moved out of `ROADMAP.md` on 2026-09-15 so the roadmap stays
 - Both PRs are functionally verified on dev; **owner visual sign-off against the `design/01`/`design/04` mockups is still open** — that is the Accept gate for Phase 4c, not a formality met by shipping the code.
 - Found and deliberately deferred (not fixed this session, filed to `BACKLOG.md`): B-26 (tenant statement queries + RLS don't exclude `status = 'draft'` — a tenant can see an unissued draft).
 
+## Long batch 2026-10-08 — hardening + Phase 4c items 3–5
+
+Owner answered "defaults, you can merge"; all PRs below merged and deployed (prod at `d5afad8`). **Migrations `0026`–`0028` are in the repo and on dev, not yet on prod** — see the admin checklist in `ROADMAP.md`.
+
+- PR #41: owner's name removed from public-repo files (D-25).
+- PR #42: **B-25** default-deny route classification (`src/lib/auth/route-access.ts` + fail-closed unit test). Confirmed pre-fix D-15 breach on dev (tenant saw the cumulative ledger on their own tenancy page).
+- PR #43: **B-26** tenants never see drafts — query filters + `0026` (statements and line items RLS).
+- PR #44: explicit `requireOwnerPersonId` in 7 owner-only server actions (RLS already held) + fail-closed guard test over every `"use server"` module.
+- PR #45: **new finding** — `tenant_insert_meter_readings` let a tenant insert an already-`verified` reading via the REST API (reproduced on dev); `0027` pins status/source/confirmed/OCR columns and `entered_by`.
+- PR #46: branded `error.tsx` / `not-found.tsx` (root + both route groups) and `global-error.tsx` (copy inlined in hu+en — the one catalog exception, renders without the i18n provider).
+- PR #47: the "flaky" `rls-requests-isolation` afterAll was a real race (name-pattern delete hitting a sibling file's fixtures); fixed.
+- PR #48: workflow actions moved to their first Node 24 majors (checkout/setup-node/pnpm-action v5, supabase setup-cli v2). `backup.yml`'s first run on them is the next nightly.
+- PR #49: **4c item 3** admin statement detail = `design/05` + delivery log (`0028`, D-23, D-24).
+- PR #50: next-intl `timeZone: Europe/Budapest` (D-22) — prod had shown UTC times; reproduced with a `TZ=UTC` dev server.
+- PR #51: **4c item 4a** tenant home = `design/02` (real reading window from `meter_reading_config`, reconciling breakdown, notices strip, mini-chart).
+- PR #52: **4c item 4b** tenant meter flow = `design/03` + "note to owner" escape (D-26); caught and fixed an `Intl` date-range hydration mismatch.
+- PR #53: **4c item 5** readings verification = `design/06`; fixed the always-empty "confirmed value" box (ref override broke react-hook-form's prefill).
+- PR #54: **B-19** admin phone drawer; `min-w-0` fixed horizontal overflow on 6 of 9 admin pages at 390px; translated filter labels.
+- PR #56: "Ask for retake" was a dead end — the tenant page counted a rejected reading as done, so the month could never reach all-verified (pre-existing; #52 made it bite harder). Rejected now reopens the meter with a "Retake requested" pill; full loop verified on dev.
+- Final smoke on merged `main` against dev: 38 page loads (owner 12 routes @1440, tenant 7 @390, × hu/en) — all 200, no overflow, zero console errors.
+- **Not verified:** the tenant mini-chart (no metered data on dev, B-30); `global-error.tsx` at runtime; a real "sent" email row (no real sends — only the `failed` path via an invalid-key override).
+
 ## Review pass 2026-09-15 (Fable)
 
 - PR #34: Vercel `fra1` region, `Card` border/shadow/radius per design, nav icons + active state + logo tile, tenant shell mobile fixes (five tabs, icon-only bell/sign-out, viewport-pinned notification panel), lint warning.

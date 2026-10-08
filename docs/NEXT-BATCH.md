@@ -1,41 +1,35 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-09-17 after the prior batch fully shipped (PRs #36-39: perf, Phase 4c items 1-2, billing polish B-05/06/07 — all merged, both migrations `0024`/`0025` applied to prod). See `docs/DELIVERY-LOG.md` for detail.
+Rewritten 2026-10-09 after the 2026-10-08 long batch (PRs #41–#54: security hardening, Phase 4c items 3–5, B-19). See `docs/DELIVERY-LOG.md` for detail.
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. PRs #36-39 are all merged and live — no longer a precondition for anything below.
-2. Read `docs/DECISIONS.md`. D-06 (ad-hoc notes) is the only tentative decision and is not in this batch.
-3. Confirm ship-autonomy for the batch explicitly, per the `/next-batch` skill.
+1. **Prod migrations `0026`–`0028` applied?** `gh run list --workflow migrate-prod.yml --limit 1` must show a run after 2026-10-08. If not, remind the owner before anything else — `0027` closes a live tenant write hole. Never run it yourself (D-14).
+2. **Owner visual sign-off on Phase 4c items 1–5** (`design/01`, `04`, `05`, `02`, `03`, `06`). Fold any feedback into this batch ahead of item 2 below.
+3. D-24 (post-issue corrections) is **proposed**; if the owner wants an in-place "+ Add adjustment" on issued statements, that is a new item (engine + design), not a tweak.
+4. Confirm ship-autonomy for the batch explicitly.
 
 ## The three
 
-### 0. Do first — B-25, auth route-allowlist gap (security)
+### 1. B-28 — tenant write policies that don't pin other columns (security, S)
 
-Still open, still first, carried over unchanged from the prior recommendation — nobody picked it up in the 2026-09-15→17 batch since it wasn't one of the 3 confirmed items. `src/lib/supabase/middleware.ts`'s role-based allow-list doesn't cover `/properties`, `/persons`, `/tenancies`, `/requests`, `/notices`, `/meters`, so an authenticated **tenant** session isn't redirected off owner-only pages. See `BACKLOG.md` B-25 for the fix shape (default-deny, explicit per-role allowlist, regression test).
+Same class as `0027`, lower stakes: tenant request insert/withdraw can set unrelated columns; `tenant_update_inventory_reconfirmation_items` has no `WITH CHECK`. Pattern and test shape are already in `0027` + `rls-billing-isolation.test.ts`.
 
-### 1. B-26 — tenant can see draft statements
+### 2. Phase 4c item 6 — remaining `design/09` screens (M–L)
 
-New finding from the 2026-09-17 session (advisor-flagged, deliberately deferred since it wasn't one of the 3 confirmed items that session). `tenant_scope_statements` RLS has no `status` restriction, and neither tenant statements query (list or detail) filters out `status = 'draft'` — only `voided_at is null`. A tenant can see a draft statement's full detail/PDF before the admin has issued it. Small: two query filters plus tightening the RLS policy itself as the real backstop. See `BACKLOG.md` B-26.
+Requests (create / thread / admin queue), notices (compose / tenant acknowledge), approval diff card, inventory grid + reconfirmation, contract version chain + parse review — at token level, plus empty states and loading skeletons. Error pages and admin phone nav are already done (#46, #54). Consider splitting per screen family, one PR each.
 
-### 2. Phase 4c item 3 — admin statement detail = `design/05`
+### 3. B-08 — committed Playwright smoke (M)
 
-Natural next step in Phase 4c's own sequencing now that items 1-2 (component tokens, admin dashboard) are shipped. Scope: line items grouped fixed/metered (rate chips, reading deltas)/adjustments, immutability note, payments panel, **delivery log** (email/WhatsApp sends persisted — needs a small schema addition first, so this item likely needs a schema-first sub-step same as B-05 needed migration `0025`), history.
+Every batch rewrites the same login helper (`auth.admin.generateLink`, wait for `/home|/dashboard` because the magic link lands on `/login#access_token` and the client redirects). The 2026-10-08 batch's route sweep (both roles × locales, status / overflow / console errors) is exactly the smoke B-08 asks for — commit it with a `workflow_dispatch` + nightly run against **dev**.
 
-*Done means:* matches `design/05` at 1440, both themes; delivery log shows real sent-email/WhatsApp rows; immutability note is visible on an issued statement.
+## Alternatives
 
-## Open from the prior batch, not yet resolved
+- **B-30** (seed dev with metered history) — small, and makes every chart/metered UI verifiable on dev; good warm-up before item 2.
+- **B-04** Sentry; **B-03** `getClaims()` (needs the owner to enable asymmetric JWT keys).
 
-- **Phase 4c items 1-2 (component tokens, admin dashboard) are built and functionally verified on dev, but still await the owner's visual sign-off against `design/01`/`design/04`.** That sign-off — not the code shipping — is Phase 4c's actual Accept gate. Worth doing before piling item 3 on top.
-- **B-27** (duplicate `MonthPicker` components, `src/components/month-picker.tsx` vs `src/components/ui/month-picker.tsx`) — tech debt, pick up only if adjacent work touches either one.
+## Session logistics
 
-## Alternatives if the admin prefers
-
-- **B-01** (domain purchase) and **B-03** (middleware `getClaims()`, needs asymmetric JWT keys enabled by the admin in both Supabase projects) are both admin-action-gated, not pure-code items.
-- **B-04** (Sentry) or **B-08** (committed Playwright smoke) if reliability/observability matters more than the security gap or the design pass right now.
-
-## Session logistics (unchanged)
-
-`/verify` for lint + typecheck (build/tests need the DB; CI covers them) · real verification against **dev** with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test`, login via `auth.admin.generateLink` + `page.goto(action_link)` (rewrite `redirect_to` to `http://localhost:3000/auth/callback`) · Base UI `Switch` = `[data-slot="switch"]` · prod migrations via `migrate-prod.yml` only · `gh run list` after every push · the `rls-requests-isolation` `afterAll` flake is pre-existing, rerun once · SSR hydration-safe client-only reads need `useSyncExternalStore`, not `useState`+`useEffect` (this repo's lint rejects the latter) · don't run `pnpm test` against dev locally, it's CI-only and leaves orphaned fixture rows · `/close-session` to end.
+`/verify` for lint + typecheck · real verification on **dev** (`kqrzqbocruwafvuodatb`) with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test` · tenant-a's contact email is a real inbox — never trigger real email sends; for send paths start the dev server with an invalid `RESEND_API_KEY` override · format date **ranges** on the server only (`Intl.formatRange` differs between Node and Chromium → hydration mismatch) · Base UI `Select.Value` needs a render-function child · stop dev servers with TaskStop, not `pkill -f` (it matches its own shell) · prod migrations via `migrate-prod.yml` only · `gh run list` after every push · `/close-session` to end.
