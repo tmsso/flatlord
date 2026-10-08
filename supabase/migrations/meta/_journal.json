@@ -190,6 +190,13 @@
       "when": 1791496114441,
       "tag": "0026_tenant-hide-draft-statements",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1791496743801,
+      "tag": "0027_tenant-reading-insert-cannot-verify",
+      "breakpoints": true
     }
   ]
 }
