@@ -654,5 +654,14 @@
     "eventPaymentDetail": "{amount} · {method}",
     "eventRequestDetail": "{title} — {category} · {status}",
     "eventNoticeDetail": "{title} — {type}"
+  },
+  "errors": {
+    "errorTitle": "Valami hiba történt",
+    "errorBody": "Az oldalt nem sikerült betölteni. Próbáld újra – ha a hiba ismétlődik, küldd el az alábbi hivatkozási kódot az adminisztrátornak.",
+    "reference": "Hivatkozási kód: {code}",
+    "retry": "Újrapróbálás",
+    "home": "Vissza a kezdőlapra",
+    "notFoundTitle": "Az oldal nem található",
+    "notFoundBody": "Ez az oldal nem létezik, vagy nincs hozzáférésed."
   }
 }
