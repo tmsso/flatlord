@@ -26,6 +26,8 @@ export interface MeterFlowMeter {
   previousDate: string | null;
   ratePerUnit: number | null;
   doneThisMonth: boolean;
+  // The admin rejected this month's reading ("Ask for retake").
+  retakeRequested?: boolean;
   // charge_types.code ("electricity", "gas", "water", …) — picks the icon.
   kind?: string | null;
 }
@@ -264,9 +266,15 @@ export function MeterReadingFlow({
                       : t("previousValueLabel", { value: num(m.previousValue), unit: unitLabel(m.unit) })}
                   </span>
                 </div>
-                <StatusPill tone={done ? "success" : "warning"} icon={done ? Check : Clock}>
-                  {done ? t("statusDone") : t("statusPending")}
-                </StatusPill>
+                {m.retakeRequested && entries[m.id] == null ? (
+                  <StatusPill tone="destructive" icon={AlertCircle}>
+                    {t("statusRetakeRequested")}
+                  </StatusPill>
+                ) : (
+                  <StatusPill tone={done ? "success" : "warning"} icon={done ? Check : Clock}>
+                    {done ? t("statusDone") : t("statusPending")}
+                  </StatusPill>
+                )}
               </Card>
             );
           })}

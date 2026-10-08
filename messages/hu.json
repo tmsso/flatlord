@@ -249,7 +249,8 @@
     "noPhoto": "Nincs fotó — a bérlő kihagyta",
     "prevMonth": "Előző hónap",
     "nextMonth": "Következő hónap",
-    "atRate": "@ {rate}"
+    "atRate": "@ {rate}",
+    "statusRetakeRequested": "Újrafotózást kértek"
   },
   "properties": {
     "title": "Ingatlanok",

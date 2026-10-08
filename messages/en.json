@@ -249,7 +249,8 @@
     "noPhoto": "No photo — the tenant skipped it",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "atRate": "@ {rate}"
+    "atRate": "@ {rate}",
+    "statusRetakeRequested": "Retake requested"
   },
   "properties": {
     "title": "Properties",

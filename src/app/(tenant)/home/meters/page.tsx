@@ -65,9 +65,10 @@ export default async function TenantMetersPage() {
     meterIds.length
       ? supabase
           .from("meter_readings")
-          .select("meter_id, reading_date")
+          .select("meter_id, reading_date, status, created_at")
           .in("meter_id", meterIds)
           .gte("reading_date", `${currentMonthPrefix}-01`)
+          .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
   ]);
   const unitByChargeType = new Map((chargeTypeRows ?? []).map((ct) => [ct.id, ct.unit ?? ""]));
@@ -79,7 +80,16 @@ export default async function TenantMetersPage() {
       latestVerifiedByMeter.set(r.meter_id, { value: Number(r.confirmed_value), date: r.reading_date });
     }
   }
-  const doneThisMonth = new Set((thisMonthReadings ?? []).map((r) => r.meter_id));
+  // A meter counts as done this month only if its latest reading is
+  // submitted or verified. A rejected one ("Ask for retake") must reopen
+  // the meter, or the tenant could never resubmit and the admin's batch
+  // could never reach all-verified.
+  const latestThisMonth = new Map<string, string>();
+  for (const r of thisMonthReadings ?? []) {
+    if (!latestThisMonth.has(r.meter_id)) latestThisMonth.set(r.meter_id, r.status);
+  }
+  const doneThisMonth = new Set([...latestThisMonth].filter(([, status]) => status !== "rejected").map(([id]) => id));
+  const retakeRequested = new Set([...latestThisMonth].filter(([, status]) => status === "rejected").map(([id]) => id));
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -94,6 +104,7 @@ export default async function TenantMetersPage() {
       previousDate: verified ? verified.date : null,
       ratePerUnit: activeSchedule?.ratePerUnit ?? null,
       doneThisMonth: doneThisMonth.has(m.id),
+      retakeRequested: retakeRequested.has(m.id),
       kind: codeByChargeType.get(m.charge_type_id) ?? null,
     };
   });
