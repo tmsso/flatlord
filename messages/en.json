@@ -654,5 +654,14 @@
     "eventPaymentDetail": "{amount} · {method}",
     "eventRequestDetail": "{title} — {category} · {status}",
     "eventNoticeDetail": "{title} — {type}"
+  },
+  "errors": {
+    "errorTitle": "Something went wrong",
+    "errorBody": "This page couldn't load. Try again — if it keeps happening, send the reference code below to the administrator.",
+    "reference": "Reference: {code}",
+    "retry": "Try again",
+    "home": "Go to home page",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page doesn't exist, or you don't have access to it."
   }
 }
