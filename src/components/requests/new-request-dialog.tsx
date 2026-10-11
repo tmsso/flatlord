@@ -40,6 +40,7 @@ export function NewRequestDialog({
   const fileRef = useRef<HTMLInputElement>(null);
   const isAdmin = !!tenancyOptions;
   const [category, setCategory] = useState<RequestCategory>("other");
+  const [fileName, setFileName] = useState<string | null>(null);
   const [tenancyId, setTenancyId] = useState<string | undefined>(tenancyOptions?.[0]?.id);
   // A tenant has one active tenancy, so their options need no filter.
   const unitItems = isAdmin ? itemOptions.filter((o) => o.tenancyId === tenancyId) : itemOptions;
@@ -71,6 +72,7 @@ export function NewRequestDialog({
         toast.success(tc("save"));
         setOpen(false);
         setCategory("other");
+        setFileName(null);
         (e.target as HTMLFormElement).reset();
         router.refresh();
       } catch (err) {
@@ -103,7 +105,7 @@ export function NewRequestDialog({
                 onValueChange={(v) => v && setTenancyId(v)}
                 items={tenancyOptions?.map((opt) => ({ value: opt.id, label: opt.label }))}
               >
-                <SelectTrigger id="requestTenancyId">
+                <SelectTrigger id="requestTenancyId" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -124,7 +126,7 @@ export function NewRequestDialog({
               onValueChange={(v) => v && setCategory(v as RequestCategory)}
               items={REQUEST_CATEGORIES.map((c) => ({ value: c, label: t(`category_${c}`) }))}
             >
-              <SelectTrigger id="requestCategory">
+              <SelectTrigger id="requestCategory" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -144,7 +146,7 @@ export function NewRequestDialog({
                 defaultValue="none"
                 items={[{ value: "none", label: t("affectedItemNone") }, ...unitItems.map((o) => ({ value: o.id, label: o.title }))]}
               >
-                <SelectTrigger id="requestInventoryItem">
+                <SelectTrigger id="requestInventoryItem" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -191,10 +193,22 @@ export function NewRequestDialog({
               <Input id="requestExternalCaseRef" name="externalCaseRef" />
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="requestFile">{t("attachmentLabel")}</Label>
-            <Input id="requestFile" ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" />
-          </div>
+          {/* design/09 7a: dashed "+ photo / attachment" drop box */}
+          <label
+            htmlFor="requestFile"
+            className="flex min-h-14 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-input bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground hover:bg-muted"
+          >
+            <span>{fileName ?? t("attachHint")}</span>
+            <span className="text-xs">{t("attachmentLabel")}</span>
+            <input
+              id="requestFile"
+              ref={fileRef}
+              type="file"
+              accept="application/pdf,image/jpeg,image/png,image/heic,image/webp"
+              className="sr-only"
+              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+            />
+          </label>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={isPending}>

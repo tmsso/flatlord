@@ -581,7 +581,19 @@
     "affectedFacility": "Érintett felszereltség",
     "affectedItemNone": "Nincs / nem szerepel",
     "affectedItemFacilities": "Felszereltség",
-    "affectedItemItems": "Leltártárgyak"
+    "affectedItemItems": "Leltártárgyak",
+    "subjectColumn": "Tárgy",
+    "openedColumn": "Megnyitva",
+    "back": "Vissza a kérésekhez",
+    "you": "Ön",
+    "authorOwner": "Tulajdonos",
+    "authorTenant": "Bérlő",
+    "attachFile": "Fájl csatolása",
+    "attachHint": "+ fotó / melléklet",
+    "attached": "Csatolva: {name}",
+    "threadEmpty": "Még nincs üzenet.",
+    "externalRefColumn": "Külső ügyszám",
+    "appointmentColumn": "Időpont"
   },
   "notices": {
     "title": "Értesítések",

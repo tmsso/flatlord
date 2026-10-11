@@ -1,15 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
+import { Inbox } from "lucide-react";
 import { REQUEST_CATEGORIES, REQUEST_STATUSES, type RequestCategory, type RequestStatus } from "@/db/schema/requests";
 import { NewRequestDialog } from "@/components/requests/new-request-dialog";
 import type { RequestItemOption } from "@/lib/requests/get-request-item-options";
-import { Badge } from "@/components/ui/badge";
+import { RequestStatusBadge } from "@/components/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export interface AdminRequestRow {
   id: string;
@@ -20,15 +23,12 @@ export interface AdminRequestRow {
   propertyId: string;
   propertyName: string;
   tenantName: string;
+  externalCaseRef: string | null;
+  appointmentDate: string | null;
 }
 
-const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructive"> = {
-  open: "outline",
-  resolved: "secondary",
-  rejected: "destructive",
-  withdrawn: "secondary",
-};
-
+// design/09 7c: status pills with counts (open first — the admin's work
+// queue), category + property filters, dense table; a row opens the thread.
 export function AdminRequestsDashboard({
   requests,
   tenancyOptions,
@@ -40,7 +40,8 @@ export function AdminRequestsDashboard({
 }) {
   const t = useTranslations("requests");
   const format = useFormatter();
-  const [status, setStatus] = useState<RequestStatus | "all">("all");
+  const router = useRouter();
+  const [status, setStatus] = useState<RequestStatus | "all">("open");
   const [category, setCategory] = useState<RequestCategory | "all">("all");
   const [propertyId, setPropertyId] = useState<string | "all">("all");
 
@@ -50,41 +51,40 @@ export function AdminRequestsDashboard({
     return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
   }, [requests]);
 
-  const filtered = requests.filter(
-    (r) =>
-      (status === "all" || r.status === status) &&
-      (category === "all" || r.category === category) &&
-      (propertyId === "all" || r.propertyId === propertyId),
-  );
+  const matchesOtherFilters = (r: AdminRequestRow) =>
+    (category === "all" || r.category === category) && (propertyId === "all" || r.propertyId === propertyId);
+  const countFor = (s: RequestStatus | "all") => requests.filter((r) => matchesOtherFilters(r) && (s === "all" || r.status === s)).length;
+  const filtered = requests.filter((r) => matchesOtherFilters(r) && (status === "all" || r.status === status));
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle>{t("title")}</CardTitle>
         <NewRequestDialog tenancyOptions={tenancyOptions} itemOptions={itemOptions} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="filterStatus">{t("statusLabel")}</Label>
-            <Select value={status} onValueChange={(v) => v && setStatus(v as RequestStatus | "all")}>
-              <SelectTrigger id="filterStatus" className="w-40">
-                <SelectValue>{(v: string) => (v === "all" ? t("allStatuses") : t(`status_${v}`))}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                {REQUEST_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {t(`status_${s}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label={t("statusLabel")} className="flex flex-wrap gap-1.5">
+            {[...REQUEST_STATUSES, "all" as const].map((s) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={status === s}
+                onClick={() => setStatus(s)}
+                className={cn(
+                  "rounded-4xl border px-3 py-1 text-xs font-medium transition-colors",
+                  status === s
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted",
+                )}
+              >
+                {s === "all" ? t("allStatuses") : t(`status_${s}`)} · {countFor(s)}
+              </button>
+            ))}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="filterCategory">{t("categoryLabel")}</Label>
+          <div className="ml-auto flex flex-wrap gap-2">
             <Select value={category} onValueChange={(v) => v && setCategory(v as RequestCategory | "all")}>
-              <SelectTrigger id="filterCategory" className="w-48">
+              <SelectTrigger id="filterCategory" size="sm" className="w-44" aria-label={t("categoryLabel")}>
                 <SelectValue>{(v: string) => (v === "all" ? t("allCategories") : t(`category_${v}`))}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -96,44 +96,74 @@ export function AdminRequestsDashboard({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="filterProperty">{t("propertyFilterLabel")}</Label>
-            <Select value={propertyId} onValueChange={(v) => v && setPropertyId(v)}>
-              <SelectTrigger id="filterProperty" className="w-48">
-                <SelectValue>{(v: string) => (v === "all" ? t("allProperties") : (properties.find((p) => p.id === v)?.name ?? v))}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("allProperties")}</SelectItem>
-                {properties.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {properties.length > 1 && (
+              <Select value={propertyId} onValueChange={(v) => v && setPropertyId(v)}>
+                <SelectTrigger id="filterProperty" size="sm" className="w-44" aria-label={t("propertyFilterLabel")}>
+                  <SelectValue>{(v: string) => (v === "all" ? t("allProperties") : (properties.find((p) => p.id === v)?.name ?? v))}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("allProperties")}</SelectItem>
+                  {properties.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
-        {filtered.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
-        <div className="flex flex-col gap-2">
-          {filtered.map((r) => (
-            <Link
-              key={r.id}
-              href={`/requests/${r.id}`}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 hover:bg-muted"
-            >
-              <div className="flex flex-col gap-1 overflow-hidden">
-                <span className="truncate text-sm font-medium">{r.title}</span>
-                <span className="text-xs text-muted-foreground">
-                  {t(`category_${r.category}`)} · {r.propertyName} · {r.tenantName} ·{" "}
-                  {format.dateTime(new Date(r.createdAt))}
-                </span>
-              </div>
-              <Badge variant={STATUS_VARIANT[r.status]}>{t(`status_${r.status}`)}</Badge>
-            </Link>
-          ))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
+            <Inbox className="size-6 text-muted-foreground" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">{t("empty")}</p>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("subjectColumn")}</TableHead>
+                  <TableHead>{t("categoryLabel")}</TableHead>
+                  <TableHead>{t("externalRefColumn")}</TableHead>
+                  <TableHead>{t("appointmentColumn")}</TableHead>
+                  <TableHead>{t("openedColumn")}</TableHead>
+                  <TableHead className="text-right">{t("statusLabel")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.id} className="cursor-pointer" onClick={() => router.push(`/requests/${r.id}`)}>
+                    <TableCell className="max-w-80">
+                      <Link href={`/requests/${r.id}`} className="block truncate font-medium" onClick={(e) => e.stopPropagation()}>
+                        {r.title}
+                      </Link>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {r.propertyName} · {r.tenantName}
+                      </span>
+                    </TableCell>
+                    <TableCell>{t(`category_${r.category}`)}</TableCell>
+                    <TableCell className="font-mono text-xs">{r.externalCaseRef ?? "—"}</TableCell>
+                    <TableCell className="tabular-nums">
+                      {r.appointmentDate
+                        ? // Date-only in practice (the form collects a date, stored as
+                          // UTC midnight) — format in UTC so the day never shifts.
+                          format.dateTime(new Date(r.appointmentDate), { dateStyle: "medium", timeZone: "UTC" })
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="tabular-nums text-muted-foreground">
+                      {format.dateTime(new Date(r.createdAt), { dateStyle: "medium" })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <RequestStatusBadge status={r.status} label={t(`status_${r.status}`)} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

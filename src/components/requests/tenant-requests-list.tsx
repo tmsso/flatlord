@@ -5,7 +5,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
 import { NewRequestDialog } from "@/components/requests/new-request-dialog";
 import type { RequestItemOption } from "@/lib/requests/get-request-item-options";
-import { Badge } from "@/components/ui/badge";
+import { RequestStatusBadge } from "@/components/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface TenantRequestRow {
@@ -16,12 +16,6 @@ export interface TenantRequestRow {
   createdAt: string;
 }
 
-const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructive"> = {
-  open: "outline",
-  resolved: "secondary",
-  rejected: "destructive",
-  withdrawn: "secondary",
-};
 
 export function TenantRequestsList({ requests, itemOptions }: { requests: TenantRequestRow[]; itemOptions?: RequestItemOption[] }) {
   const t = useTranslations("requests");
@@ -47,7 +41,7 @@ export function TenantRequestsList({ requests, itemOptions }: { requests: Tenant
                 {t(`category_${r.category}`)} · {format.dateTime(new Date(r.createdAt))}
               </span>
             </div>
-            <Badge variant={STATUS_VARIANT[r.status]}>{t(`status_${r.status}`)}</Badge>
+            <RequestStatusBadge status={r.status} label={t(`status_${r.status}`)} />
           </Link>
         ))}
       </CardContent>

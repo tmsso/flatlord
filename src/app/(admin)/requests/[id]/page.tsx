@@ -21,7 +21,7 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("request_messages")
-    .select("id, author_id, body, created_at")
+    .select("id, author_id, body, created_at, persons(given_name)")
     .eq("request_id", id)
     .order("created_at", { ascending: true });
   assertNoQueryError("requests/[id]/messages", messagesError);
@@ -62,6 +62,10 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
     body: m.body,
     createdAt: m.created_at,
     isOwnMessage: m.author_id === profile.personId,
+    authorName: (() => {
+      const ref = m.persons as unknown as { given_name: string } | { given_name: string }[] | null;
+      return (Array.isArray(ref) ? ref[0] : ref)?.given_name ?? null;
+    })(),
   }));
 
   const attachments: AttachmentRow[] = (attachmentRows ?? []).map((a) => ({

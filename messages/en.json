@@ -581,7 +581,19 @@
     "affectedFacility": "Affected facility",
     "affectedItemNone": "None / not listed",
     "affectedItemFacilities": "Facilities",
-    "affectedItemItems": "Items"
+    "affectedItemItems": "Items",
+    "subjectColumn": "Subject",
+    "openedColumn": "Opened",
+    "back": "Back to requests",
+    "you": "You",
+    "authorOwner": "Owner",
+    "authorTenant": "Tenant",
+    "attachFile": "Attach a file",
+    "attachHint": "+ photo / attachment",
+    "attached": "Attached: {name}",
+    "threadEmpty": "No messages yet.",
+    "externalRefColumn": "External ref",
+    "appointmentColumn": "Appointment"
   },
   "notices": {
     "title": "Notices",

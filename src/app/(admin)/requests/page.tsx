@@ -19,7 +19,7 @@ export default async function AdminRequestsPage() {
   const { data: requestRows, error } = await supabase
     .from("requests")
     .select(
-      "id, category, status, title, created_at, tenancy_id, tenancies(unit_id, primary_tenant_id, properties(id, name), persons(given_name, family_name))",
+      "id, category, status, title, created_at, external_case_ref, appointment_date, tenancy_id, tenancies(unit_id, primary_tenant_id, properties(id, name), persons(given_name, family_name))",
     )
     .order("created_at", { ascending: false });
   assertNoQueryError("requests", error);
@@ -46,6 +46,8 @@ export default async function AdminRequestsPage() {
       propertyId: property?.id ?? "",
       propertyName: property?.name ?? "—",
       tenantName: person ? `${person.given_name} ${person.family_name}` : "—",
+      externalCaseRef: r.external_case_ref,
+      appointmentDate: r.appointment_date,
     };
   });
 

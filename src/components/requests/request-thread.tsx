@@ -2,6 +2,8 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowRight, ChevronLeft, Paperclip } from "lucide-react";
 import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 import { addRequestMessage } from "@/server/requests/add-request-message";
@@ -15,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { RequestStatusBadge } from "@/components/status-badge";
+import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface RequestMessageRow {
@@ -24,6 +27,9 @@ export interface RequestMessageRow {
   body: string;
   createdAt: string;
   isOwnMessage: boolean;
+  // Given name when the viewer may read the author's person row (RLS);
+  // otherwise the bubble falls back to the author's role.
+  authorName?: string | null;
 }
 
 export interface FieldChangePayload {
@@ -51,12 +57,6 @@ export interface RequestDetail {
   affectedItem?: { title: string; kind: "item" | "facility" } | null;
 }
 
-const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructive"> = {
-  open: "outline",
-  resolved: "secondary",
-  rejected: "destructive",
-  withdrawn: "secondary",
-};
 
 // role gates which actions render: tenant sees withdraw (own open request
 // only); owner sees resolve/reject + the external-case-ref/appointment-
@@ -80,6 +80,12 @@ export function RequestThread({
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  // appointment_date is timestamptz but collected as a date (stored as
+  // UTC midnight): show and edit it as a date in UTC.
+  const appointmentDay = request.appointmentDate ? request.appointmentDate.slice(0, 10) : "";
+  const dateOnly = (d: string) => format.dateTime(new Date(`${d}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
+  const otherRoleLabel = role === "owner" ? t("authorTenant") : t("authorOwner");
 
   function handleReply(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,6 +98,7 @@ export function RequestThread({
         await addRequestMessage({ requestId: request.id, body }, file);
         toast.success(tc("save"));
         (e.target as HTMLFormElement).reset();
+        setFileName(null);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errorGeneric"));
@@ -181,14 +188,31 @@ export function RequestThread({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <CardTitle>{request.title}</CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <Link
+                href={role === "owner" ? "/requests" : "/home/requests"}
+                aria-label={t("back")}
+                className="-ml-1 flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+              >
+                <ChevronLeft className="size-4" aria-hidden="true" />
+              </Link>
+              <CardTitle className="truncate">{request.title}</CardTitle>
+            </div>
+            {/* design/09 7b meta line: category · external ref · appointment · opened */}
             <span className="text-xs text-muted-foreground">
-              {t(`category_${request.category}`)} · {t("openedOn", { date: format.dateTime(new Date(request.createdAt)) })}
+              {[
+                t(`category_${request.category}`),
+                request.externalCaseRef ? `${t("externalRefColumn")}: ${request.externalCaseRef}` : null,
+                appointmentDay ? `${t("appointmentColumn")}: ${dateOnly(appointmentDay)}` : null,
+                t("openedOn", { date: format.dateTime(new Date(request.createdAt), { dateStyle: "medium" }) }),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </span>
           </div>
-          <Badge variant={STATUS_VARIANT[request.status]}>{t(`status_${request.status}`)}</Badge>
+          <RequestStatusBadge status={request.status} label={t(`status_${request.status}`)} />
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {request.affectedItem && (
@@ -216,27 +240,25 @@ export function RequestThread({
           )}
           {request.description && <p className="text-sm">{request.description}</p>}
           {role === "owner" ? (
-            <form onSubmit={handleMetaSave} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <form
+              // Remount on saved values so the uncontrolled inputs pick up
+              // the refreshed defaults (Base UI warns on a changing defaultValue).
+              key={`${request.externalCaseRef ?? ""}|${appointmentDay}`}
+              onSubmit={handleMetaSave}
+              className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="externalCaseRef">{t("externalCaseRefLabel")}</Label>
                 <Input id="externalCaseRef" name="externalCaseRef" defaultValue={request.externalCaseRef ?? ""} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="appointmentDate">{t("appointmentDateLabel")}</Label>
-                <Input id="appointmentDate" name="appointmentDate" type="date" defaultValue={request.appointmentDate ?? ""} />
+                <Input id="appointmentDate" name="appointmentDate" type="date" defaultValue={appointmentDay} />
               </div>
               <Button type="submit" variant="outline" size="sm" disabled={isSavingMeta}>
                 {tc("save")}
               </Button>
             </form>
-          ) : (
-            (request.externalCaseRef || request.appointmentDate) && (
-              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                {request.externalCaseRef && <span>{t("externalCaseRefLabel")}: {request.externalCaseRef}</span>}
-                {request.appointmentDate && <span>{t("appointmentDateLabel")}: {request.appointmentDate}</span>}
-              </div>
-            )
-          )}
+          ) : null}
           <div className="flex items-center gap-2 self-end">
             {canWithdraw && (
               <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={handleWithdraw}>
@@ -272,23 +294,51 @@ export function RequestThread({
           <CardTitle>{t("threadTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {messages.length === 0 && <p className="text-sm text-muted-foreground">{t("threadEmpty")}</p>}
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`flex flex-col gap-1 rounded-lg border border-border p-3 ${m.isOwnMessage ? "self-end bg-muted" : "self-start"}`}
+              className={cn(
+                "flex max-w-[85%] flex-col gap-1 rounded-lg border p-3",
+                m.isOwnMessage ? "self-end border-primary/20 bg-primary/5" : "self-start border-border bg-card",
+              )}
             >
+              <span className="text-xs font-medium">
+                {m.isOwnMessage ? t("you") : (m.authorName ?? otherRoleLabel)}
+                <span className="font-normal text-muted-foreground"> · {format.dateTime(new Date(m.createdAt), { dateStyle: "medium", timeStyle: "short" })}</span>
+              </span>
               <p className="text-sm whitespace-pre-wrap">{m.body}</p>
-              <span className="text-xs text-muted-foreground">{format.dateTime(new Date(m.createdAt))}</span>
             </div>
           ))}
-          <form onSubmit={handleReply} className="flex flex-col gap-2">
-            <Textarea ref={replyRef} name="body" placeholder={t("replyPlaceholder")} required />
-            <div className="flex items-center gap-2">
-              <Input ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" className="max-w-xs" />
-              <Button type="submit" size="sm" disabled={isPending}>
-                {t("reply")}
+          <form onSubmit={handleReply} className="flex flex-col gap-1.5">
+            <div className="flex items-end gap-2">
+              <label
+                className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted"
+                title={t("attachFile")}
+              >
+                <Paperclip className="size-4" aria-hidden="true" />
+                <span className="sr-only">{t("attachFile")}</span>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="application/pdf,image/jpeg,image/png,image/heic,image/webp"
+                  className="sr-only"
+                  onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+                />
+              </label>
+              <Textarea
+                ref={replyRef}
+                name="body"
+                rows={1}
+                placeholder={t("replyPlaceholder")}
+                required
+                className="min-h-10 rounded-2xl py-2.5"
+              />
+              <Button type="submit" size="icon" className="size-10 shrink-0 rounded-full" disabled={isPending} aria-label={t("reply")}>
+                <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </div>
+            {fileName && <p className="pl-12 text-xs text-muted-foreground">{t("attached", { name: fileName })}</p>}
             {error && <p className="text-sm text-destructive">{error}</p>}
           </form>
         </CardContent>

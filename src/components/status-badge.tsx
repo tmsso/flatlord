@@ -72,3 +72,23 @@ export function MeterReadingStatusBadge({ status, label }: { status: MeterReadin
     </StatusPill>
   );
 }
+
+export type RequestStatus = "open" | "resolved" | "rejected" | "withdrawn";
+
+// design/09 7b/7c: open = info, resolved = success, rejected = destructive,
+// withdrawn = muted (the tenant closed it themselves).
+const requestStatusConfig: Record<RequestStatus, { tone: StatusTone; icon: typeof Check }> = {
+  open: { tone: "info", icon: CircleDashed },
+  resolved: { tone: "success", icon: Check },
+  rejected: { tone: "destructive", icon: AlertCircle },
+  withdrawn: { tone: "muted", icon: ArrowRight },
+};
+
+export function RequestStatusBadge({ status, label }: { status: RequestStatus; label: string }) {
+  const config = requestStatusConfig[status];
+  return (
+    <StatusPill tone={config.tone} icon={config.icon}>
+      {label}
+    </StatusPill>
+  );
+}
