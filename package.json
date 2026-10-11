@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "dotenv -e .env.local -- tsx src/db/migrate.ts",
     "db:seed": "dotenv -e .env.local -- tsx seed/seed.demo.ts",
-    "test": "dotenv -e .env.local -- vitest run"
+    "test": "dotenv -e .env.local -- vitest run",
+    "e2e": "dotenv -e .env.local -- playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
