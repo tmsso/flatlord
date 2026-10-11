@@ -674,7 +674,9 @@
     "reconfirmationScheduledTenantSubject": "Please reconfirm your inventory",
     "reconfirmationScheduledTenantBody": "A scheduled inventory reconfirmation has started. Please go through each item and confirm it's present and in the recorded condition by {date}.",
     "reconfirmationScheduledOwnerSubject": "Scheduled inventory reconfirmation launched",
-    "reconfirmationScheduledOwnerBody": "The recurring inventory reconfirmation schedule fired: a full campaign was created and the tenant asked to respond by {date}."
+    "reconfirmationScheduledOwnerBody": "The recurring inventory reconfirmation schedule fired: a full campaign was created and the tenant asked to respond by {date}.",
+    "meterRetakeSubject": "Please retake your {meter} reading",
+    "meterRetakeBody": "The owner asked for a new photo/reading of the {meter} meter. Open Meters in the portal to resubmit it."
   },
   "dashboard": {
     "draftsAwaitingTitle": "Statements awaiting issue",

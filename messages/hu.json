@@ -674,7 +674,9 @@
     "reconfirmationScheduledTenantSubject": "Kérjük, erősítsd meg újra a leltárt",
     "reconfirmationScheduledTenantBody": "Elindult egy ütemezett leltár-újramegerősítés. Kérjük, tételről tételre erősítsd meg, hogy megvan és a nyilvántartott állapotban van, legkésőbb {date} napig.",
     "reconfirmationScheduledOwnerSubject": "Ütemezett leltár-újramegerősítés elindult",
-    "reconfirmationScheduledOwnerBody": "Az ismétlődő leltár-újramegerősítési ütemezés lefutott: teljes kampány jött létre, a bérlő {date} napig kapott határidőt a válaszra."
+    "reconfirmationScheduledOwnerBody": "Az ismétlődő leltár-újramegerősítési ütemezés lefutott: teljes kampány jött létre, a bérlő {date} napig kapott határidőt a válaszra.",
+    "meterRetakeSubject": "Kérjük, olvassa le újra: {meter}",
+    "meterRetakeBody": "A tulajdonos új fotót/leolvasást kér a(z) {meter} mérőóráról. A portál Mérőállások oldalán küldheti be újra."
   },
   "dashboard": {
     "draftsAwaitingTitle": "Kiállításra váró statementek",
