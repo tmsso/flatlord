@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 
 export interface TenantInventoryItemRow {
   id: string;
+  kind: "item" | "facility";
   title: string;
   ownedBy: "owner" | "renter" | "conditional";
   condition: string | null;
@@ -94,6 +95,10 @@ export function TenantInventorySection({
 }) {
   const t = useTranslations("inventory");
   const router = useRouter();
+  // Facilities (B-35) are built in and always owner-owned — no ownership
+  // badge; listed first, like the admin view.
+  const facilities = items.filter((i) => i.kind === "facility");
+  const movables = items.filter((i) => i.kind !== "facility");
 
   return (
     <div className="flex flex-col gap-4">
@@ -118,7 +123,15 @@ export function TenantInventorySection({
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {items.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
-          {items.map((item) => (
+          {facilities.length > 0 && <span className="text-sm font-medium">{t("facilitiesTitle")}</span>}
+          {facilities.map((item) => (
+            <div key={item.id} className="flex items-center justify-between rounded-lg border border-border p-3">
+              <span className="text-sm">{item.title}</span>
+              {item.condition && <span className="text-xs text-muted-foreground">{item.condition}</span>}
+            </div>
+          ))}
+          {facilities.length > 0 && movables.length > 0 && <span className="mt-2 text-sm font-medium">{t("itemsTitle")}</span>}
+          {movables.map((item) => (
             <div key={item.id} className="flex items-center justify-between rounded-lg border border-border p-3">
               <span className="text-sm">{item.title}</span>
               <div className="flex items-center gap-2">

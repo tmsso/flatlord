@@ -26,16 +26,19 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
 
   const { data: before } = await supabase
     .from("inventory_items")
-    .select("title, owned_by, status")
+    .select("kind, title, owned_by, status")
     .eq("id", parsed.id)
     .maybeSingle();
+
+  // kind is fixed at creation; a facility stays owner-owned.
+  const ownedBy = before?.kind === "facility" ? "owner" : parsed.ownedBy;
 
   const { error } = await supabase
     .from("inventory_items")
     .update({
       title: parsed.title,
       description: parsed.description ?? null,
-      owned_by: parsed.ownedBy,
+      owned_by: ownedBy,
       condition: parsed.condition ?? null,
       notes: parsed.notes ?? null,
       action_by_date: parsed.actionByDate ?? null,
@@ -51,6 +54,6 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
     actorId: personId,
     action: "update",
     before: before ?? null,
-    after: { title: parsed.title, ownedBy: parsed.ownedBy, status: parsed.status },
+    after: { title: parsed.title, ownedBy, status: parsed.status },
   });
 }

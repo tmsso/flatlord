@@ -211,6 +211,13 @@
       "when": 1791721231533,
       "tag": "0029_tenant-write-pins",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1791721716864,
+      "tag": "0030_facilities",
+      "breakpoints": true
     }
   ]
 }

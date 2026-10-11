@@ -301,3 +301,44 @@ describe("RLS: tenant reconfirmation answers pin other columns (migration 0029)"
     }
   });
 });
+
+// B-35 (migration 0030): facilities are inventory rows with kind =
+// 'facility', always owner-owned. Same RLS as items: owner CRUD, tenant
+// read-only.
+describe("facilities (migration 0030)", () => {
+  it("the owner can add a facility; the tenant sees it but cannot edit it", async () => {
+    let facilityId = "";
+    await asUser(ownerUserId, async (tx) => {
+      const [row] = await tx`
+        insert into inventory_items (unit_id, kind, title, owned_by) values (${flatAId}, 'facility', 'RII Gas boiler', 'owner') returning id
+      `;
+      facilityId = row.id;
+    });
+    await asUser(userAId, async (tx) => {
+      const rows = await tx`select kind, owned_by from inventory_items where id = ${facilityId}`;
+      expect(rows).toEqual([{ kind: "facility", owned_by: "owner" }]);
+    });
+    await expectUpdateDenied(userAId, (tx) => tx`update inventory_items set title = 'renamed' where id = ${facilityId}`);
+  });
+
+  it("a facility can't be renter-owned or conditional — even for the owner", async () => {
+    for (const ownedBy of ["renter", "conditional"]) {
+      await expect(
+        asUser(ownerUserId, async (tx) => {
+          await tx`insert into inventory_items (unit_id, kind, title, owned_by) values (${flatAId}, 'facility', 'RII AC', ${ownedBy})`;
+        }),
+      ).rejects.toThrow(/inventory_items_facility_owner_owned/);
+    }
+    await expect(
+      adminSql`update inventory_items set kind = 'facility', owned_by = 'renter' where id = ${itemAId}`,
+    ).rejects.toThrow(/inventory_items_facility_owner_owned/);
+  });
+
+  it("kind only accepts item | facility, and defaults to item", async () => {
+    await expect(adminSql`insert into inventory_items (unit_id, kind, title) values (${flatAId}, 'fixture', 'RII x')`).rejects.toThrow(
+      /inventory_items_kind_check/,
+    );
+    const [row] = await adminSql`select kind from inventory_items where id = ${itemAId}`;
+    expect(row.kind).toBe("item");
+  });
+});

@@ -42,7 +42,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         .neq("status", "terminated"),
       supabase
         .from("inventory_items")
-        .select("id, title, description, owned_by, condition, notes, action_by_date, action_by_reason, status")
+        .select("id, kind, title, description, owned_by, condition, notes, action_by_date, action_by_reason, status")
         .eq("unit_id", id)
         .order("created_at", { ascending: false }),
     ]);
@@ -175,6 +175,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         tenancyId={activeTenancyId}
         items={(inventoryRows ?? []).map((i) => ({
           id: i.id,
+          kind: i.kind as "item" | "facility",
           title: i.title,
           description: i.description,
           ownedBy: i.owned_by as "owner" | "renter" | "conditional",
