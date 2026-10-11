@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 
 // design/04 dashboard header: bordered pill, 30x32px chevron buttons,
 // centered 92px-min label. Purely presentational — callers own the actual
-// month state and label formatting (locale-aware "MMMM yyyy").
+// month state and label formatting (locale-aware "MMMM yyyy"); pair with
+// `addMonths` from "@/lib/month" for client-state callers. The app's only
+// month picker (B-27 removed a same-named controlled duplicate).
 export function MonthPicker({
   label,
   onPrevious,

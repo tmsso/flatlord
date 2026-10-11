@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { createDraftStatement } from "@/server/billing/create-draft-statement";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MonthPicker } from "@/components/month-picker";
+import { MonthPicker } from "@/components/ui/month-picker";
+import { addMonths } from "@/lib/month";
 import { StatementStatusBadge, type StatementDisplayStatus } from "@/components/status-badge";
 import { deriveStatementDisplayStatus, type StoredStatementStatus } from "@/lib/billing/derive-statement-display-status";
 
@@ -38,6 +39,7 @@ export function StatementsList({
 }) {
   const t = useTranslations("statements");
   const format = useFormatter();
+  const tc = useTranslations("common");
   const router = useRouter();
   const [draftMonth, setDraftMonth] = useState(currentMonthStart());
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +63,13 @@ export function StatementsList({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <MonthPicker value={draftMonth} onChange={setDraftMonth} />
+        <MonthPicker
+          label={format.dateTime(new Date(`${draftMonth}T00:00:00Z`), { year: "numeric", month: "long", timeZone: "UTC" })}
+          onPrevious={() => setDraftMonth(addMonths(draftMonth, -1))}
+          onNext={() => setDraftMonth(addMonths(draftMonth, 1))}
+          previousLabel={tc("previousMonth")}
+          nextLabel={tc("nextMonth")}
+        />
         <Button type="button" onClick={handleCreateDraft} disabled={isPending || !activeTenancyId}>
           {t("createDraft")}
         </Button>
