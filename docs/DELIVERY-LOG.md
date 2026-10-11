@@ -91,3 +91,21 @@ Owner answered "defaults, you can merge"; all PRs below merged and deployed (pro
 
 - PR #34: Vercel `fra1` region, `Card` border/shadow/radius per design, nav icons + active state + logo tile, tenant shell mobile fixes (five tabs, icon-only bell/sign-out, viewport-pinned notification panel), lint warning.
 - Docs restructure: this file, `BACKLOG.md`, `docs/DECISIONS.md`, `docs/NEXT-BATCH.md`, `docs/HEALTH-REPORT-2026-09-15.md`; `ROADMAP.md` reduced to open work; `IDEAS.md` pruned; `README.md` and `CLAUDE.md` docs map refreshed.
+
+## Long batch 2026-10-11 — prod-testing fixes, facilities, Phase 4c item 6
+
+Started from the owner's prod-testing notes (recorded as B-33…B-37 in `50796ff`, a docs-only push to main). Owner answered "defaults, go ahead". `gh pr merge` was blocked by the auto-mode classifier this session, so everything is a **stacked PR chain #57 → #73, open, awaiting the owner's merge** (merge-commit procedure dry-run locally: final tree identical to the top branch). Migrations `0029`–`0031` are applied on **dev only**.
+
+- #57 **B-33/B-34** — bare Base UI `<SelectValue />` rendered the raw value (UUIDs, enum codes like "other"); 16 Selects got `items` label maps; guard test (unlabeled Select, missing hu/en enum keys).
+- #58 **B-37** — meter glyphs (`meterKind` by charge-type code + unit; `water_kitchen` had fallen back to a gauge).
+- #59 **B-28** (`0029`) — tenant write pins; the first version's self-subquery raised "infinite recursion" on the real withdraw action on dev → SECURITY DEFINER fns in `private` (D-29).
+- #60 **B-35** (`0030`) — facilities register (D-27, D-28, D-31).
+- #61 — tenancy pickers lead with the flat ("<flat> · <tenant>").
+- #62 **B-36** (`0031`) — repair "affected item" picker; unit-scope trigger (root-property scope would leak sibling flats); discrepancy requests link their item.
+- #63 **B-32** — retake-requested notification (new tenant-facing notification).
+- #64 **B-29**, #65 **B-27**, #66 **B-08** (committed e2e smoke + nightly `e2e-smoke.yml`, dev-only), #67 **B-30** (dev metered history, already run).
+- #68–#72 **Phase 4c item 6** — design/09 requests (7a/b/c), notices (8a/b), approval diff (9), inventory grid + reconfirmation (10a/b), contract screen with full-text search (11, also **B-16**), loading skeletons. Bugs fixed on the way: appointment date shown as raw ISO / owner date input always empty; **all dialogs lacked a max height** (tall forms pushed the submit button off-screen); Base UI default-value warning.
+- Verification: lint, typecheck, unit tests, CI green on every PR (one runner port-conflict flake on #63, re-run green); RLS tests for 0029–0031 run in CI; headless click-throughs on dev for every item (both locales, tenant 390px / admin 1440px, both themes for 4c); final committed smoke 6/6 against a production build of the top of the stack.
+- **Not verified:** anything on prod (nothing merged); the reconfirmation answer path through the UI before 0029 (RLS-tested only); the nightly e2e workflow on GitHub (needs the secret); PDF iframe rendering of a real scanned contract.
+- Deviations (filed): notice preview + clause picker (B-39), PDF hit highlighting (B-40), reject-with-note (B-41), facility conversion (B-38 / D-31).
+
