@@ -429,7 +429,19 @@
     "signedAtLabel": "Aláírás dátuma",
     "download": "PDF letöltése",
     "activate": "Aktiválás",
-    "errorGeneric": "Hiba történt. Kérjük, próbálja újra."
+    "errorGeneric": "Hiba történt. Kérjük, próbálja újra.",
+    "versionChainLabel": "Szerződésverziók",
+    "chainActive": "v{version} · {date}-ig (hatályos)",
+    "searchPlaceholder": "Keresés a szerződés szövegében (pl. „felmondás”)",
+    "search": "Keresés",
+    "searchNoHits": "Egyik verzióban sincs találat.",
+    "documentFrameTitle": "Aláírt szerződés, {version}. verzió",
+    "noDocument": "Ehhez a verzióhoz nincs szkennelt dokumentum.",
+    "keyTermsTitle": "Fő feltételek (strukturált)",
+    "termLabel": "Időtartam",
+    "depositLabel": "Kaució",
+    "noticeLabel": "Felmondás",
+    "parseReviewNote": "Feltöltéskor a kinyert feltételeket mezőnként javasoljuk — egyenként elfogadja, szerkeszti vagy kihagyja; semmi nem mentődik automatikusan."
   },
   "deposits": {
     "title": "Kaució",
