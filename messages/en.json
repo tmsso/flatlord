@@ -250,7 +250,12 @@
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "atRate": "@ {rate}",
-    "statusRetakeRequested": "Retake requested"
+    "statusRetakeRequested": "Retake requested",
+    "kind_electricity": "Electricity meter",
+    "kind_gas": "Gas meter",
+    "kind_water": "Water meter",
+    "kind_heat": "Heat meter",
+    "kind_other": "Meter"
   },
   "properties": {
     "title": "Properties",

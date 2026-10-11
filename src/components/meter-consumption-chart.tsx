@@ -5,10 +5,13 @@ import { useFormatter, useTranslations } from "next-intl";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Card } from "@/components/ui/card";
 import type { ConsumptionMonth } from "@/lib/billing/compute-chart-series";
+import { MeterIcon } from "@/components/meter-icon";
 
 export interface ConsumptionSeriesMeta {
   chargeTypeId: string;
   label: string;
+  // charge_types.code — picks the meter glyph in the legend (B-37).
+  code?: string | null;
   unit: string;
   color: string;
 }
@@ -77,6 +80,7 @@ export function MeterConsumptionChart({ months, series }: { months: ConsumptionM
               aria-pressed={!hidden.has(s.chargeTypeId)}
             >
               <span className="size-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+              <MeterIcon code={s.code} unit={s.unit} bare size="sm" decorative />
               {s.label}
             </button>
           ))}

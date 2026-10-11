@@ -50,12 +50,12 @@ export async function getTenancyChartData(supabase: SupabaseClient, tenancyId: s
   // Stable per-charge-type color, shared across both charts — built from
   // whichever charge types actually appear in this tenancy's own history,
   // never a hardcoded set.
-  const chargeTypeById = new Map<string, { name: string; unit: string | null; kind: string; sortOrder: number }>();
+  const chargeTypeById = new Map<string, { name: string; code: string | null; unit: string | null; kind: string; sortOrder: number }>();
   for (const li of lineItemRows ?? []) {
     const ct = li.charge_types as unknown as ChargeTypeRef | ChargeTypeRef[] | null;
     const c = Array.isArray(ct) ? ct[0] : ct;
     if (c && (c.kind === "metered" || c.kind === "tracked_only")) {
-      chargeTypeById.set(c.id, { name: c.name, unit: c.unit, kind: c.kind, sortOrder: c.sort_order });
+      chargeTypeById.set(c.id, { name: c.name, code: c.code, unit: c.unit, kind: c.kind, sortOrder: c.sort_order });
     }
   }
   const colorMap = assignChartColors(
@@ -65,6 +65,7 @@ export async function getTenancyChartData(supabase: SupabaseClient, tenancyId: s
   const consumptionSeries = [...chargeTypeById.entries()].map(([id, c]) => ({
     chargeTypeId: id,
     label: c.name,
+    code: c.code,
     unit: c.unit ?? "",
     color: colorMap.get(id) ?? "var(--muted-foreground)",
   }));

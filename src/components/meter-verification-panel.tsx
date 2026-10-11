@@ -16,8 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { MeterReadingStatusBadge, StatusPill } from "@/components/status-badge";
+import { MeterIcon } from "@/components/meter-icon";
 import { MonthPicker } from "@/components/ui/month-picker";
-import { Clock, Gauge, Minus, Plus, RotateCcw } from "lucide-react";
+import { Clock, Minus, Plus, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface AdminMeterReading {
@@ -245,11 +246,14 @@ export function MeterVerificationPanel({
                   <img src={reading.photoUrl} alt="" className="h-12 w-16 shrink-0 rounded-md border border-border object-cover" />
                 ) : (
                   <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded-md border border-border bg-muted">
-                    <Gauge className="size-4 text-muted-foreground" aria-hidden="true" />
+                    <MeterIcon code={m.kind} unit={m.unit} size="sm" decorative />
                   </div>
                 )}
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-sm font-semibold">{m.label}</span>
+                  <span className="flex items-center gap-1.5 truncate text-sm font-semibold">
+                    <MeterIcon code={m.kind} unit={m.unit} bare size="sm" />
+                    {m.label}
+                  </span>
                   {reading && value != null ? (
                     <span className="text-xs text-muted-foreground tabular-figures">
                       {num(value)} {unitLabel(m.unit)} · Δ {value - m.previousValue >= 0 ? "+" : ""}
@@ -285,7 +289,10 @@ export function MeterVerificationPanel({
         {selected && (
           <Card className="gap-0 overflow-hidden py-0">
             <div className="flex items-center justify-between border-b border-border px-[18px] py-3">
-              <h2 className="text-[15px] font-semibold">{selected.label}</h2>
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold">
+                <MeterIcon code={selected.kind} unit={selected.unit} size="sm" />
+                {selected.label}
+              </h2>
               <div className="flex gap-1.5">
                 <Button type="button" variant="outline" size="icon-sm" aria-label={t("zoomIn")} onClick={() => setZoom((z) => Math.min(4, z + 0.5))} disabled={!selectedReading?.photoUrl}>
                   <Plus className="size-4" aria-hidden="true" />

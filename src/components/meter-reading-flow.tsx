@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
-import { AlertCircle, Check, ChevronLeft, Clock, Droplet, Flame, Gauge, ImageIcon, Info, Pencil, Zap } from "lucide-react";
+import { AlertCircle, Check, ChevronLeft, Clock, ImageIcon, Info, Pencil } from "lucide-react";
 import { submitMeterReading } from "@/server/billing/submit-meter-reading";
 import { createRequest } from "@/server/requests/create-request";
 import { evaluateMeterReadingEntry } from "@/lib/billing/evaluate-meter-reading-entry";
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { StatusPill } from "@/components/status-badge";
+import { MeterIcon } from "@/components/meter-icon";
 import { cn } from "@/lib/utils";
 
 export interface MeterFlowMeter {
@@ -49,22 +50,6 @@ function parseValue(raw: string): number | null {
 
 function unitLabel(unit: string): string {
   return unit === "m3" ? "m³" : unit;
-}
-
-const KIND_ICON: Record<string, { icon: typeof Zap; tone: string }> = {
-  electricity: { icon: Zap, tone: "bg-warning-bg text-warning border-warning-border" },
-  gas: { icon: Flame, tone: "bg-destructive-bg text-destructive border-destructive-border" },
-  water: { icon: Droplet, tone: "bg-info-bg text-info border-info-border" },
-};
-
-function MeterIcon({ kind }: { kind?: string | null }) {
-  const config = (kind && KIND_ICON[kind]) || { icon: Gauge, tone: "bg-muted text-muted-foreground border-border" };
-  const Icon = config.icon;
-  return (
-    <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-md border", config.tone)} aria-hidden="true">
-      <Icon className="size-5" />
-    </span>
-  );
 }
 
 // Header shared by every frame (design/03): 44px back button, title,
@@ -257,7 +242,7 @@ export function MeterReadingFlow({
             const done = m.doneThisMonth || entries[m.id] != null;
             return (
               <Card key={m.id} className="flex-row items-center gap-3 p-3">
-                <MeterIcon kind={m.kind} />
+                <MeterIcon code={m.kind} unit={m.unit} decorative />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="text-sm font-semibold">{m.label}</span>
                   <span className="text-xs text-muted-foreground tabular-figures">
@@ -483,7 +468,7 @@ export function MeterReadingFlow({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={entry.photoPreviewUrl} alt="" className="size-12 shrink-0 rounded-md border border-border object-cover" />
                 ) : (
-                  <MeterIcon kind={m.kind} />
+                  <MeterIcon code={m.kind} unit={m.unit} decorative />
                 )}
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="text-sm font-semibold">{m.label}</span>
