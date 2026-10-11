@@ -574,7 +574,12 @@
     "changeRequestOld": "Jelenlegi",
     "changeRequestNew": "Javasolt",
     "approveChange": "Módosítás jóváhagyása",
-    "newRequestCta": "Új kérés"
+    "newRequestCta": "Új kérés",
+    "affectedItemLabel": "Érintett tárgy",
+    "affectedFacility": "Érintett felszereltség",
+    "affectedItemNone": "Nincs / nem szerepel",
+    "affectedItemFacilities": "Felszereltség",
+    "affectedItemItems": "Leltártárgyak"
   },
   "notices": {
     "title": "Értesítések",

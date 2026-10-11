@@ -265,7 +265,15 @@ export default async function TenantHomePage() {
               }),
             })}
           </p>
-          <NewRequestDialog trigger="cta" />
+          <NewRequestDialog
+            trigger="cta"
+            itemOptions={(inventoryRows ?? []).map((i) => ({
+              id: i.id,
+              title: i.title,
+              kind: i.kind as "item" | "facility",
+              tenancyId: tenancy?.id ?? "",
+            }))}
+          />
         </div>
       )}
       <div className="rounded-lg border border-border bg-card p-4 shadow-sm">

@@ -47,6 +47,8 @@ export interface RequestDetail {
   // approval_required path (ROADMAP Phase 3 item 3) — a plain
   // tenant-opened request never has this.
   changePayload?: FieldChangePayload | null;
+  // B-36: the inventory item / facility the request is about, if named.
+  affectedItem?: { title: string; kind: "item" | "facility" } | null;
 }
 
 const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructive"> = {
@@ -189,6 +191,14 @@ export function RequestThread({
           <Badge variant={STATUS_VARIANT[request.status]}>{t(`status_${request.status}`)}</Badge>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
+          {request.affectedItem && (
+            <p className="text-sm">
+              <span className="text-muted-foreground">
+                {request.affectedItem.kind === "facility" ? t("affectedFacility") : t("affectedItemLabel")}:
+              </span>{" "}
+              <span className="font-medium">{request.affectedItem.title}</span>
+            </p>
+          )}
           {changePayload && (
             <div className="rounded-md border border-border p-3 text-sm">
               <p className="mb-1 font-medium">{t("changeRequestDiffTitle", { field: changeFieldLabel })}</p>

@@ -12,17 +12,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { RequestItemOption } from "@/lib/requests/get-request-item-options";
 
 // Shared between tenant (no tenancyOptions — server resolves their own
 // active tenancy) and admin (tenancyOptions required — logging a request
 // on a tenant's behalf, e.g. a phone-in repair call).
 // `trigger="cta"`: the tenant home's full-width secondary action (design/02).
+// `itemOptions` (B-36): active inventory items + facilities per tenancy;
+// the "affected item" picker appears for repair requests when the chosen
+// tenancy's unit has any.
 export function NewRequestDialog({
   tenancyOptions,
+  itemOptions = [],
   trigger = "compact",
 }: {
   tenancyOptions?: { id: string; label: string }[];
+  itemOptions?: RequestItemOption[];
   trigger?: "compact" | "cta";
 }) {
   const t = useTranslations("requests");
@@ -33,6 +39,13 @@ export function NewRequestDialog({
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const isAdmin = !!tenancyOptions;
+  const [category, setCategory] = useState<RequestCategory>("other");
+  const [tenancyId, setTenancyId] = useState<string | undefined>(tenancyOptions?.[0]?.id);
+  // A tenant has one active tenancy, so their options need no filter.
+  const unitItems = isAdmin ? itemOptions.filter((o) => o.tenancyId === tenancyId) : itemOptions;
+  const facilities = unitItems.filter((o) => o.kind === "facility");
+  const movables = unitItems.filter((o) => o.kind !== "facility");
+  const showItemPicker = category === "repair" && unitItems.length > 0;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,17 +58,19 @@ export function NewRequestDialog({
       try {
         await createRequest(
           {
-            tenancyId: isAdmin ? String(data.get("tenancyId") ?? "") || null : null,
-            category: String(data.get("category") ?? "other") as RequestCategory,
+            tenancyId: isAdmin ? (tenancyId ?? null) : null,
+            category,
             title,
             description: (String(data.get("description") ?? "").trim() || null) as string | null,
             externalCaseRef: (String(data.get("externalCaseRef") ?? "").trim() || null) as string | null,
             appointmentDate: (String(data.get("appointmentDate") ?? "").trim() || null) as string | null,
+            inventoryItemId: showItemPicker ? String(data.get("inventoryItemId") ?? "none").replace(/^none$/, "") || null : null,
           },
           file,
         );
         toast.success(tc("save"));
         setOpen(false);
+        setCategory("other");
         (e.target as HTMLFormElement).reset();
         router.refresh();
       } catch (err) {
@@ -84,7 +99,8 @@ export function NewRequestDialog({
               <Label htmlFor="requestTenancyId">{t("tenancyLabel")}</Label>
               <Select
                 name="tenancyId"
-                defaultValue={tenancyOptions?.[0]?.id}
+                value={tenancyId}
+                onValueChange={(v) => v && setTenancyId(v)}
                 items={tenancyOptions?.map((opt) => ({ value: opt.id, label: opt.label }))}
               >
                 <SelectTrigger id="requestTenancyId">
@@ -104,7 +120,8 @@ export function NewRequestDialog({
             <Label htmlFor="requestCategory">{t("categoryLabel")}</Label>
             <Select
               name="category"
-              defaultValue="other"
+              value={category}
+              onValueChange={(v) => v && setCategory(v as RequestCategory)}
               items={REQUEST_CATEGORIES.map((c) => ({ value: c, label: t(`category_${c}`) }))}
             >
               <SelectTrigger id="requestCategory">
@@ -119,6 +136,43 @@ export function NewRequestDialog({
               </SelectContent>
             </Select>
           </div>
+          {showItemPicker && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="requestInventoryItem">{t("affectedItemLabel")}</Label>
+              <Select
+                name="inventoryItemId"
+                defaultValue="none"
+                items={[{ value: "none", label: t("affectedItemNone") }, ...unitItems.map((o) => ({ value: o.id, label: o.title }))]}
+              >
+                <SelectTrigger id="requestInventoryItem">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t("affectedItemNone")}</SelectItem>
+                  {facilities.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>{t("affectedItemFacilities")}</SelectLabel>
+                      {facilities.map((o) => (
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.title}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {movables.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>{t("affectedItemItems")}</SelectLabel>
+                      {movables.map((o) => (
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.title}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="requestTitle">{t("titleLabel")}</Label>
             <Input id="requestTitle" name="title" required />

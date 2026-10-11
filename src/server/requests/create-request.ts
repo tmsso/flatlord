@@ -19,6 +19,9 @@ const CreateRequestSchema = z.object({
   description: z.string().trim().min(1).nullable().optional(),
   externalCaseRef: z.string().trim().min(1).nullable().optional(),
   appointmentDate: z.string().min(1).nullable().optional(),
+  // B-36: the item/facility a repair is about. The DB trigger
+  // trg_requests_inventory_item_scope rejects one outside the tenancy's unit.
+  inventoryItemId: z.string().uuid().nullable().optional(),
 });
 
 // Both roles can open a request (CLAUDE.md §3.7 describes the tenant path;
@@ -55,6 +58,7 @@ export async function createRequest(input: z.infer<typeof CreateRequestSchema>, 
       description: parsed.description ?? null,
       external_case_ref: parsed.externalCaseRef ?? null,
       appointment_date: parsed.appointmentDate ?? null,
+      inventory_item_id: parsed.category === "repair" ? (parsed.inventoryItemId ?? null) : null,
       initiated_by: profile.personId,
     })
     .select("id")

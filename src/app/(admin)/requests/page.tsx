@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { AdminRequestsDashboard, type AdminRequestRow } from "@/components/requests/admin-requests-dashboard";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
+import { getRequestItemOptions } from "@/lib/requests/get-request-item-options";
 
 type TenancyRef = {
   properties: { id: string; name: string } | { id: string; name: string }[] | null;
@@ -23,11 +24,14 @@ export default async function AdminRequestsPage() {
     .order("created_at", { ascending: false });
   assertNoQueryError("requests", error);
 
-  const { data: tenancyRows } = await supabase
-    .from("tenancies")
-    .select("id, properties(name), persons(given_name, family_name)")
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+  const [{ data: tenancyRows }, itemOptions] = await Promise.all([
+    supabase
+      .from("tenancies")
+      .select("id, properties(name), persons(given_name, family_name)")
+      .eq("status", "active")
+      .order("created_at", { ascending: false }),
+    getRequestItemOptions(supabase),
+  ]);
 
   const requests: AdminRequestRow[] = (requestRows ?? []).map((r) => {
     const tenancyRef = one(r.tenancies as unknown as TenancyRef | TenancyRef[] | null);
@@ -58,7 +62,7 @@ export default async function AdminRequestsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <AdminRequestsDashboard requests={requests} tenancyOptions={tenancyOptions} />
+      <AdminRequestsDashboard requests={requests} tenancyOptions={tenancyOptions} itemOptions={itemOptions} />
     </div>
   );
 }

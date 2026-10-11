@@ -2,6 +2,7 @@ import { pgTable, uuid, text, timestamp, jsonb, check, index } from "drizzle-orm
 import { sql } from "drizzle-orm";
 import { tenancies } from "./tenancies";
 import { persons } from "./persons";
+import { inventoryItems } from "./inventory-items";
 
 // Tenant<->admin workflow (CLAUDE.md §3.7) AND the approval-required
 // field-change flow (§3.5, Phase 3's field-editability item, built on top
@@ -51,6 +52,10 @@ export const requests = pgTable(
     // entityId, fieldName, oldValue, newValue } for an approval-required
     // change request. Genuinely unused/unwritten by this migration.
     changePayload: jsonb("change_payload"),
+    // B-36: the inventory item / facility a repair (or an inventory
+    // discrepancy) is about. Optional. trg_requests_inventory_item_scope
+    // (migration 0031) keeps it to the request's own unit.
+    inventoryItemId: uuid("inventory_item_id").references(() => inventoryItems.id),
     initiatedBy: uuid("initiated_by")
       .notNull()
       .references(() => persons.id),
@@ -60,6 +65,11 @@ export const requests = pgTable(
   (table) => [
     index("requests_tenancy_id_idx").on(table.tenancyId),
     index("requests_initiated_by_idx").on(table.initiatedBy),
+    index("requests_inventory_item_id_idx").on(table.inventoryItemId),
+    check(
+      "requests_inventory_item_category_check",
+      sql`${table.inventoryItemId} is null or ${table.category} in ('repair', 'inventory')`,
+    ),
     check(
       "requests_category_check",
       sql`${table.category} in ('repair', 'contract_change', 'personal_data_change', 'inventory', 'billing_question', 'other')`,

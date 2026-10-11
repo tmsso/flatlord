@@ -422,3 +422,92 @@ describe("RLS: tenant request writes pin other columns (migration 0029)", () => 
     expect(withdrawn.status).toBe("withdrawn");
   });
 });
+
+// B-36 (migration 0031): a request can name an inventory item / facility
+// of its own unit — never a sibling flat's under the same root property.
+describe("requests.inventory_item_id scope (migration 0031)", () => {
+  let itemA = "";
+  let itemB = "";
+
+  beforeAll(async () => {
+    [{ id: itemA }] = await adminSql`insert into inventory_items (unit_id, kind, title) values (${flatAId}, 'facility', 'RRI boiler A') returning id`;
+    [{ id: itemB }] = await adminSql`insert into inventory_items (unit_id, title) values (${flatBId}, 'RRI fridge B') returning id`;
+  });
+
+  afterAll(async () => {
+    await adminSql`delete from requests where inventory_item_id in (${itemA}, ${itemB})`;
+    await adminSql`delete from inventory_items where id in (${itemA}, ${itemB})`;
+  });
+
+  it("a tenant can file a repair naming an active item of their own unit", async () => {
+    await asUser(userAId, async (tx) => {
+      const [row] = await tx`
+        insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+        values (${tenancyAId}, 'repair', 'open', 'RRI 0031 boiler', ${itemA}, ${personAId})
+        returning inventory_item_id
+      `;
+      expect(row.inventory_item_id).toBe(itemA);
+    });
+  });
+
+  it("rejects an item of a sibling flat under the same root property — for the owner too", async () => {
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+          values (${tenancyAId}, 'repair', 'open', 'RRI 0031 foreign', ${itemB}, ${personAId})
+        `;
+      }),
+    ).rejects.toThrow(/not an active item of this request's unit/);
+    await expect(
+      asUser(ownerUserId, async (tx) => {
+        await tx`
+          insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+          values (${tenancyAId}, 'repair', 'open', 'RRI 0031 foreign owner', ${itemB}, ${ownerPersonId})
+        `;
+      }),
+    ).rejects.toThrow(/not an active item of this request's unit/);
+  });
+
+  it("only repair / inventory requests can name an item", async () => {
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+          values (${tenancyAId}, 'billing_question', 'open', 'RRI 0031 billing', ${itemA}, ${personAId})
+        `;
+      }),
+    ).rejects.toThrow(/requests_inventory_item_category_check/);
+  });
+
+  it("withdrawing can't change the named item; retiring the item doesn't block resolving", async () => {
+    const [own] = await adminSql`
+      insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+      values (${tenancyAId}, 'repair', 'open', 'RRI 0031 withdraw', ${itemA}, ${personAId})
+      returning id
+    `;
+    await expectUpdateDenied(
+      userAId,
+      (tx) => tx`update requests set status = 'withdrawn', inventory_item_id = null where id = ${own.id}`,
+    );
+
+    await adminSql`update inventory_items set status = 'removed' where id = ${itemA}`;
+    try {
+      await asUser(ownerUserId, async (tx) => {
+        const r = await tx`update requests set status = 'resolved' where id = ${own.id}`;
+        expect(r.count).toBe(1);
+      });
+      // ...but a new request can't name the retired item.
+      await expect(
+        asUser(userAId, async (tx) => {
+          await tx`
+            insert into requests (tenancy_id, category, status, title, inventory_item_id, initiated_by)
+            values (${tenancyAId}, 'repair', 'open', 'RRI 0031 retired', ${itemA}, ${personAId})
+          `;
+        }),
+      ).rejects.toThrow(/not an active item/);
+    } finally {
+      await adminSql`update inventory_items set status = 'active' where id = ${itemA}`;
+    }
+  });
+});
