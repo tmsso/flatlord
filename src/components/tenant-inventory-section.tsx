@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { submitReconfirmationResponse } from "@/server/inventory/submit-reconfirmation-response";
 import { Button } from "@/components/ui/button";
@@ -94,6 +94,7 @@ export function TenantInventorySection({
   activeCampaign: { id: string; dueDate: string | null; items: TenantReconfirmationItemRow[] } | null;
 }) {
   const t = useTranslations("inventory");
+  const format = useFormatter();
   const router = useRouter();
   // Facilities (B-35) are built in and always owner-owned — no ownership
   // badge; listed first, like the admin view.
@@ -109,7 +110,7 @@ export function TenantInventorySection({
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
-              {activeCampaign.dueDate ? t("reconfirmationDueBy", { date: activeCampaign.dueDate }) : t("reconfirmationNoDueDate")}
+              {activeCampaign.dueDate ? t("reconfirmationDueBy", { date: format.dateTime(new Date(`${activeCampaign.dueDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }) }) : t("reconfirmationNoDueDate")}
             </p>
             {activeCampaign.items.map((row) => (
               <ReconfirmationRow key={row.id} row={row} onResponded={() => router.refresh()} />

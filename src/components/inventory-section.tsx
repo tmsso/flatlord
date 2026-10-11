@@ -359,6 +359,7 @@ function ReconfirmationCampaignCard({ campaign, onChanged }: { campaign: Reconfi
 
 function ItemCard({ unitId, item, onChanged }: { unitId: string; item: InventoryItemRow; onChanged: () => void }) {
   const t = useTranslations("inventory");
+  const format = useFormatter();
   const refresh = onChanged;
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
@@ -375,7 +376,7 @@ function ItemCard({ unitId, item, onChanged }: { unitId: string; item: Inventory
       {item.condition && <span className="text-xs text-muted-foreground">{t("conditionLabel")}: {item.condition}</span>}
       {item.actionByDate && (
         <span className="text-xs text-muted-foreground">
-          {t("actionByDateLabel")}: {item.actionByDate}
+          {t("actionByDateLabel")}: {format.dateTime(new Date(`${item.actionByDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" })}
           {item.actionByReason && ` — ${item.actionByReason}`}
         </span>
       )}
