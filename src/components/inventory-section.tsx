@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export interface InventoryItemRow {
   id: string;
@@ -43,7 +44,6 @@ export interface ReconfirmationCampaignRow {
   items: { id: string; itemTitle: string; status: "pending" | "confirmed" | "discrepancy"; tenantNote: string | null }[];
 }
 
-const OWNED_BY_VARIANT: Record<string, "secondary" | "outline"> = { owner: "secondary", renter: "outline", conditional: "outline" };
 
 function ItemFormDialog({
   unitId,
@@ -100,7 +100,7 @@ function ItemFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button type="button" variant={item ? "ghost" : "outline"} size="sm" />}>
+      <DialogTrigger render={<Button type="button" variant={item ? "ghost" : isFacility ? "outline" : "default"} size="sm" />}>
         {item ? t("edit") : addLabel}
       </DialogTrigger>
       <DialogContent>
@@ -357,35 +357,96 @@ function ReconfirmationCampaignCard({ campaign, onChanged }: { campaign: Reconfi
   );
 }
 
+const IMAGE_EXT = /\.(jpe?g|png|webp|heic|gif)$/i;
+
+// design/09 10a: grid card (photo, title, ownership · condition chip);
+// the card opens a detail dialog with the photo gallery / attachments,
+// condition, action-by flag and the edit + status actions.
 function ItemCard({ unitId, item, onChanged }: { unitId: string; item: InventoryItemRow; onChanged: () => void }) {
   const t = useTranslations("inventory");
   const format = useFormatter();
   const refresh = onChanged;
+  const photo = item.attachments.find((a) => a.downloadUrl && IMAGE_EXT.test(a.fileName));
+  const ownedLabel = t(`ownedBy${item.ownedBy === "owner" ? "Owner" : item.ownedBy === "renter" ? "Renter" : "Conditional"}`);
+  const actionBy = item.actionByDate
+    ? format.dateTime(new Date(`${item.actionByDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" })
+    : null;
+  // Facilities are always owner-owned — the chip shows condition only.
+  const chip = [item.kind === "facility" ? null : ownedLabel, item.condition].filter(Boolean).join(" · ");
+
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">{item.title}</span>
-          {item.description && <span className="text-xs text-muted-foreground">{item.description}</span>}
+    <Dialog>
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            className={cn(
+              "flex flex-col overflow-hidden rounded-lg border border-border bg-card text-left transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+              item.status !== "active" && "opacity-60",
+            )}
+          />
+        }
+      >
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo.downloadUrl!} alt="" className="h-24 w-full border-b border-border object-cover" />
+        ) : (
+          <div
+            className="h-24 w-full border-b border-border bg-[repeating-linear-gradient(135deg,var(--muted)_0_10px,transparent_10px_20px)]"
+            aria-hidden="true"
+          />
+        )}
+        <div className="flex flex-col gap-1 p-2.5">
+          <span className="truncate text-sm font-medium">{item.title}</span>
+          <div className="flex flex-wrap gap-1">
+            {item.ownedBy === "conditional" || actionBy ? (
+              <Badge variant="warning">{[ownedLabel, actionBy && t("byDate", { date: actionBy })].filter(Boolean).join(" · ")}</Badge>
+            ) : (
+              chip && <Badge variant="secondary">{chip}</Badge>
+            )}
+            {item.status !== "active" && <Badge variant="outline">{t(`itemStatus_${item.status}`)}</Badge>}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={OWNED_BY_VARIANT[item.ownedBy]}>{t(`ownedBy${item.ownedBy === "owner" ? "Owner" : item.ownedBy === "renter" ? "Renter" : "Conditional"}`)}</Badge>
-          {item.status !== "active" && <Badge variant="secondary">{t(`itemStatus_${item.status}`)}</Badge>}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{item.title}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+            <dt className="text-muted-foreground">{t("ownedByLabel")}</dt>
+            <dd>{item.kind === "facility" ? t("facilityOwnerShort") : ownedLabel}</dd>
+            {item.condition && (
+              <>
+                <dt className="text-muted-foreground">{t("conditionLabel")}</dt>
+                <dd>{item.condition}</dd>
+              </>
+            )}
+            {actionBy && (
+              <>
+                <dt className="text-muted-foreground">{t("actionByDateLabel")}</dt>
+                <dd>
+                  {actionBy}
+                  {item.actionByReason && ` — ${item.actionByReason}`}
+                </dd>
+              </>
+            )}
+            {item.notes && (
+              <>
+                <dt className="text-muted-foreground">{t("notesLabel")}</dt>
+                <dd className="whitespace-pre-wrap">{item.notes}</dd>
+              </>
+            )}
+          </dl>
+          <AttachmentsSection entityType="inventory_item" entityId={item.id} attachments={item.attachments} />
+          <div className="flex items-center justify-end gap-2">
+            <StatusButton item={item} onChanged={refresh} />
+            <ItemFormDialog unitId={unitId} item={item} onSaved={refresh} />
+          </div>
         </div>
-      </div>
-      {item.condition && <span className="text-xs text-muted-foreground">{t("conditionLabel")}: {item.condition}</span>}
-      {item.actionByDate && (
-        <span className="text-xs text-muted-foreground">
-          {t("actionByDateLabel")}: {format.dateTime(new Date(`${item.actionByDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" })}
-          {item.actionByReason && ` — ${item.actionByReason}`}
-        </span>
-      )}
-      <AttachmentsSection entityType="inventory_item" entityId={item.id} attachments={item.attachments} />
-      <div className="flex items-center gap-2 self-end">
-        <ItemFormDialog unitId={unitId} item={item} onSaved={refresh} />
-        <StatusButton item={item} onChanged={refresh} />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -409,8 +470,8 @@ export function InventorySection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{t("title")}</CardTitle>
-        <div className="flex items-center gap-2">
+        <CardTitle>{t("titleWithCount", { count: items.length })}</CardTitle>
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {tenancyId && <LaunchReconfirmationDialog tenancyId={tenancyId} items={items} onLaunched={refresh} />}
           <ItemFormDialog unitId={unitId} kind="facility" onSaved={refresh} />
           <ItemFormDialog unitId={unitId} onSaved={refresh} />
@@ -421,17 +482,21 @@ export function InventorySection({
         {facilities.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium">{t("facilitiesTitle")}</span>
-            {facilities.map((item) => (
-              <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
-            ))}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+              {facilities.map((item) => (
+                <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
+              ))}
+            </div>
           </div>
         )}
         {movables.length > 0 && (
           <div className="flex flex-col gap-2">
             {facilities.length > 0 && <span className="text-sm font-medium">{t("itemsTitle")}</span>}
-            {movables.map((item) => (
-              <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
-            ))}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+              {movables.map((item) => (
+                <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
+              ))}
+            </div>
           </div>
         )}
         {campaigns.length > 0 && (

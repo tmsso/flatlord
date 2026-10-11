@@ -224,18 +224,29 @@ export function RequestThread({
             </p>
           )}
           {changePayload && (
-            <div className="rounded-md border border-border p-3 text-sm">
-              <p className="mb-1 font-medium">{t("changeRequestDiffTitle", { field: changeFieldLabel })}</p>
-              {/* Owner view is the CLAUDE.md §6 "admin detail view" masking
-                  exception — shows raw values. Tenant view (their own
-                  request) still masks, same as the rest of their profile
-                  page. */}
-              <p className="text-xs text-muted-foreground">
-                {t("changeRequestOld")}: {isSensitiveChange && role === "tenant" ? (maskId(changePayload.oldValue) ?? "—") : (changePayload.oldValue ?? "—")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("changeRequestNew")}: {isSensitiveChange && role === "tenant" ? (maskId(changePayload.newValue) ?? "—") : (changePayload.newValue ?? "—")}
-              </p>
+            // design/09 9: current (struck through) → proposed (success tint).
+            // Owner view is the CLAUDE.md §6 "admin detail view" masking
+            // exception — shows raw values. Tenant view (their own request)
+            // still masks, same as the rest of their profile page.
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium">{t("changeRequestDiffTitle", { field: changeFieldLabel })}</p>
+              <div className="grid items-stretch gap-2 sm:grid-cols-[1fr_auto_1fr]">
+                <div className="rounded-md border border-border bg-muted/50 p-3">
+                  <p className="text-xs text-muted-foreground">{t("changeRequestOld")}</p>
+                  <p className="text-sm text-muted-foreground line-through">
+                    {isSensitiveChange && role === "tenant" ? (maskId(changePayload.oldValue) ?? "—") : (changePayload.oldValue ?? "—")}
+                  </p>
+                </div>
+                <span className="hidden self-center text-muted-foreground sm:block" aria-hidden="true">
+                  →
+                </span>
+                <div className="rounded-md border border-success-border bg-success-bg p-3">
+                  <p className="text-xs text-success">{t("changeRequestNew")}</p>
+                  <p className="text-sm font-medium">
+                    {isSensitiveChange && role === "tenant" ? (maskId(changePayload.newValue) ?? "—") : (changePayload.newValue ?? "—")}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
           {request.description && <p className="text-sm">{request.description}</p>}
@@ -277,11 +288,17 @@ export function RequestThread({
             )}
             {canApproveOrReject && (
               <>
-                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={handleRejectChange}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-destructive-border text-destructive hover:text-destructive"
+                  disabled={isPending}
+                  onClick={handleRejectChange}
+                >
                   {t("reject")}
                 </Button>
-                <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={handleApprove}>
-                  {t("approveChange")}
+                <Button type="button" disabled={isPending} onClick={handleApprove}>
+                  {t("approveApplyNotify")}
                 </Button>
               </>
             )}

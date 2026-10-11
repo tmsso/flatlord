@@ -29,9 +29,14 @@ export interface TenantReconfirmationItemRow {
 // Item-by-item confirm/flag row (CLAUDE.md §3.9) with an optional note and
 // photo — the one deliberate tenant-write exception to item 4's admin-only
 // attachments precedent, see submit-reconfirmation-response.ts.
+// design/09 10b: one pending item at a time — big "OK" / "Discrepancy…"
+// buttons and a dashed optional-photo box. "Discrepancy…" first asks for
+// a note (it auto-opens a request for the owner), then submits.
 function ReconfirmationRow({ row, onResponded }: { row: TenantReconfirmationItemRow; onResponded: () => void }) {
   const t = useTranslations("inventory");
   const [note, setNote] = useState("");
+  const [flagging, setFlagging] = useState(false);
+  const [photoName, setPhotoName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -50,38 +55,75 @@ function ReconfirmationRow({ row, onResponded }: { row: TenantReconfirmationItem
     });
   }
 
-  if (row.status !== "pending") {
-    return (
-      <div className="flex items-center justify-between rounded-lg border border-border p-3">
-        <span className="text-sm">{row.itemTitle}</span>
-        <Badge variant={row.status === "discrepancy" ? "destructive" : "secondary"}>{t(`reconfirmationStatus_${row.status}`)}</Badge>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
-      <span className="text-sm font-medium">{row.itemTitle}</span>
-      <Input
-        type="text"
-        placeholder={t("tenantNotePlaceholder")}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`reconfirmPhoto-${row.id}`} className="text-xs text-muted-foreground">
-          {t("photoOptionalLabel")}
-        </Label>
-        <Input id={`reconfirmPhoto-${row.id}`} ref={fileRef} type="file" accept="image/jpeg,image/png,image/heic,image/webp" />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+        <div
+          className="size-14 shrink-0 rounded-md border border-border bg-[repeating-linear-gradient(135deg,var(--muted)_0_8px,transparent_8px_16px)]"
+          aria-hidden="true"
+        />
+        <span className="text-sm font-medium">{row.itemTitle}</span>
       </div>
-      <div className="flex gap-2">
-        <Button type="button" size="sm" disabled={isPending} onClick={() => respond("confirmed")}>
-          {t("confirmMatches")}
-        </Button>
-        <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={() => respond("discrepancy")}>
-          {t("flagDiscrepancy")}
-        </Button>
-      </div>
+      {flagging ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={`reconfirmNote-${row.id}`}>{t("discrepancyNoteLabel")}</Label>
+          <Input
+            id={`reconfirmNote-${row.id}`}
+            type="text"
+            placeholder={t("tenantNotePlaceholder")}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            autoFocus
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Button type="button" variant="outline" className="h-11" disabled={isPending} onClick={() => setFlagging(false)}>
+              {t("back")}
+            </Button>
+            <Button
+              type="button"
+              className="h-11 border-warning-border bg-warning-bg text-warning hover:brightness-95"
+              disabled={isPending}
+              onClick={() => respond("discrepancy")}
+            >
+              {t("flagDiscrepancy")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            className="h-12 border border-success-border bg-success-bg text-success hover:brightness-95"
+            disabled={isPending}
+            onClick={() => respond("confirmed")}
+          >
+            ✓ {t("okShort")}
+          </Button>
+          <Button
+            type="button"
+            className="h-12 border border-warning-border bg-warning-bg text-warning hover:brightness-95"
+            disabled={isPending}
+            onClick={() => setFlagging(true)}
+          >
+            {t("discrepancyEllipsis")}
+          </Button>
+        </div>
+      )}
+      <label
+        htmlFor={`reconfirmPhoto-${row.id}`}
+        className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-dashed border-input px-3 text-center text-sm text-muted-foreground hover:bg-muted"
+      >
+        {photoName ?? t("photoOptionalHint")}
+        <input
+          id={`reconfirmPhoto-${row.id}`}
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/heic,image/webp"
+          className="sr-only"
+          onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? null)}
+        />
+      </label>
+      <p className="text-xs text-muted-foreground">{t("discrepancyOpensRequest")}</p>
     </div>
   );
 }
@@ -100,21 +142,46 @@ export function TenantInventorySection({
   // badge; listed first, like the admin view.
   const facilities = items.filter((i) => i.kind === "facility");
   const movables = items.filter((i) => i.kind !== "facility");
+  const nextPending = activeCampaign?.items.find((r) => r.status === "pending") ?? null;
+  const answered = activeCampaign?.items.filter((r) => r.status !== "pending") ?? [];
 
   return (
     <div className="flex flex-col gap-4">
       {activeCampaign && (
         <Card>
-          <CardHeader>
-            <CardTitle>{t("reconfirmationTitle")}</CardTitle>
+          <CardHeader className="flex flex-col gap-2">
+            <CardTitle>
+              {t("reconfirmationTitle")} · {answered.length} / {activeCampaign.items.length}
+            </CardTitle>
+            <div
+              className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={activeCampaign.items.length}
+              aria-valuenow={answered.length}
+            >
+              <div className="h-full rounded-full bg-primary" style={{ width: `${(answered.length / Math.max(1, activeCampaign.items.length)) * 100}%` }} />
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
               {activeCampaign.dueDate ? t("reconfirmationDueBy", { date: format.dateTime(new Date(`${activeCampaign.dueDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }) }) : t("reconfirmationNoDueDate")}
             </p>
-            {activeCampaign.items.map((row) => (
-              <ReconfirmationRow key={row.id} row={row} onResponded={() => router.refresh()} />
-            ))}
+            {nextPending ? (
+              <ReconfirmationRow key={nextPending.id} row={nextPending} onResponded={() => router.refresh()} />
+            ) : (
+              <p className="text-sm text-success">{t("reconfirmationAllDone")}</p>
+            )}
+            {answered.length > 0 && (
+              <ul className="flex flex-col gap-1.5 border-t border-border pt-3">
+                {answered.map((row) => (
+                  <li key={row.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate">{row.itemTitle}</span>
+                    <Badge variant={row.status === "discrepancy" ? "warning" : "secondary"}>{t(`reconfirmationStatus_${row.status}`)}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       )}

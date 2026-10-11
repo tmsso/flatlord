@@ -522,7 +522,17 @@
     "addFacility": "Add facility",
     "facilitiesTitle": "Facilities",
     "itemsTitle": "Items",
-    "facilityOwnerNote": "Facilities are built-in parts of the flat and always owner-owned."
+    "facilityOwnerNote": "Facilities are built-in parts of the flat and always owner-owned.",
+    "titleWithCount": "Inventory · {count, plural, one {# item} other {# items}}",
+    "byDate": "by {date}",
+    "facilityOwnerShort": "Owner (facility)",
+    "discrepancyEllipsis": "Discrepancy…",
+    "discrepancyNoteLabel": "What's different?",
+    "photoOptionalHint": "+ optional photo",
+    "discrepancyOpensRequest": "Flagging a discrepancy automatically opens a request.",
+    "reconfirmationAllDone": "All items answered — thank you!",
+    "back": "Back",
+    "okShort": "OK"
   },
   "requests": {
     "title": "Requests",
@@ -593,7 +603,8 @@
     "attached": "Attached: {name}",
     "threadEmpty": "No messages yet.",
     "externalRefColumn": "External ref",
-    "appointmentColumn": "Appointment"
+    "appointmentColumn": "Appointment",
+    "approveApplyNotify": "Approve — apply + notify"
   },
   "notices": {
     "title": "Notices",
