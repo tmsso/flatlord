@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Owner-only (mirrors new-request-dialog.tsx's admin half — notices have
 // no tenant-initiated path, unlike requests). sequence/contractClauseRef
@@ -31,6 +33,7 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
   const [type, setType] = useState<NoticeType>("info");
   const [requiresAck, setRequiresAck] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const isFormalWarning = type === "formal_warning";
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -60,6 +63,7 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
         (e.target as HTMLFormElement).reset();
         setType("info");
         setRequiresAck(false);
+        setFileName(null);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errorGeneric"));
@@ -70,7 +74,7 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>{t("issueNotice")}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t("issueNotice")}</DialogTitle>
         </DialogHeader>
@@ -82,7 +86,7 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
               defaultValue={tenancyOptions[0]?.id}
               items={tenancyOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             >
-              <SelectTrigger id="noticeTenancyId">
+              <SelectTrigger id="noticeTenancyId" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -94,24 +98,48 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="noticeType">{t("typeLabel")}</Label>
-            <Select
-              value={type}
-              onValueChange={(v) => v && setType(v as NoticeType)}
-              items={NOTICE_TYPES.map((nt) => ({ value: nt, label: t(`type_${nt}`) }))}
-            >
-              <SelectTrigger id="noticeType">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {NOTICE_TYPES.map((nt) => (
-                  <SelectItem key={nt} value={nt}>
-                    {t(`type_${nt}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* design/09 8a: type + sequence side by side */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="noticeType">{t("typeLabel")}</Label>
+              <Select
+                value={type}
+                onValueChange={(v) => v && setType(v as NoticeType)}
+                items={NOTICE_TYPES.map((nt) => ({ value: nt, label: t(`type_${nt}`) }))}
+              >
+                <SelectTrigger id="noticeType" className={cn("w-full", isFormalWarning && "font-medium text-destructive")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NOTICE_TYPES.map((nt) => (
+                    <SelectItem key={nt} value={nt}>
+                      {t(`type_${nt}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {isFormalWarning && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="noticeSequence">{t("sequenceLabel")}</Label>
+                <Select
+                  name="sequence"
+                  defaultValue="first"
+                  items={NOTICE_SEQUENCES.map((s) => ({ value: s, label: t(`sequence_${s}`) }))}
+                >
+                  <SelectTrigger id="noticeSequence" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NOTICE_SEQUENCES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {t(`sequence_${s}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="noticeTitle">{t("titleLabel")}</Label>
@@ -119,33 +147,12 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="noticeBody">{t("bodyLabel")}</Label>
-            <Textarea id="noticeBody" name="body" required />
+            <Textarea id="noticeBody" name="body" required className="max-h-64" />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="noticeContractClauseRef">{t("contractClauseRefLabel")}</Label>
             <Input id="noticeContractClauseRef" name="contractClauseRef" />
           </div>
-          {isFormalWarning && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="noticeSequence">{t("sequenceLabel")}</Label>
-              <Select
-                name="sequence"
-                defaultValue="first"
-                items={NOTICE_SEQUENCES.map((s) => ({ value: s, label: t(`sequence_${s}`) }))}
-              >
-                <SelectTrigger id="noticeSequence">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {NOTICE_SEQUENCES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {t(`sequence_${s}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
           <div className="flex items-center gap-2">
             <Checkbox
               id="noticeRequiresAck"
@@ -157,15 +164,31 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
               {t("requiresAcknowledgementLabel")}
             </Label>
           </div>
-          {isFormalWarning && <p className="text-xs text-muted-foreground">{t("requiresAcknowledgementForcedNote")}</p>}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="noticeFile">{t("attachmentLabel")}</Label>
-            <Input id="noticeFile" ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" />
-          </div>
+          {isFormalWarning && (
+            <p className="flex items-start gap-2 rounded-md border border-destructive-border bg-destructive-bg p-2.5 text-xs text-destructive">
+              <AlertCircle className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+              {t("formalWarningBanner")}
+            </p>
+          )}
+          <label
+            htmlFor="noticeFile"
+            className="flex min-h-12 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-input bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground hover:bg-muted"
+          >
+            <span>{fileName ?? t("attachmentLabel")}</span>
+            <input
+              id="noticeFile"
+              ref={fileRef}
+              type="file"
+              accept="application/pdf,image/jpeg,image/png,image/heic,image/webp"
+              className="sr-only"
+              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+            />
+          </label>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
-            <Button type="submit" disabled={isPending}>
-              {t("submit")}
+            {/* A formal warning is a serious, immutable act: red send. */}
+            <Button type="submit" variant={isFormalWarning ? "destructive" : "default"} disabled={isPending}>
+              {t("sendInAppEmail")}
             </Button>
           </DialogFooter>
         </form>

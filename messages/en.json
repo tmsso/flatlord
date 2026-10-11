@@ -631,7 +631,13 @@
     "immutableNote": "Notices can't be edited or withdrawn once issued.",
     "errorGeneric": "Something went wrong. Please try again.",
     "notify_issuedSubject": "New notice: {title}",
-    "notify_issuedBody": "Your landlord issued a new {type} notice: \"{title}\". Check the portal for details."
+    "notify_issuedBody": "Your landlord issued a new {type} notice: \"{title}\". Check the portal for details.",
+    "formalWarningBanner": "Formal warnings require explicit tenant acknowledgement and become immutable on send.",
+    "sendInAppEmail": "Send — in-app + email",
+    "contractClauseShort": "Contract",
+    "ackCheckbox": "I have read and understood this notice",
+    "ackConfirm": "Confirm acknowledgement",
+    "ackLoggedNote": "Acknowledgement is logged (who + when) · the notice can't be changed."
   },
   "fieldEditability": {
     "policyManagerTitle": "Field editability",
