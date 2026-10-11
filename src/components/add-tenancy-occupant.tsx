@@ -58,7 +58,11 @@ export function AddTenancyOccupant({ tenancyId, persons }: { tenancyId: string; 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="occupantPersonId">{t("occupantPersonLabel")}</Label>
-            <Select value={personId ?? undefined} onValueChange={setPersonId}>
+            <Select
+              value={personId ?? undefined}
+              onValueChange={setPersonId}
+              items={persons.map((p) => ({ value: p.id, label: p.name }))}
+            >
               <SelectTrigger id="occupantPersonId" className="w-full">
                 <SelectValue placeholder={t("tenantPlaceholder")} />
               </SelectTrigger>

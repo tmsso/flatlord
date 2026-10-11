@@ -100,7 +100,11 @@ export function InviteManager({ invites }: { invites: Invite[] }) {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="invite-role">{t("roleLabel")}</Label>
-              <Select value={role} onValueChange={(v) => setRole(v as "owner" | "tenant")}>
+              <Select
+                value={role}
+                onValueChange={(v) => setRole(v as "owner" | "tenant")}
+                items={{ tenant: t("roleTenant"), owner: t("roleOwner") }}
+              >
                 <SelectTrigger id="invite-role" className="w-32">
                   <SelectValue />
                 </SelectTrigger>

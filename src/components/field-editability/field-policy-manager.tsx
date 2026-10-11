@@ -62,6 +62,7 @@ export function FieldPolicyManager({ policies }: { policies: Record<string, Fiel
                       value={current}
                       onValueChange={(v) => handleChange(field.key, v as FieldPolicy)}
                       disabled={isPending && savingField === field.key}
+                      items={FIELD_POLICIES.map((p) => ({ value: p, label: tf(`policy_${p}`) }))}
                     >
                       <SelectTrigger id={`policy-${field.key}`} className="w-48">
                         <SelectValue />
