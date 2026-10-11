@@ -35,7 +35,7 @@ Sizes: S = under half a batch item · M = one batch item · L = more than one.
 | B-20 | Tenant "More" tab (design/02 has 5 tabs with "Egyéb"): only if the header gets crowded again; today Settings is a header gear. | S | PR #34 |
 | B-21 | `getUserMedia` live-preview capture (CLAUDE.md §3.4 "upgrade if worthwhile"); the `capture` attribute flow is in place. | M | Phase 1 |
 | B-22 | Field editability for enum fields (`document_type` stays `read_only` until a select editor exists). | S | Phase 3 scope cut |
-| B-23 | Rebuild-dev-DB note: dev's `0022` was hand-patched; a from-scratch replay of `supabase/migrations/` on dev is unverified. Do a clean rebuild of dev once, then delete this item. | S | Memory 2026-09-04 |
+| B-23 | Rebuild-dev-DB note: dev's `0022` was hand-patched, and dev's migrations table holds the *pre-fix* hash of `0029` (the file was corrected and re-applied by hand before prod ever saw it); a from-scratch replay of `supabase/migrations/` on dev is unverified. Do a clean rebuild of dev once, then delete this item. | S | Memory 2026-09-04 |
 | B-24 | Unified `getCurrentProfile` use in the older server actions that still inline `getUser()` + `profiles` (11 call sites). | S | Code comment in `current-profile.ts` |
 | B-31 | Meter-flow "skip photo" has no reason field (design/03 asks for one); needs a `meter_readings` column or a note field. | S | Long batch 2026-10-08 |
 
