@@ -356,3 +356,69 @@ describe("RLS: requests isolation (migration 0019)", () => {
     ).rejects.toThrow(/row-level security|permission denied/i);
   });
 });
+
+// B-28 (migration 0029): the tenant's insert/withdraw policies pin every
+// column the app's own actions don't let a tenant choose.
+describe("RLS: tenant request writes pin other columns (migration 0029)", () => {
+  it("accepts the app's own shapes: a plain request and an own-person field-edit request", async () => {
+    await asUser(userAId, async (tx) => {
+      await tx`
+        insert into requests (tenancy_id, category, status, title, appointment_date, initiated_by)
+        values (${tenancyAId}, 'repair', 'open', 'RRI 0029 plain', now(), ${personAId})
+      `;
+      const payload = { entityType: "person", entityId: personAId, fieldName: "phone", oldValue: null, newValue: "x" };
+      await tx`
+        insert into requests (tenancy_id, category, status, title, change_payload, initiated_by)
+        values (${tenancyAId}, 'personal_data_change', 'open', 'RRI 0029 field edit', ${tx.json(payload)}, ${personAId})
+      `;
+    });
+  });
+
+  it.each([
+    ["a non-open status", "repair", "resolved", null, null, "self"],
+    ["an external case reference", "repair", "open", "INS-123", null, "self"],
+    ["someone else as initiator", "repair", "open", null, null, "other"],
+    ["a change_payload about another person", "personal_data_change", "open", null, "other", "self"],
+    ["a change_payload on a non-personal-data category", "repair", "open", null, "self", "self"],
+  ])("rejects a tenant insert with %s", async (_label, category, status, caseRef, payloadFor, initiator) => {
+    const payload =
+      payloadFor == null
+        ? null
+        : { entityType: "person", entityId: payloadFor === "self" ? personAId : personBId, fieldName: "phone", oldValue: null, newValue: "x" };
+    await expect(
+      asUser(userAId, async (tx) => {
+        await tx`
+          insert into requests (tenancy_id, category, status, title, external_case_ref, change_payload, initiated_by)
+          values (${tenancyAId}, ${category}, ${status}, 'RRI 0029 forged', ${caseRef}, ${payload ? tx.json(payload) : null},
+                  ${initiator === "self" ? personAId : personBId})
+        `;
+      }),
+    ).rejects.toThrow(/row-level security|permission denied/i);
+  });
+
+  it("withdrawing may change status only — not the title or the admin's fields", async () => {
+    const [own] = await adminSql`
+      insert into requests (tenancy_id, category, status, title, initiated_by)
+      values (${tenancyAId}, 'repair', 'open', 'RRI 0029 withdraw', ${personAId})
+      returning id
+    `;
+    await expectUpdateDenied(userAId, (tx) => tx`update requests set status = 'withdrawn', title = 'RRI renamed' where id = ${own.id}`);
+    await expectUpdateDenied(
+      userAId,
+      (tx) => tx`update requests set status = 'withdrawn', external_case_ref = 'INS-9' where id = ${own.id}`,
+    );
+    await expectUpdateDenied(
+      userAId,
+      (tx) => tx`update requests set status = 'withdrawn', appointment_date = now() where id = ${own.id}`,
+    );
+    const [unchanged] = await adminSql`select status, title, external_case_ref from requests where id = ${own.id}`;
+    expect(unchanged).toMatchObject({ status: "open", title: "RRI 0029 withdraw", external_case_ref: null });
+
+    // The app's own withdraw (status + updated_at) still works.
+    await asUser(userAId, async (tx) => {
+      await tx`update requests set status = 'withdrawn', updated_at = now() where id = ${own.id}`;
+    });
+    const [withdrawn] = await adminSql`select status from requests where id = ${own.id}`;
+    expect(withdrawn.status).toBe("withdrawn");
+  });
+});
