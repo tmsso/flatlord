@@ -26,6 +26,8 @@ import { notifyRateReview } from "@/server/notifications/notify-rate-review";
 import { notifyInventoryActionBy } from "@/server/notifications/notify-inventory-action-by";
 import { runStatementAutoDraft } from "@/server/reminders/run-statement-auto-draft";
 import { runScheduledReconfirmation } from "@/server/reminders/run-scheduled-reconfirmation";
+import { createPropertyModuleLookup } from "@/server/modules/get-modules";
+import type { OptionalModule } from "@/lib/modules";
 
 export const runtime = "nodejs";
 
@@ -59,12 +61,32 @@ export async function GET(request: Request) {
   const service = createServiceRoleClient();
   const today = new Date().toISOString().slice(0, 10);
 
-  const statements = await runStatementReminders(service, today);
-  const leadReminders = await runLeadReminders(service, today);
+  const moduleOn = createModuleCheck(service);
+  const statements = await runStatementReminders(service, today, moduleOn);
+  const leadReminders = await runLeadReminders(service, today, moduleOn);
+  // Billing is core (no switch): auto-draft always runs.
   const autoDraft = await runStatementAutoDraft(service, today);
-  const reconfirmation = await runScheduledReconfirmation(service, today);
+  const reconfirmation = await runScheduledReconfirmation(service, today, (propertyId) => moduleOn(propertyId, "inventory"));
 
   return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft, ...reconfirmation });
+}
+
+// B-45 / D-33: reminders are the "notifications" module (inventory
+// reminders also need "inventory"); a property's module is on if any of its
+// owners has it on. A failed lookup keeps the pre-switch behaviour (send)
+// and logs — a broken settings read must not silently stop reminders.
+type ModuleCheck = (propertyId: string | null, module: OptionalModule) => Promise<boolean>;
+function createModuleCheck(service: SupabaseClient): ModuleCheck {
+  const lookup = createPropertyModuleLookup(service);
+  return async (propertyId, module) => {
+    if (!propertyId) return true;
+    try {
+      return (await lookup(propertyId)).has(module);
+    } catch (err) {
+      console.error("daily-reminders: module lookup failed, assuming on", propertyId, err instanceof Error ? err.message : err);
+      return true;
+    }
+  };
 }
 
 // Has an in-app notification row for this entity+category already been
@@ -88,10 +110,10 @@ async function alreadyNotifiedToday(
 }
 
 // --- payment-due + overdue (first cron batch, unchanged behaviour) ------
-async function runStatementReminders(service: SupabaseClient, today: string) {
+async function runStatementReminders(service: SupabaseClient, today: string, moduleOn: ModuleCheck) {
   const { data: statements, error } = await service
     .from("statements")
-    .select("id, tenancy_id, status, due_date, issued_at")
+    .select("id, tenancy_id, property_id, status, due_date, issued_at")
     .in("status", ["issued", "partially_paid"])
     .not("due_date", "is", null);
   if (error) {
@@ -104,6 +126,7 @@ async function runStatementReminders(service: SupabaseClient, today: string) {
 
   for (const statement of statements ?? []) {
     if (!statement.due_date) continue;
+    if (!(await moduleOn(statement.property_id, "notifications"))) continue;
 
     const { data: tenancy } = await service
       .from("tenancies")
@@ -139,7 +162,7 @@ async function runStatementReminders(service: SupabaseClient, today: string) {
 }
 
 // --- meter-reading / contract-expiry / rate-review / inventory action_by
-async function runLeadReminders(service: SupabaseClient, today: string) {
+async function runLeadReminders(service: SupabaseClient, today: string, moduleOn: ModuleCheck) {
   let meterReadingReminders = 0;
   let contractExpiryAlerts = 0;
   let rateReviewAlerts = 0;
@@ -163,6 +186,7 @@ async function runLeadReminders(service: SupabaseClient, today: string) {
   // 1. meter-reading-window nudge — per active tenancy, to the tenant
   for (const tenancy of activeTenancies) {
     if (!isMonthlyMeterReading(tenancy.meter_reading_config)) continue;
+    if (!(await moduleOn(tenancy.property_id, "notifications"))) continue;
     const windowStartDay = resolveMeterReadingWindowStartDay(tenancy.meter_reading_config);
     const leadDays = resolveMeterReadingLeadDays(tenancy.reminder_lead_days);
     if (!isMeterReadingReminderDay(windowStartDay, leadDays, today)) continue;
@@ -174,12 +198,13 @@ async function runLeadReminders(service: SupabaseClient, today: string) {
   // 2. contract-expiry — per active contract, to owners, one per lead value
   const { data: contracts } = await service
     .from("contracts")
-    .select("id, tenancy_id, term_end")
+    .select("id, tenancy_id, property_id, term_end")
     .eq("status", "active")
     .not("term_end", "is", null);
   const leadByTenancy = new Map(activeTenancies.map((t) => [t.id, t.reminder_lead_days]));
   for (const contract of contracts ?? []) {
     if (!contract.term_end) continue;
+    if (!(await moduleOn(contract.property_id, "notifications"))) continue;
     const leads = resolveContractExpiryLeadDays(leadByTenancy.get(contract.tenancy_id));
     const matched = matchedLeadDays(contract.term_end, leads, today);
     if (matched == null) continue;
@@ -191,11 +216,12 @@ async function runLeadReminders(service: SupabaseClient, today: string) {
   // 3. fixed-charge rate-review — per fixed charge_schedule with a valid_to
   const { data: schedules } = await service
     .from("charge_schedules")
-    .select("id, tenancy_id, valid_to, charge_types!inner(kind)")
+    .select("id, tenancy_id, property_id, valid_to, charge_types!inner(kind)")
     .eq("charge_types.kind", "fixed")
     .not("valid_to", "is", null);
   for (const schedule of schedules ?? []) {
     if (!schedule.valid_to) continue;
+    if (!(await moduleOn(schedule.property_id, "notifications"))) continue;
     const lead = resolveRateReviewLeadDays(leadByTenancy.get(schedule.tenancy_id));
     if (!isLeadReminderDay(schedule.valid_to, lead, today)) continue;
     if (await alreadyNotifiedToday(service, "charge_schedule", schedule.id, "rate_review", today)) continue;
@@ -211,6 +237,7 @@ async function runLeadReminders(service: SupabaseClient, today: string) {
     .not("action_by_date", "is", null);
   for (const item of items ?? []) {
     if (!item.action_by_date) continue;
+    if (!(await moduleOn(item.property_id, "notifications")) || !(await moduleOn(item.property_id, "inventory"))) continue;
     const lead = resolveInventoryActionByLeadDays(leadByProperty.get(item.property_id));
     if (!isLeadReminderDay(item.action_by_date, lead, today)) continue;
     if (await alreadyNotifiedToday(service, "inventory_item", item.id, "inventory", today)) continue;

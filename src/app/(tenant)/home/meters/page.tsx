@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getTenantModules } from "@/server/modules/get-modules";
 import { pickActiveSchedule, type ChargeScheduleInput } from "@/lib/billing/compute-statement";
 import { MeterReadingFlow, type MeterFlowMeter } from "@/components/meter-reading-flow";
 import { resolveMeterReadingWindow } from "@/server/reminders/compute-lead-reminders";
@@ -116,6 +117,7 @@ export default async function TenantMetersPage() {
   return (
     <MeterReadingFlow
       tenancyId={tenancy.id}
+      canMessageOwner={(await getTenantModules(supabase, profile.personId)).has("requests")}
       meters={flowMeters}
       readingWindowLabel={t("windowLabel", {
         range: format.dateTimeRange(new Date(`${readingWindow.start}T00:00:00Z`), new Date(`${readingWindow.end}T00:00:00Z`), {

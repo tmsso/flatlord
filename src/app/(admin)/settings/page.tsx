@@ -6,6 +6,9 @@ import { BackupExport } from "@/components/backup-export";
 import { FieldPolicyManager } from "@/components/field-editability/field-policy-manager";
 import { getFieldPolicyMap } from "@/server/field-editability/get-field-policy-map";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
+import { ModuleSettings } from "@/components/modules/module-settings";
+import { getOwnerModules } from "@/server/modules/get-modules";
+import { OPTIONAL_MODULES } from "@/lib/modules";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { OWNER_NOTIFICATION_CATEGORIES } from "@/lib/notifications/notification-categories";
 
@@ -14,6 +17,7 @@ export default async function AdminSettingsPage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
 
+  const modules = await getOwnerModules(supabase, profile.userId);
   const { data: ownProfile } = await supabase.from("profiles").select("notification_prefs").eq("id", profile.userId).maybeSingle();
 
   // owner_scope_invites RLS restricts this to the caller's own reads as an
@@ -60,6 +64,7 @@ export default async function AdminSettingsPage() {
           propertyName={policyManagers.length > 1 ? property.name : undefined}
         />
       ))}
+      <ModuleSettings enabled={OPTIONAL_MODULES.filter((m) => modules.has(m))} />
       <NotificationPreferences categories={OWNER_NOTIFICATION_CATEGORIES} prefs={ownProfile?.notification_prefs ?? {}} />
       <BackupExport />
     </div>

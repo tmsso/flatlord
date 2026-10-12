@@ -80,8 +80,11 @@ export function MeterReadingFlow({
   tenancyId,
   meters,
   readingWindowLabel,
+  canMessageOwner = true,
 }: {
   tenancyId: string | null;
+  /** D-26's "send a note to the owner" opens a request — hidden while the requests module is off (B-45). */
+  canMessageOwner?: boolean;
   meters: MeterFlowMeter[];
   // Pre-formatted on the server: Intl date-range output differs in
   // invisible spacing between Node's ICU and the browser's, which caused
@@ -408,7 +411,7 @@ export function MeterReadingFlow({
                 <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 {t("errorBelowPrevious", { previous: `${num(current.previousValue)} ${unitLabel(current.unit)}` })}
               </p>
-              {noted ? (
+              {!canMessageOwner ? null : noted ? (
                 <p className="flex gap-2 rounded-md border border-info-border bg-info-bg p-3 text-sm text-info">
                   <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                   {t("noteSent")}

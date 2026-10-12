@@ -232,6 +232,13 @@
       "when": 1791810343819,
       "tag": "0032_owner-isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791812097423,
+      "tag": "0033_module-switches",
+      "breakpoints": true
     }
   ]
 }

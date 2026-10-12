@@ -6,26 +6,34 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getOwnerModules } from "@/server/modules/get-modules";
+import { InactiveModules } from "@/components/modules/inactive-modules";
+import { OPTIONAL_MODULES, type OptionalModule } from "@/lib/modules";
 
 // Order follows the design's sidebar (design/04): overview first, the
 // monthly workflow (statements, meters) next, then the entity/admin pages.
-const navSpec = [
+// `module`: hidden while that optional module is off (B-45 / D-33).
+const navSpec: { key: string; href: string; icon: NavItem["icon"]; module?: OptionalModule }[] = [
   { key: "dashboard", href: "/dashboard", icon: "dashboard" },
   { key: "statements", href: "/statements", icon: "file" },
   { key: "meters", href: "/meters", icon: "gauge" },
   { key: "properties", href: "/properties", icon: "building" },
   { key: "tenancies", href: "/tenancies", icon: "key" },
   { key: "persons", href: "/persons", icon: "users" },
-  { key: "requests", href: "/requests", icon: "message" },
+  { key: "requests", href: "/requests", icon: "message", module: "requests" },
   { key: "notices", href: "/notices", icon: "bell" },
   { key: "settings", href: "/settings", icon: "settings" },
-] as const;
+];
 
 export default async function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const t = await getTranslations("nav");
   const supabase = await createClient();
+  const profile = await getCurrentProfile(supabase);
+  const modules = await getOwnerModules(supabase, profile.userId);
+  const inactiveModules = OPTIONAL_MODULES.filter((m) => !modules.has(m));
 
   // self_scope_notifications RLS already restricts this to the caller's
   // own rows — no extra filter needed here. Logged, not thrown, on error:
@@ -47,7 +55,9 @@ export default async function AdminLayout({
     createdAt: n.created_at,
   }));
 
-  const navItems: NavItem[] = navSpec.map((n) => ({ href: n.href, icon: n.icon, label: t(n.key) }));
+  const navItems: NavItem[] = navSpec
+    .filter((n) => !n.module || modules.has(n.module))
+    .map((n) => ({ href: n.href, icon: n.icon, label: t(n.key) }));
 
   return (
     <div className="flex min-h-screen">
@@ -65,13 +75,19 @@ export default async function AdminLayout({
           <span className="text-[15px] font-semibold">Flatlord</span>
         </div>
         <SidebarNav items={navItems} rootHref="/dashboard" />
+        <InactiveModules modules={inactiveModules} />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-end gap-2 px-4">
           <div className="mr-auto md:hidden">
-            <AdminMobileNav items={navItems} menuLabel={t("menu")} closeLabel={t("closeMenu")} />
+            <AdminMobileNav
+              items={navItems}
+              menuLabel={t("menu")}
+              closeLabel={t("closeMenu")}
+              footer={<InactiveModules modules={inactiveModules} />}
+            />
           </div>
-          <NotificationBell notifications={notifications} role="owner" />
+          {modules.has("notifications") && <NotificationBell notifications={notifications} role="owner" />}
           <LocaleSwitcher />
           <ThemeToggle />
           <SignOutButton />

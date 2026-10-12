@@ -4,11 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { PropertyDetail } from "@/components/property-detail";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { InventorySection } from "@/components/inventory-section";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getOwnerModules } from "@/server/modules/get-modules";
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations("properties");
   const supabase = await createClient();
+  // B-45: inventory (incl. facilities) is a switchable module.
+  const showInventory = (await getOwnerModules(supabase, (await getCurrentProfile(supabase)).userId)).has("inventory");
 
   const { data: property, error: propertyError } = await supabase
     .from("properties")
@@ -170,33 +174,35 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         tenancyId={tenanciesForUnit?.[0]?.id ?? null}
         persons={(personRows ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
       />
-      <InventorySection
-        unitId={property.id}
-        tenancyId={activeTenancyId}
-        items={(inventoryRows ?? []).map((i) => ({
-          id: i.id,
-          kind: i.kind as "item" | "facility",
-          title: i.title,
-          description: i.description,
-          ownedBy: i.owned_by as "owner" | "renter" | "conditional",
-          condition: i.condition,
-          notes: i.notes,
-          actionByDate: i.action_by_date,
-          actionByReason: i.action_by_reason,
-          status: i.status as "active" | "removed" | "transferred",
-          attachments: (inventoryAttachmentRows ?? [])
-            .filter((a) => a.entity_id === i.id)
-            .map((a) => ({
-              id: a.id,
-              fileName: a.file_name,
-              sizeBytes: a.size_bytes,
-              note: a.note,
-              createdAt: a.created_at,
-              downloadUrl: a.storage_path ? (inventoryAttachmentUrlByPath.get(a.storage_path) ?? null) : null,
-            })),
-        }))}
-        campaigns={campaignsWithItems}
-      />
+      {showInventory && (
+        <InventorySection
+          unitId={property.id}
+          tenancyId={activeTenancyId}
+          items={(inventoryRows ?? []).map((i) => ({
+            id: i.id,
+            kind: i.kind as "item" | "facility",
+            title: i.title,
+            description: i.description,
+            ownedBy: i.owned_by as "owner" | "renter" | "conditional",
+            condition: i.condition,
+            notes: i.notes,
+            actionByDate: i.action_by_date,
+            actionByReason: i.action_by_reason,
+            status: i.status as "active" | "removed" | "transferred",
+            attachments: (inventoryAttachmentRows ?? [])
+              .filter((a) => a.entity_id === i.id)
+              .map((a) => ({
+                id: a.id,
+                fileName: a.file_name,
+                sizeBytes: a.size_bytes,
+                note: a.note,
+                createdAt: a.created_at,
+                downloadUrl: a.storage_path ? (inventoryAttachmentUrlByPath.get(a.storage_path) ?? null) : null,
+              })),
+          }))}
+          campaigns={campaignsWithItems}
+        />
+      )}
     </div>
   );
 }

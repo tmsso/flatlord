@@ -3,6 +3,7 @@ import { Camera, Clock } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getTenantModules } from "@/server/modules/get-modules";
 import { TenantAmountDue } from "@/components/tenant-amount-due";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { ConsumptionMiniChart } from "@/components/consumption-mini-chart";
@@ -26,6 +27,8 @@ export default async function TenantHomePage() {
   const format = await getFormatter();
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
+  // B-45: optional modules follow the owner(s) of the tenant's property.
+  const modules = await getTenantModules(supabase, profile.personId);
 
   // Stage 1: everything that only needs identity (profile.personId) —
   // none of these depend on each other, so they run concurrently instead
@@ -265,15 +268,17 @@ export default async function TenantHomePage() {
               }),
             })}
           </p>
-          <NewRequestDialog
-            trigger="cta"
-            itemOptions={(inventoryRows ?? []).map((i) => ({
-              id: i.id,
-              title: i.title,
-              kind: i.kind as "item" | "facility",
-              tenancyId: tenancy?.id ?? "",
-            }))}
-          />
+          {modules.has("requests") && (
+            <NewRequestDialog
+              trigger="cta"
+              itemOptions={(modules.has("inventory") ? (inventoryRows ?? []) : []).map((i) => ({
+                id: i.id,
+                title: i.title,
+                kind: i.kind as "item" | "facility",
+                tenancyId: tenancy?.id ?? "",
+              }))}
+            />
+          )}
         </div>
       )}
       <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
@@ -351,16 +356,18 @@ export default async function TenantHomePage() {
           note: d.note,
         }))}
       />
-      <TenantInventorySection
-        items={(inventoryRows ?? []).map((i) => ({
-          id: i.id,
-          title: i.title,
-          kind: i.kind as "item" | "facility",
-          ownedBy: i.owned_by as "owner" | "renter" | "conditional",
-          condition: i.condition,
-        }))}
-        activeCampaign={activeCampaign}
-      />
+      {modules.has("inventory") && (
+        <TenantInventorySection
+          items={(inventoryRows ?? []).map((i) => ({
+            id: i.id,
+            title: i.title,
+            kind: i.kind as "item" | "facility",
+            ownedBy: i.owned_by as "owner" | "renter" | "conditional",
+            condition: i.condition,
+          }))}
+          activeCampaign={activeCampaign}
+        />
+      )}
     </div>
   );
 }
