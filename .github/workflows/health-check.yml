@@ -18,6 +18,11 @@ on:
   schedule:
     - cron: "17 */6 * * *" # every 6 hours, off-the-hour
   workflow_dispatch:
+    inputs:
+      simulate_pending:
+        description: "Drift-check self-test: pretend main has this many unapplied migrations (0 = real check)"
+        required: false
+        default: "0"
 
 jobs:
   ping:
@@ -32,4 +37,45 @@ jobs:
           if [ "$status" != "200" ]; then
             echo "::error::Production health check failed (HTTP $status) — app may be down or Supabase prod may be unreachable."
             exit 1
+          fi
+
+  # B-12: prod sat three weeks behind on migrations (incl. the 0027 security
+  # fix) and nothing went red. This compares prod's drizzle bookkeeping with
+  # main's journal using the migrator's own rule — drizzle applies every
+  # journal entry whose `when` is newer than the newest applied
+  # `created_at` — so "pending" here means exactly what migrate-prod.yml
+  # would apply. Read-only: one SELECT on prod.
+  #
+  # Prod *ahead* of main is normal for a short while: D-30 has the owner run
+  # migrate-prod.yml against a PR branch before merging it. That only warns;
+  # prod *behind* main (code expecting a schema prod lacks) fails.
+  migration-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compare prod migrations with main's journal
+        env:
+          SUPABASE_DB_URL_PROD: ${{ secrets.SUPABASE_DB_URL_PROD }}
+          # Manual-dispatch knob to prove the check fails on drift (B-12's
+          # "done means"): pretends main has N extra pending migrations.
+          SIMULATE_PENDING: ${{ inputs.simulate_pending || '0' }}
+        run: |
+          read -r journal_count journal_latest < <(node -e '
+            const j = require("./supabase/migrations/meta/_journal.json");
+            console.log(j.entries.length, Math.max(...j.entries.map((e) => e.when)));
+          ')
+          read -r prod_count prod_latest < <(psql "$SUPABASE_DB_URL_PROD" -tA -F ' ' -c \
+            "select count(*), coalesce(max(created_at), 0) from drizzle.__drizzle_migrations")
+          pending=$(node -e '
+            const j = require("./supabase/migrations/meta/_journal.json");
+            console.log(j.entries.filter((e) => e.when > Number(process.argv[1])).length + Number(process.argv[2]));
+          ' "$prod_latest" "$SIMULATE_PENDING")
+          echo "main journal: $journal_count migrations · prod applied: $prod_count · pending on prod: $pending"
+          if [ "$pending" != "0" ]; then
+            echo "::error::Prod is $pending migration(s) behind main — run migrate-prod.yml (D-14/D-30)."
+            exit 1
+          fi
+          if [ "$prod_latest" -gt "$journal_latest" ]; then
+            echo "::warning::Prod has a migration main doesn't (newest applied $prod_latest > journal $journal_latest) — expected only between migrate-prod and merging its PR (D-30)."
           fi
