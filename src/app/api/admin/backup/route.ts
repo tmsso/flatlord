@@ -8,7 +8,8 @@ export const runtime = "nodejs";
 // with assets streamed as a zip (BACKLOG.md B-18) — 60s is Hobby's max.
 export const maxDuration = 60;
 
-// Highest-value target in the app — returns every row in every table.
+// Highest-value target in the app — returns every row the calling owner can
+// see, in every table (scoped by RLS inside buildBackupArchive).
 // Middleware already gates /api/admin to owners; this in-handler check is
 // deliberate defense in depth, not redundancy (CLAUDE.md §6: RLS/gating is
 // the last line of defence, not the only one).
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   let archive: Buffer;
   try {
-    archive = await buildBackupArchive({ dataOnly });
+    archive = await buildBackupArchive({ dataOnly, userId: profile.userId });
   } catch (err) {
     console.error("backup export failed", err);
     return new Response("Backup export failed", { status: 500 });
