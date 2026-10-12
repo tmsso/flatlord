@@ -110,7 +110,11 @@ function ItemFormDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="itemOwnedBy">{t("ownedByLabel")}</Label>
-            <Select name="ownedBy" defaultValue={item?.ownedBy ?? "owner"}>
+            <Select
+              name="ownedBy"
+              defaultValue={item?.ownedBy ?? "owner"}
+              items={{ owner: t("ownedByOwner"), renter: t("ownedByRenter"), conditional: t("ownedByConditional") }}
+            >
               <SelectTrigger id="itemOwnedBy">
                 <SelectValue />
               </SelectTrigger>
@@ -235,7 +239,11 @@ function LaunchReconfirmationDialog({ tenancyId, items, onLaunched }: { tenancyI
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="reconfirmationScope">{t("scopeLabel")}</Label>
-            <Select value={scope} onValueChange={(v) => v && setScope(v as "full" | "subset")}>
+            <Select
+              value={scope}
+              onValueChange={(v) => v && setScope(v as "full" | "subset")}
+              items={{ full: t("scopeFull"), subset: t("scopeSubset") }}
+            >
               <SelectTrigger id="reconfirmationScope">
                 <SelectValue />
               </SelectTrigger>

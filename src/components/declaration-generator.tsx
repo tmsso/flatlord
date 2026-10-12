@@ -48,7 +48,11 @@ export function DeclarationGenerator({ tenancyId, occupants }: { tenancyId: stri
         <p className="text-sm text-muted-foreground">{t("addressRegistrationDescription")}</p>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="declarationOccupant">{t("occupantLabel")}</Label>
-          <Select value={occupantId} onValueChange={(v) => v && setOccupantId(v)}>
+          <Select
+            value={occupantId}
+            onValueChange={(v) => v && setOccupantId(v)}
+            items={occupants.map((o) => ({ value: o.personId, label: o.name }))}
+          >
             <SelectTrigger id="declarationOccupant">
               <SelectValue />
             </SelectTrigger>

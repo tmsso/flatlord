@@ -482,7 +482,11 @@ function RecordPaymentDialog({ statementId, variant = "default", size = "default
             render={({ field }) => (
               <div className="flex flex-col gap-1.5">
                 <Label>{t("paymentMethodLabel")}</Label>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  items={paymentMethods.map((m) => ({ value: m, label: t(`paymentMethod${capitalize(m)}`) }))}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -77,7 +77,11 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="noticeTenancyId">{t("tenancyLabel")}</Label>
-            <Select name="tenancyId" defaultValue={tenancyOptions[0]?.id}>
+            <Select
+              name="tenancyId"
+              defaultValue={tenancyOptions[0]?.id}
+              items={tenancyOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+            >
               <SelectTrigger id="noticeTenancyId">
                 <SelectValue />
               </SelectTrigger>
@@ -92,7 +96,11 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="noticeType">{t("typeLabel")}</Label>
-            <Select value={type} onValueChange={(v) => v && setType(v as NoticeType)}>
+            <Select
+              value={type}
+              onValueChange={(v) => v && setType(v as NoticeType)}
+              items={NOTICE_TYPES.map((nt) => ({ value: nt, label: t(`type_${nt}`) }))}
+            >
               <SelectTrigger id="noticeType">
                 <SelectValue />
               </SelectTrigger>
@@ -120,7 +128,11 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
           {isFormalWarning && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="noticeSequence">{t("sequenceLabel")}</Label>
-              <Select name="sequence" defaultValue="first">
+              <Select
+                name="sequence"
+                defaultValue="first"
+                items={NOTICE_SEQUENCES.map((s) => ({ value: s, label: t(`sequence_${s}`) }))}
+              >
                 <SelectTrigger id="noticeSequence">
                   <SelectValue />
                 </SelectTrigger>

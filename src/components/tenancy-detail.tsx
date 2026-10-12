@@ -222,7 +222,7 @@ export function TenancyDetail({ tenancy, occupants, persons }: TenancyDetailProp
                     {o.personName}
                   </Link>
                   <span className="text-xs text-muted-foreground">
-                    {o.relationship}
+                    {t(`relationship_${o.relationship}`)}
                     {o.registrationType ? ` · ${t(`registrationType_${o.registrationType}`)}` : ""}
                     {o.moveOut ? ` · ${t("endedOn", { date: o.moveOut })}` : ""}
                   </span>

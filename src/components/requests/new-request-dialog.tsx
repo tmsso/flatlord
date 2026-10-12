@@ -82,7 +82,11 @@ export function NewRequestDialog({
           {isAdmin && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="requestTenancyId">{t("tenancyLabel")}</Label>
-              <Select name="tenancyId" defaultValue={tenancyOptions?.[0]?.id}>
+              <Select
+                name="tenancyId"
+                defaultValue={tenancyOptions?.[0]?.id}
+                items={tenancyOptions?.map((opt) => ({ value: opt.id, label: opt.label }))}
+              >
                 <SelectTrigger id="requestTenancyId">
                   <SelectValue />
                 </SelectTrigger>
@@ -98,7 +102,11 @@ export function NewRequestDialog({
           )}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="requestCategory">{t("categoryLabel")}</Label>
-            <Select name="category" defaultValue="other">
+            <Select
+              name="category"
+              defaultValue="other"
+              items={REQUEST_CATEGORIES.map((c) => ({ value: c, label: t(`category_${c}`) }))}
+            >
               <SelectTrigger id="requestCategory">
                 <SelectValue />
               </SelectTrigger>

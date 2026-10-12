@@ -94,7 +94,11 @@ export function DepositSection({ tenancyId, transactions }: { tenancyId: string;
             <form onSubmit={handleCreate} className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="depositTransactionType">{t("typeLabel")}</Label>
-                <Select value={type} onValueChange={(v) => setType(v as DepositTransactionType)}>
+                <Select
+                  value={type}
+                  onValueChange={(v) => setType(v as DepositTransactionType)}
+                  items={TRANSACTION_TYPES.map((tt) => ({ value: tt, label: t(`type_${tt}`) }))}
+                >
                   <SelectTrigger id="depositTransactionType">
                     <SelectValue />
                   </SelectTrigger>

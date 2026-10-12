@@ -78,7 +78,11 @@ export function TenancyCreateForm({ units, persons }: { units: { id: string; nam
             control={control}
             name="unitId"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                items={units.map((u) => ({ value: u.id, label: u.name }))}
+              >
                 <SelectTrigger id="unitId" className="w-full">
                   <SelectValue placeholder={t("unitPlaceholder")} />
                 </SelectTrigger>
@@ -101,7 +105,11 @@ export function TenancyCreateForm({ units, persons }: { units: { id: string; nam
             control={control}
             name="primaryTenantId"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                items={persons.map((p) => ({ value: p.id, label: p.name }))}
+              >
                 <SelectTrigger id="primaryTenantId" className="w-full">
                   <SelectValue placeholder={t("tenantPlaceholder")} />
                 </SelectTrigger>
