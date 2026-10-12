@@ -6,8 +6,8 @@ Rewritten 2026-10-12 after the owner merged the 2026-10-11 chain (#57–#73), mi
 
 ## Preconditions to check first
 
-1. `ROADMAP.md` admin checklist: the **full forgery-check query** is still open (the nightly e2e smoke is live since 2026-10-12 — check its last run) — remind the owner, don't block on them.
-2. Confirm ship-autonomy, and find out early whether `gh pr merge` is allowed in the session's mode (classifier-blocked on 2026-10-11 → stacked chain + owner merge script).
+1. Nightly `e2e-smoke.yml` is live since 2026-10-12 — check its last run is green before building on `main`. Remaining owner items (`CRON_SECRET`, domain B-01) are long-standing; mention, don't block.
+2. Confirm ship-autonomy, and find out early whether `gh pr merge` is allowed in the session's mode (classifier-blocked on 2026-10-11 → stacked chain + owner merge script; allowed again on 2026-10-12 for #74).
 3. Any migration in this batch: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
 
 ## The three

@@ -113,7 +113,7 @@ Started from the owner's prod-testing notes (recorded as B-33…B-37 in `50796ff
 
 - The owner ran `private/merge-chain-2026-10-11.sh`: migrate-prod run `38216819825` (from the top branch) green, applying `0026`–`0031`; #57→#73 merged in order with merge commits, branches deleted afterwards. `main` CI green on `838cea6`; prod deployed `838cea6`; `/api/health` ok. The GitHub retarget step worked as scripted.
 - Owner signed off Phase 4c items 1–6 → Phase 4c closed. D-24 confirmed; D-31 decided "convertible" (B-38 promoted to P1).
-- Forgery check: a narrower variant (tenant-source rows only) returned 0 rows; the full ROADMAP query is still to run.
-- E2E smoke: 6/6 locally against dev on merged `main` (prod build). The GitHub workflow still skips — `SUPABASE_DEV_SERVICE_ROLE_KEY` isn't set (only the anon key was updated).
+- Forgery check: both the narrower variant and the full ROADMAP query returned 0 rows — `0027`'s hole was never used.
+- E2E smoke: 6/6 locally against dev on merged `main`; after the owner added `SUPABASE_DEV_SERVICE_ROLE_KEY`, the first GitHub run failed at build (no `SUPABASE_DB_URL`) → #74 placeholder → `e2e-smoke.yml` green 6/6 on `main` (run `38238163856`).
 - Restore drill (#40) by a session at the owner's request — see `docs/backup-restore.md`. Found B-46 (same-day manual backup fails at publish).
 - New owner requests recorded: B-42 onboarding wizard, B-43 offboarding wizard, B-44 taxation module (D-32), B-45 switchable modules (D-33).
