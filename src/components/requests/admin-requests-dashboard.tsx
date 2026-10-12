@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
 import { REQUEST_CATEGORIES, REQUEST_STATUSES, type RequestCategory, type RequestStatus } from "@/db/schema/requests";
 import { NewRequestDialog } from "@/components/requests/new-request-dialog";
+import type { RequestItemOption } from "@/lib/requests/get-request-item-options";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,9 +32,11 @@ const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructi
 export function AdminRequestsDashboard({
   requests,
   tenancyOptions,
+  itemOptions,
 }: {
   requests: AdminRequestRow[];
   tenancyOptions: { id: string; label: string }[];
+  itemOptions?: RequestItemOption[];
 }) {
   const t = useTranslations("requests");
   const format = useFormatter();
@@ -58,7 +61,7 @@ export function AdminRequestsDashboard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{t("title")}</CardTitle>
-        <NewRequestDialog tenancyOptions={tenancyOptions} />
+        <NewRequestDialog tenancyOptions={tenancyOptions} itemOptions={itemOptions} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end gap-3">

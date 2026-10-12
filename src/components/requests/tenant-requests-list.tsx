@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
 import { NewRequestDialog } from "@/components/requests/new-request-dialog";
+import type { RequestItemOption } from "@/lib/requests/get-request-item-options";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
@@ -22,7 +23,7 @@ const STATUS_VARIANT: Record<RequestStatus, "outline" | "secondary" | "destructi
   withdrawn: "secondary",
 };
 
-export function TenantRequestsList({ requests }: { requests: TenantRequestRow[] }) {
+export function TenantRequestsList({ requests, itemOptions }: { requests: TenantRequestRow[]; itemOptions?: RequestItemOption[] }) {
   const t = useTranslations("requests");
   const format = useFormatter();
 
@@ -30,7 +31,7 @@ export function TenantRequestsList({ requests }: { requests: TenantRequestRow[] 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{t("title")}</CardTitle>
-        <NewRequestDialog />
+        <NewRequestDialog itemOptions={itemOptions} />
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {requests.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}

@@ -13,7 +13,7 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
 
   const { data: request, error: requestError } = await supabase
     .from("requests")
-    .select("id, category, status, title, description, external_case_ref, appointment_date, created_at, change_payload")
+    .select("id, category, status, title, description, external_case_ref, appointment_date, created_at, change_payload, inventory_items(title, kind)")
     .eq("id", id)
     .maybeSingle();
   assertNoQueryError("requests/[id]", requestError);
@@ -49,6 +49,11 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
     appointmentDate: request.appointment_date,
     createdAt: request.created_at,
     changePayload: request.change_payload as RequestDetail["changePayload"],
+    affectedItem: (() => {
+      const ref = request.inventory_items as unknown as { title: string; kind: string } | { title: string; kind: string }[] | null;
+      const item = Array.isArray(ref) ? ref[0] : ref;
+      return item ? { title: item.title, kind: item.kind as "item" | "facility" } : null;
+    })(),
   };
 
   const messages: RequestMessageRow[] = (messageRows ?? []).map((m) => ({

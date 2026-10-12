@@ -574,7 +574,12 @@
     "changeRequestOld": "Current",
     "changeRequestNew": "Proposed",
     "approveChange": "Approve change",
-    "newRequestCta": "New request"
+    "newRequestCta": "New request",
+    "affectedItemLabel": "Affected item",
+    "affectedFacility": "Affected facility",
+    "affectedItemNone": "None / not listed",
+    "affectedItemFacilities": "Facilities",
+    "affectedItemItems": "Items"
   },
   "notices": {
     "title": "Notices",

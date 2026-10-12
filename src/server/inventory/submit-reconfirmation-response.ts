@@ -37,14 +37,14 @@ export async function submitReconfirmationResponse(
   const { data: reconfirmationItem, error: fetchError } = await supabase
     .from("inventory_reconfirmation_items")
     .select(
-      "id, inventory_item_id, inventory_items(title, property_id), inventory_reconfirmations(tenancy_id)",
+      "id, inventory_item_id, inventory_items(title, property_id, status), inventory_reconfirmations(tenancy_id)",
     )
     .eq("id", parsed.reconfirmationItemId)
     .maybeSingle();
   if (fetchError) throw new Error(fetchError.message);
   if (!reconfirmationItem) throw new Error("Not found");
 
-  type ItemRef = { title: string; property_id: string };
+  type ItemRef = { title: string; property_id: string; status: string };
   const itemRef = reconfirmationItem.inventory_items as unknown as ItemRef | ItemRef[] | null;
   const item = Array.isArray(itemRef) ? itemRef[0] : itemRef;
   if (!item) throw new Error("Not found");
@@ -101,6 +101,10 @@ export async function submitReconfirmationResponse(
         tenancy_id: reconfirmation.tenancy_id,
         category: "inventory",
         title: item.title,
+        // B-36: link the discrepancy to the item it's about — only while
+        // the item is active (the scope trigger rejects retired ones, and
+        // the request itself matters more than the link).
+        inventory_item_id: item.status === "active" ? reconfirmationItem.inventory_item_id : null,
         description: [t("inventoryDiscrepancyPrefix", { item: item.title }), parsed.tenantNote].filter(Boolean).join(" "),
         initiated_by: profile.personId,
       })
