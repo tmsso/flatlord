@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { createContract } from "@/server/contracts/create-contract";
 import { activateContract } from "@/server/contracts/activate-contract";
 import { parseContract, type ParseContractResult } from "@/server/contracts/parse-contract";
+import { searchContractText, type ContractSearchHit } from "@/server/contracts/search-contract-text";
+import { Info, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +47,27 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
   const depositAmountRef = useRef<HTMLInputElement>(null);
 
   const latest = contracts[0] ?? null;
+  // design/09 11: the selected version drives the document + key terms
+  // panels; defaults to the active one (else the newest).
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = contracts.find((c) => c.id === selectedId) ?? contracts.find((c) => c.status === "active") ?? latest;
+  const chain = [...contracts].sort((a, b) => a.version - b.version);
+  const [query, setQuery] = useState("");
+  const [hits, setHits] = useState<ContractSearchHit[] | null>(null);
+  const [isSearching, startSearching] = useTransition();
+  const dateOnly = (d: string) => format.dateTime(new Date(`${d}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
+
+  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (query.trim().length < 2) return;
+    startSearching(async () => {
+      try {
+        setHits(await searchContractText({ tenancyId, query }));
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      }
+    });
+  }
 
   function formatMoney(amount: number, currency: string) {
     return format.number(amount, { style: "currency", currency, maximumFractionDigits: 0 });
@@ -237,37 +261,124 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {contracts.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
-        {contracts.map((c) => (
-          <div key={c.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{t("versionLabel", { version: c.version })}</span>
-                <Badge variant="outline">{t(`status_${c.status}`)}</Badge>
+      <CardContent className="flex flex-col gap-4">
+        {contracts.length === 0 || !selected ? (
+          <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        ) : (
+          <>
+            {/* Version chain: v1 — v2 — … (lineage via predecessor_contract_id) */}
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("versionChainLabel")}>
+              {chain.map((c, i) => {
+                const year = (c.termStart ?? c.signedAt)?.slice(0, 4);
+                const label =
+                  c.status === "active" && c.termEnd
+                    ? t("chainActive", { version: c.version, date: dateOnly(c.termEnd) })
+                    : `v${c.version}${year ? ` · ${year}` : ""}${c.status === "draft" ? ` · ${t("status_draft")}` : ""}`;
+                return (
+                  <span key={c.id} className="flex items-center gap-1.5">
+                    {i > 0 && <span className="text-muted-foreground" aria-hidden="true">—</span>}
+                    <button
+                      type="button"
+                      aria-pressed={selected.id === c.id}
+                      onClick={() => setSelectedId(c.id)}
+                      className={cn(
+                        "rounded-4xl border px-3 py-1 text-xs font-medium",
+                        c.status === "active" ? "border-primary text-primary" : "border-border text-muted-foreground",
+                        selected.id === c.id ? "bg-primary/10" : "bg-card hover:bg-muted",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+              <div className="flex min-w-0 flex-col gap-3">
+                <form onSubmit={handleSearch} className="flex gap-2">
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t("searchPlaceholder")}
+                    aria-label={t("searchPlaceholder")}
+                  />
+                  <Button type="submit" variant="outline" disabled={isSearching || query.trim().length < 2} aria-label={t("search")}>
+                    <Search className="size-4" aria-hidden="true" />
+                  </Button>
+                </form>
+                {hits && (
+                  <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+                    {hits.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">{t("searchNoHits")}</p>
+                    ) : (
+                      hits.map((h) => (
+                        <div key={h.contractId} className="flex flex-col gap-1">
+                          <button type="button" className="self-start text-xs font-medium text-primary hover:underline" onClick={() => setSelectedId(h.contractId)}>
+                            {t("versionLabel", { version: h.version })}
+                          </button>
+                          {h.snippets.map((sn, i) => (
+                            <p key={i} className="text-sm text-muted-foreground">
+                              {sn.before}
+                              <mark className="rounded-sm bg-warning-bg px-0.5 text-foreground">{sn.match}</mark>
+                              {sn.after}
+                            </p>
+                          ))}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+                {selected.documentUrl ? (
+                  <iframe
+                    src={selected.documentUrl}
+                    title={t("documentFrameTitle", { version: selected.version })}
+                    className="h-[28rem] w-full rounded-lg border border-border bg-muted"
+                  />
+                ) : (
+                  <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+                    {t("noDocument")}
+                  </div>
+                )}
               </div>
-              <span className="text-xs text-muted-foreground">
-                {c.termStart ? format.dateTime(new Date(c.termStart)) : "—"} –{" "}
-                {c.termEnd ? format.dateTime(new Date(c.termEnd)) : t("noEndDate")}
-                {" · "}
-                {t("noticeDaysValue", { days: c.noticeDays ?? 0 })}
-                {c.depositAmount != null && ` · ${formatMoney(c.depositAmount, c.depositCurrency)}`}
-              </span>
+
+              <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{t("keyTermsTitle")}</span>
+                  <Badge variant={selected.status === "active" ? "info" : "outline"}>{t(`status_${selected.status}`)}</Badge>
+                </div>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+                  <dt className="text-muted-foreground">{t("termLabel")}</dt>
+                  <dd>
+                    {selected.termStart ? dateOnly(selected.termStart) : "—"} – {selected.termEnd ? dateOnly(selected.termEnd) : t("noEndDate")}
+                  </dd>
+                  <dt className="text-muted-foreground">{t("depositLabel")}</dt>
+                  <dd>{selected.depositAmount != null ? formatMoney(selected.depositAmount, selected.depositCurrency) : "—"}</dd>
+                  <dt className="text-muted-foreground">{t("noticeLabel")}</dt>
+                  <dd>{t("noticeDaysValue", { days: selected.noticeDays ?? 0 })}</dd>
+                  <dt className="text-muted-foreground">{t("signedAtLabel")}</dt>
+                  <dd>{selected.signedAt ? dateOnly(selected.signedAt) : "—"}</dd>
+                </dl>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selected.documentUrl && (
+                    <a href={selected.documentUrl} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
+                      {t("download")}
+                    </a>
+                  )}
+                  {selected.status === "draft" && (
+                    <Button type="button" size="sm" disabled={isPending} onClick={() => handleActivate(selected.id)}>
+                      {t("activate")}
+                    </Button>
+                  )}
+                </div>
+                <p className="flex items-start gap-2 rounded-md border border-info-border bg-info-bg p-2.5 text-xs text-info">
+                  <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+                  {t("parseReviewNote")}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {c.documentUrl && (
-                <a href={c.documentUrl} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
-                  {t("download")}
-                </a>
-              )}
-              {c.status === "draft" && (
-                <Button type="button" size="sm" disabled={isPending} onClick={() => handleActivate(c.id)}>
-                  {t("activate")}
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
+          </>
+        )}
       </CardContent>
     </Card>
   );

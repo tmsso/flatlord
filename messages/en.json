@@ -429,7 +429,19 @@
     "signedAtLabel": "Signed on",
     "download": "Download PDF",
     "activate": "Activate",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "versionChainLabel": "Contract versions",
+    "chainActive": "v{version} · until {date} (current)",
+    "searchPlaceholder": "Search in contract text (e.g. \"notice\")",
+    "search": "Search",
+    "searchNoHits": "No matches in any version.",
+    "documentFrameTitle": "Signed contract, version {version}",
+    "noDocument": "No scanned document for this version.",
+    "keyTermsTitle": "Key terms (structured)",
+    "termLabel": "Term",
+    "depositLabel": "Deposit",
+    "noticeLabel": "Notice",
+    "parseReviewNote": "On upload, extracted terms are proposed field by field — you accept, edit or skip each one; nothing is saved automatically."
   },
   "deposits": {
     "title": "Deposit",
