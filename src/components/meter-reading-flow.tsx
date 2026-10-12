@@ -433,8 +433,11 @@ export function MeterReadingFlow({
           )}
         </Card>
         {/* ≥ previous blocks continuing (only the admin can override); after
-            a note to the owner, the tenant may skip this meter instead. */}
-        {blocked && noted ? (
+            a note to the owner, the tenant may skip this meter instead. With
+            the requests module off there is no note to send (B-45, D-39), so
+            skipping is offered straight away — the missing reading still
+            shows on the owner's verification screen. */}
+        {blocked && (noted || !canMessageOwner) ? (
           <Button type="button" className="h-[52px] text-base" onClick={handleSkipMeter}>
             {t("skipMeter")}
           </Button>
