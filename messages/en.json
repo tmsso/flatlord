@@ -544,7 +544,11 @@
     "discrepancyOpensRequest": "Flagging a discrepancy automatically opens a request.",
     "reconfirmationAllDone": "All items answered — thank you!",
     "back": "Back",
-    "okShort": "OK"
+    "okShort": "OK",
+    "kindLabel": "Kind",
+    "kindItem": "Movable item",
+    "kindFacility": "Facility (built-in)",
+    "facilityNeedsOwner": "Only an item owned by the owner can become a facility. Set its owner to “Owner” first, save, then convert it."
   },
   "requests": {
     "title": "Requests",
