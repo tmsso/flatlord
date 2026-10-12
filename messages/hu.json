@@ -631,7 +631,13 @@
     "immutableNote": "A kiküldött értesítések nem szerkeszthetők és nem vonhatók vissza.",
     "errorGeneric": "Hiba történt. Kérjük, próbáld újra.",
     "notify_issuedSubject": "Új értesítés: {title}",
-    "notify_issuedBody": "A bérbeadó új értesítést küldött: „{title}”. A részletekért nézd meg a portált."
+    "notify_issuedBody": "A bérbeadó új értesítést küldött: „{title}”. A részletekért nézd meg a portált.",
+    "formalWarningBanner": "A hivatalos felszólítást a bérlőnek kifejezetten tudomásul kell vennie, és küldés után nem módosítható.",
+    "sendInAppEmail": "Küldés — alkalmazásban + e-mailben",
+    "contractClauseShort": "Szerződés",
+    "ackCheckbox": "Elolvastam és tudomásul vettem",
+    "ackConfirm": "Tudomásulvétel megerősítése",
+    "ackLoggedNote": "Megerősítés naplózva (ki + mikor) · az értesítés nem módosítható."
   },
   "fieldEditability": {
     "policyManagerTitle": "Mezők szerkeszthetősége",
