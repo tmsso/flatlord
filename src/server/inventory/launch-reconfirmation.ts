@@ -41,7 +41,10 @@ export async function launchReconfirmation(input: z.infer<typeof LaunchReconfirm
       .from("inventory_items")
       .select("id")
       .eq("unit_id", tenancy.unit_id)
-      .eq("status", "active");
+      .eq("status", "active")
+      // Facilities (B-35) are built in and rarely go missing — a full
+      // campaign covers movable items only; a subset can still pick them.
+      .eq("kind", "item");
     if (itemsError) throw new Error(itemsError.message);
     itemIds = (activeItems ?? []).map((i) => i.id);
   }

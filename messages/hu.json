@@ -516,7 +516,11 @@
     "flagDiscrepancy": "Eltérés jelzése",
     "discrepancyEmailIntro": "A bérlő eltérést jelzett a leltárellenőrzés során: „{item}”.",
     "discrepancyEmailNote": "Bérlői megjegyzés: {note}",
-    "discrepancyEmailSubject": "Leltári eltérés jelezve: {item}"
+    "discrepancyEmailSubject": "Leltári eltérés jelezve: {item}",
+    "addFacility": "Felszereltség hozzáadása",
+    "facilitiesTitle": "Felszereltség",
+    "itemsTitle": "Leltártárgyak",
+    "facilityOwnerNote": "A felszereltség a lakás beépített része, mindig a tulajdonosé."
   },
   "requests": {
     "title": "Kérések",

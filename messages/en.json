@@ -516,7 +516,11 @@
     "flagDiscrepancy": "Flag discrepancy",
     "discrepancyEmailIntro": "A tenant flagged a discrepancy during an inventory reconfirmation for \"{item}\".",
     "discrepancyEmailNote": "Tenant note: {note}",
-    "discrepancyEmailSubject": "Inventory discrepancy flagged: {item}"
+    "discrepancyEmailSubject": "Inventory discrepancy flagged: {item}",
+    "addFacility": "Add facility",
+    "facilitiesTitle": "Facilities",
+    "itemsTitle": "Items",
+    "facilityOwnerNote": "Facilities are built-in parts of the flat and always owner-owned."
   },
   "requests": {
     "title": "Requests",

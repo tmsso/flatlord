@@ -113,7 +113,7 @@ export default async function TenantHomePage() {
     tenancy
       ? supabase
           .from("inventory_items")
-          .select("id, title, owned_by, condition")
+          .select("id, kind, title, owned_by, condition")
           .eq("unit_id", tenancy.unit_id)
           .eq("status", "active")
           .order("title")
@@ -347,6 +347,7 @@ export default async function TenantHomePage() {
         items={(inventoryRows ?? []).map((i) => ({
           id: i.id,
           title: i.title,
+          kind: i.kind as "item" | "facility",
           ownedBy: i.owned_by as "owner" | "renter" | "conditional",
           condition: i.condition,
         }))}

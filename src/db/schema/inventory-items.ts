@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, date, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, date, timestamp, index, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { properties } from "./properties";
 import { inventoryOwnedByEnum, inventoryItemStatusEnum } from "./enums";
@@ -25,6 +25,12 @@ export const inventoryItems = pgTable(
       .notNull()
       .references(() => properties.id),
     propertyId: uuid("property_id").notNull().default(sql`gen_random_uuid()`),
+    // B-35: 'item' (movable, owner- or renter-owned, ownership can change)
+    // or 'facility' (a built-in part of the flat: central heating, gas
+    // connection, cooker, AC… — always owner-owned, enforced by the check
+    // below). text + CHECK rather than a pg enum: enums can't be extended
+    // and used in the same migration transaction (project gotcha).
+    kind: text("kind").notNull().default("item"),
     title: text("title").notNull(),
     description: text("description"),
     ownedBy: inventoryOwnedByEnum("owned_by").notNull().default("owner"),
@@ -39,5 +45,9 @@ export const inventoryItems = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("inventory_items_unit_id_idx").on(table.unitId)],
+  (table) => [
+    index("inventory_items_unit_id_idx").on(table.unitId),
+    check("inventory_items_kind_check", sql`${table.kind} in ('item', 'facility')`),
+    check("inventory_items_facility_owner_owned", sql`${table.kind} <> 'facility' or ${table.ownedBy} = 'owner'`),
+  ],
 );

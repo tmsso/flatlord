@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export interface InventoryItemRow {
   id: string;
+  kind: "item" | "facility";
   title: string;
   description: string | null;
   ownedBy: "owner" | "renter" | "conditional";
@@ -47,10 +48,13 @@ const OWNED_BY_VARIANT: Record<string, "secondary" | "outline"> = { owner: "seco
 function ItemFormDialog({
   unitId,
   item,
+  kind: newKind = "item",
   onSaved,
 }: {
   unitId: string;
   item?: InventoryItemRow;
+  /** For a new row; an existing row keeps its own kind. */
+  kind?: "item" | "facility";
   onSaved: () => void;
 }) {
   const t = useTranslations("inventory");
@@ -58,6 +62,9 @@ function ItemFormDialog({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const kind = item?.kind ?? newKind;
+  const isFacility = kind === "facility";
+  const addLabel = isFacility ? t("addFacility") : t("addItem");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -67,7 +74,8 @@ function ItemFormDialog({
     const payload = {
       title,
       description: (String(data.get("description") ?? "").trim() || null) as string | null,
-      ownedBy: String(data.get("ownedBy") ?? "owner") as "owner" | "renter" | "conditional",
+      // Facilities are always owner-owned (DB CHECK); the field isn't shown.
+      ownedBy: (isFacility ? "owner" : String(data.get("ownedBy") ?? "owner")) as "owner" | "renter" | "conditional",
       condition: (String(data.get("condition") ?? "").trim() || null) as string | null,
       notes: (String(data.get("notes") ?? "").trim() || null) as string | null,
       actionByDate: (String(data.get("actionByDate") ?? "").trim() || null) as string | null,
@@ -79,7 +87,7 @@ function ItemFormDialog({
         if (item) {
           await updateInventoryItem({ id: item.id, ...payload, status: item.status });
         } else {
-          await createInventoryItem({ unitId, ...payload });
+          await createInventoryItem({ unitId, kind, ...payload });
         }
         toast.success(tc("save"));
         setOpen(false);
@@ -93,11 +101,11 @@ function ItemFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button type="button" variant={item ? "ghost" : "outline"} size="sm" />}>
-        {item ? t("edit") : t("addItem")}
+        {item ? t("edit") : addLabel}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{item ? t("edit") : t("addItem")}</DialogTitle>
+          <DialogTitle>{item ? t("edit") : addLabel}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
@@ -108,23 +116,27 @@ function ItemFormDialog({
             <Label htmlFor="itemDescription">{t("descriptionLabel")}</Label>
             <Textarea id="itemDescription" name="description" defaultValue={item?.description ?? ""} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="itemOwnedBy">{t("ownedByLabel")}</Label>
-            <Select
-              name="ownedBy"
-              defaultValue={item?.ownedBy ?? "owner"}
-              items={{ owner: t("ownedByOwner"), renter: t("ownedByRenter"), conditional: t("ownedByConditional") }}
-            >
-              <SelectTrigger id="itemOwnedBy">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="owner">{t("ownedByOwner")}</SelectItem>
-                <SelectItem value="renter">{t("ownedByRenter")}</SelectItem>
-                <SelectItem value="conditional">{t("ownedByConditional")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {isFacility ? (
+            <p className="text-xs text-muted-foreground">{t("facilityOwnerNote")}</p>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="itemOwnedBy">{t("ownedByLabel")}</Label>
+              <Select
+                name="ownedBy"
+                defaultValue={item?.ownedBy ?? "owner"}
+                items={{ owner: t("ownedByOwner"), renter: t("ownedByRenter"), conditional: t("ownedByConditional") }}
+              >
+                <SelectTrigger id="itemOwnedBy">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="owner">{t("ownedByOwner")}</SelectItem>
+                  <SelectItem value="renter">{t("ownedByRenter")}</SelectItem>
+                  <SelectItem value="conditional">{t("ownedByConditional")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="itemCondition">{t("conditionLabel")}</Label>
             <Input id="itemCondition" name="condition" defaultValue={item?.condition ?? ""} />
@@ -345,6 +357,37 @@ function ReconfirmationCampaignCard({ campaign, onChanged }: { campaign: Reconfi
   );
 }
 
+function ItemCard({ unitId, item, onChanged }: { unitId: string; item: InventoryItemRow; onChanged: () => void }) {
+  const t = useTranslations("inventory");
+  const refresh = onChanged;
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{item.title}</span>
+          {item.description && <span className="text-xs text-muted-foreground">{item.description}</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant={OWNED_BY_VARIANT[item.ownedBy]}>{t(`ownedBy${item.ownedBy === "owner" ? "Owner" : item.ownedBy === "renter" ? "Renter" : "Conditional"}`)}</Badge>
+          {item.status !== "active" && <Badge variant="secondary">{t(`itemStatus_${item.status}`)}</Badge>}
+        </div>
+      </div>
+      {item.condition && <span className="text-xs text-muted-foreground">{t("conditionLabel")}: {item.condition}</span>}
+      {item.actionByDate && (
+        <span className="text-xs text-muted-foreground">
+          {t("actionByDateLabel")}: {item.actionByDate}
+          {item.actionByReason && ` — ${item.actionByReason}`}
+        </span>
+      )}
+      <AttachmentsSection entityType="inventory_item" entityId={item.id} attachments={item.attachments} />
+      <div className="flex items-center gap-2 self-end">
+        <ItemFormDialog unitId={unitId} item={item} onSaved={refresh} />
+        <StatusButton item={item} onChanged={refresh} />
+      </div>
+    </div>
+  );
+}
+
 export function InventorySection({
   unitId,
   tenancyId,
@@ -359,6 +402,8 @@ export function InventorySection({
   const t = useTranslations("inventory");
   const router = useRouter();
   const refresh = () => router.refresh();
+  const facilities = items.filter((i) => i.kind === "facility");
+  const movables = items.filter((i) => i.kind !== "facility");
 
   return (
     <Card>
@@ -366,37 +411,28 @@ export function InventorySection({
         <CardTitle>{t("title")}</CardTitle>
         <div className="flex items-center gap-2">
           {tenancyId && <LaunchReconfirmationDialog tenancyId={tenancyId} items={items} onLaunched={refresh} />}
+          <ItemFormDialog unitId={unitId} kind="facility" onSaved={refresh} />
           <ItemFormDialog unitId={unitId} onSaved={refresh} />
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {items.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
-        {items.map((item) => (
-          <div key={item.id} className="flex flex-col gap-2 rounded-lg border border-border p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{item.title}</span>
-                {item.description && <span className="text-xs text-muted-foreground">{item.description}</span>}
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={OWNED_BY_VARIANT[item.ownedBy]}>{t(`ownedBy${item.ownedBy === "owner" ? "Owner" : item.ownedBy === "renter" ? "Renter" : "Conditional"}`)}</Badge>
-                {item.status !== "active" && <Badge variant="secondary">{t(`itemStatus_${item.status}`)}</Badge>}
-              </div>
-            </div>
-            {item.condition && <span className="text-xs text-muted-foreground">{t("conditionLabel")}: {item.condition}</span>}
-            {item.actionByDate && (
-              <span className="text-xs text-muted-foreground">
-                {t("actionByDateLabel")}: {item.actionByDate}
-                {item.actionByReason && ` — ${item.actionByReason}`}
-              </span>
-            )}
-            <AttachmentsSection entityType="inventory_item" entityId={item.id} attachments={item.attachments} />
-            <div className="flex items-center gap-2 self-end">
-              <ItemFormDialog unitId={unitId} item={item} onSaved={refresh} />
-              <StatusButton item={item} onChanged={refresh} />
-            </div>
+        {facilities.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium">{t("facilitiesTitle")}</span>
+            {facilities.map((item) => (
+              <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
+            ))}
           </div>
-        ))}
+        )}
+        {movables.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {facilities.length > 0 && <span className="text-sm font-medium">{t("itemsTitle")}</span>}
+            {movables.map((item) => (
+              <ItemCard key={item.id} unitId={unitId} item={item} onChanged={refresh} />
+            ))}
+          </div>
+        )}
         {campaigns.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium">{t("campaignsTitle")}</span>
