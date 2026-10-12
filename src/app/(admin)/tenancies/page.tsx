@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export default async function TenanciesPage() {
   const t = await getTranslations("tenancies");
+  const format = await getFormatter();
+  // B-29: date-only columns, formatted like the rest of the admin UI.
+  const dateLabel = (d: string) => format.dateTime(new Date(`${d}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
   const supabase = await createClient();
 
   const { data: tenancies } = await supabase
@@ -52,7 +55,7 @@ export default async function TenanciesPage() {
                   </TableCell>
                   <TableCell>{per ? `${per.given_name} ${per.family_name}` : "—"}</TableCell>
                   <TableCell className="tabular-nums">
-                    {row.term_start} – {row.term_end ?? "—"}
+                    {dateLabel(row.term_start)} – {row.term_end ? dateLabel(row.term_end) : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{t(`status_${row.status}`)}</Badge>

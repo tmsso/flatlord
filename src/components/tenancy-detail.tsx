@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { updateTenancy } from "@/server/tenancies/update-tenancy";
 import { endTenancyOccupancy } from "@/server/tenancies/end-tenancy-occupancy";
@@ -57,6 +57,7 @@ export interface TenancyDetailProps {
 
 export function TenancyDetail({ tenancy, occupants, persons }: TenancyDetailProps) {
   const t = useTranslations("tenancies");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -224,7 +225,7 @@ export function TenancyDetail({ tenancy, occupants, persons }: TenancyDetailProp
                   <span className="text-xs text-muted-foreground">
                     {t(`relationship_${o.relationship}`)}
                     {o.registrationType ? ` · ${t(`registrationType_${o.registrationType}`)}` : ""}
-                    {o.moveOut ? ` · ${t("endedOn", { date: o.moveOut })}` : ""}
+                    {o.moveOut ? ` · ${t("endedOn", { date: format.dateTime(new Date(`${o.moveOut}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }) })}` : ""}
                   </span>
                 </div>
                 {!o.moveOut && (
