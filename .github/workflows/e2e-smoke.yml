@@ -24,6 +24,12 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       RESEND_API_KEY: re_invalid_e2e_no_send
+      # src/db/client.ts throws at import without SUPABASE_DB_URL, and
+      # `next build` imports /api/admin/backup while collecting page data.
+      # Only that admin export route uses the Drizzle client and the smoke
+      # never calls it, so a syntactically valid dead local address is
+      # enough — and guarantees no direct DB connection from this job.
+      SUPABASE_DB_URL: postgresql://placeholder:placeholder@127.0.0.1:1/placeholder
       E2E_BASE_URL: http://localhost:3000
       E2E_START_SERVER: "1"
     steps:
