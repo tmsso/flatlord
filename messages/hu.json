@@ -522,7 +522,17 @@
     "addFacility": "Felszereltség hozzáadása",
     "facilitiesTitle": "Felszereltség",
     "itemsTitle": "Leltártárgyak",
-    "facilityOwnerNote": "A felszereltség a lakás beépített része, mindig a tulajdonosé."
+    "facilityOwnerNote": "A felszereltség a lakás beépített része, mindig a tulajdonosé.",
+    "titleWithCount": "Leltár · {count} tétel",
+    "byDate": "{date}-ig",
+    "facilityOwnerShort": "Tulajdonos (felszereltség)",
+    "discrepancyEllipsis": "Eltérés…",
+    "discrepancyNoteLabel": "Mi az eltérés?",
+    "photoOptionalHint": "+ opcionális fotó",
+    "discrepancyOpensRequest": "Eltérés jelzése automatikusan kérést nyit.",
+    "reconfirmationAllDone": "Minden tételre válaszolt — köszönjük!",
+    "back": "Vissza",
+    "okShort": "Rendben"
   },
   "requests": {
     "title": "Kérések",
@@ -593,7 +603,8 @@
     "attached": "Csatolva: {name}",
     "threadEmpty": "Még nincs üzenet.",
     "externalRefColumn": "Külső ügyszám",
-    "appointmentColumn": "Időpont"
+    "appointmentColumn": "Időpont",
+    "approveApplyNotify": "Jóváhagyás — alkalmaz + értesít"
   },
   "notices": {
     "title": "Értesítések",
