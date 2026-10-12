@@ -16,6 +16,7 @@ afterEach(async () => {
   }
   await sql`delete from invites where email like '%invite-trigger-test%'`;
   await sql`delete from persons where given_name = 'Invite' and family_name = 'Trigger Test'`;
+  await sql`delete from persons where given_name like 'owner-no-person-%' and family_name = ''`;
 });
 
 afterAll(async () => {
@@ -49,6 +50,33 @@ describe("handle_new_user invite matching", () => {
 
     const [invite] = await sql`select consumed_at from invites where email = ${email}`;
     expect(invite.consumed_at).not.toBeNull();
+  });
+
+  it("an owner invite without a person gets a bare person record (0034)", async () => {
+    const local = `owner-no-person-${randomUUID()}`;
+    const email = `${local}@invite-trigger-test.example`;
+    await sql`
+      insert into invites (email, token_hash, role, expires_at)
+      values (${email}, ${createHash("sha256").update("x").digest("hex")}, 'owner', now() + interval '7 days')
+    `;
+    const userId = await insertAuthUser(email);
+
+    const [profile] = await sql`select role, person_id from profiles where id = ${userId}`;
+    expect(profile.role).toBe("owner");
+    expect(profile.person_id).not.toBeNull();
+    const [person] = await sql`select given_name, family_name, managed_by_person_id from persons where id = ${profile.person_id}`;
+    expect(person).toEqual({ given_name: local, family_name: "", managed_by_person_id: null });
+  });
+
+  it("a tenant invite without a person still gets no person record", async () => {
+    const email = `tenant-no-person-${randomUUID()}@invite-trigger-test.example`;
+    await sql`
+      insert into invites (email, token_hash, role, expires_at)
+      values (${email}, ${createHash("sha256").update("x").digest("hex")}, 'tenant', now() + interval '7 days')
+    `;
+    const userId = await insertAuthUser(email);
+    const [profile] = await sql`select person_id from profiles where id = ${userId}`;
+    expect(profile.person_id).toBeNull();
   });
 
   it("does not create a profile when no invite matches", async () => {
