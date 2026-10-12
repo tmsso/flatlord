@@ -25,7 +25,7 @@ export default async function AdminNoticesPage() {
 
   const { data: tenancyRows } = await supabase
     .from("tenancies")
-    .select("id, persons(given_name, family_name)")
+    .select("id, properties(name), persons(given_name, family_name)")
     .eq("status", "active")
     .order("created_at", { ascending: false });
 
@@ -46,10 +46,15 @@ export default async function AdminNoticesPage() {
     };
   });
 
+  // "<flat> · <tenant>" — the owner picks a flat, so the flat leads
+  // (B-33: prod showed a UUID here, then only the tenant's name).
   type PersonRef = { given_name: string; family_name: string };
+  type UnitRef = { name: string };
   const tenancyOptions = (tenancyRows ?? []).map((t) => {
     const person = one(t.persons as unknown as PersonRef | PersonRef[] | null);
-    return { id: t.id, label: person ? `${person.given_name} ${person.family_name}` : t.id };
+    const unit = one(t.properties as unknown as UnitRef | UnitRef[] | null);
+    const parts = [unit?.name, person ? `${person.given_name} ${person.family_name}` : null].filter(Boolean);
+    return { id: t.id, label: parts.length ? parts.join(" · ") : "—" };
   });
 
   return (
