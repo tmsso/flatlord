@@ -109,3 +109,11 @@ Started from the owner's prod-testing notes (recorded as B-33…B-37 in `50796ff
 - **Not verified:** anything on prod (nothing merged); the nightly e2e workflow on GitHub (needs the secret); the contract PDF iframe in a real (non-headless) browser; whether the nightly `supabase db dump` includes the new `private` schema (policies call `private.*` — check `schema.sql` at the restore drill, #40). (The reconfirmation answer path *was* exercised through the UI with 0029 applied — #70 click-through.)
 - Deviations (filed): notice preview + clause picker (B-39), PDF hit highlighting (B-40), reject-with-note (B-41), facility conversion (B-38 / D-31).
 
+## Owner follow-up 2026-10-12
+
+- The owner ran `private/merge-chain-2026-10-11.sh`: migrate-prod run `38216819825` (from the top branch) green, applying `0026`–`0031`; #57→#73 merged in order with merge commits, branches deleted afterwards. `main` CI green on `838cea6`; prod deployed `838cea6`; `/api/health` ok. The GitHub retarget step worked as scripted.
+- Owner signed off Phase 4c items 1–6 → Phase 4c closed. D-24 confirmed; D-31 decided "convertible" (B-38 promoted to P1).
+- Forgery check: a narrower variant (tenant-source rows only) returned 0 rows; the full ROADMAP query is still to run.
+- E2E smoke: 6/6 locally against dev on merged `main` (prod build). The GitHub workflow still skips — `SUPABASE_DEV_SERVICE_ROLE_KEY` isn't set (only the anon key was updated).
+- Restore drill (#40) by a session at the owner's request — see `docs/backup-restore.md`. Found B-46 (same-day manual backup fails at publish).
+- New owner requests recorded: B-42 onboarding wizard, B-43 offboarding wizard, B-44 taxation module (D-32), B-45 switchable modules (D-33).

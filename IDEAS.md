@@ -13,8 +13,8 @@ Loose ideas with no phase and no verification bar yet. Anything with a concrete 
 
 - **Owner-side expense tracking** — maintenance, insurance, common-cost invoices per property → yearly profitability; the cost-side companion of Phase 4b's income/tax report. Research HU flat-rate rental taxation before building.
 - **Renewal wizard** — next contract version from current terms + new rent schedule; the non-AI fallback of Phase 5 drafting.
-- **Tenant onboarding checklist** — house-rules acknowledgement, key handover, address registration, meter baselines in one guided flow.
-- **Move-out wizard** — notice → showings → final readings → deposit settlement → handover protocol (B-13) → permission revocations (B-14).
+- **Tenant onboarding checklist** — *partly covered by `BACKLOG.md` B-42 (2026-10-12).* house-rules acknowledgement, key handover, address registration, meter baselines in one guided flow.
+- **Move-out wizard** — *promoted to `BACKLOG.md` B-43 (2026-10-12).* notice → showings → final readings → deposit settlement → handover protocol (B-13) → permission revocations (B-14).
 - **Utility-rate review nudge v2** — beyond the shipped `valid_to` reminder: alert when computed cost persistently under/overshoots provider bills.
 - **Invoice-based unit-cost derivation** — parse an uploaded utility invoice (same intake pattern as contracts) → propose a derived unit rate → admin reviews → new `charge_schedules` row with the invoice attached as evidence.
 - **Photo archive timeline** per property — handovers, damages, repairs.

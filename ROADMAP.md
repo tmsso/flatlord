@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-10-11)
+## Status at a glance (2026-10-12)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -14,7 +14,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
 | 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; remainder open |
-| 4c | **UI fidelity pass** (new, 2026-09-15) | Built — items 1–5 shipped; item 6 built in PRs #68–#72 (2026-10-11, stacked, pending merge); owner visual sign-off open for all |
+| 4c | **UI fidelity pass** (new, 2026-09-15) | **Closed 2026-10-12** — items 1–6 shipped and live (item 6: PRs #68–#72, merged 2026-10-12); owner visual sign-off given 2026-10-12 |
 | 5 | AI features + expansion | Not started |
 
 ## Phase gates → admin checklist (decided 2026-09-15)
@@ -23,12 +23,11 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ### Admin actions pending (only the admin can do these — sessions must not)
 
-- [ ] **Run `migrate-prod.yml` now — still not run as of 2026-10-11** (`gh workflow run migrate-prod.yml --ref main`): applies `0026` (tenants can't read drafts), `0027` (**closes a live hole**: a tenant could insert an already-verified meter reading via the REST API) and `0028` (delivery log). Code for all three is already live.
-- [ ] **Before merging the 2026-10-11 chain (#57–#73): `gh workflow run migrate-prod.yml --ref docs/long-batch-2026-10-11`** — the top branch carries `0026`–`0031`; all are compatible with today's `main` code, and #60/#62 select the new columns, so prod must have them first (D-30). Then run the merge script from the session handoff. After this, `0029`–`0031` are frozen.
-- [ ] **Add GitHub secret `SUPABASE_DEV_SERVICE_ROLE_KEY`** (dev project's service-role key) so the nightly e2e smoke (`e2e-smoke.yml`, B-08) runs instead of skipping.
-- [ ] **Decide D-31** (facility `kind` fixed at creation vs. convertible — `BACKLOG.md` B-38) and confirm **D-24**.
-- [ ] **After that, one read-only check in the prod SQL editor** that `0027`'s hole was never used — expect zero rows: `select mr.id, mr.reading_date, mr.created_at, mr.confirmed_at from meter_readings mr join profiles ep on ep.person_id = mr.entered_by and ep.role = 'tenant' where mr.status = 'verified' and (mr.confirmed_by is null or mr.source <> 'tenant' or not exists (select 1 from profiles p where p.person_id = mr.confirmed_by and p.role = 'owner') or mr.confirmed_at - mr.created_at < interval '5 seconds');`
-- [ ] **Restore drill** (GitHub issue #40, due 2026-10-01).
+- [x] ~~Migrate prod (`0026`–`0031`) and merge the 2026-10-11 chain #57–#73~~ — done 2026-10-12 by the owner (migrate-prod run `38216819825` green, then the merge script). `0029`–`0031` are now frozen (D-30).
+- [ ] **Add GitHub secret `SUPABASE_DEV_SERVICE_ROLE_KEY`** (dev project's service-role key) so the nightly e2e smoke (`e2e-smoke.yml`, B-08) runs instead of skipping. **Still missing as of 2026-10-12** — `SUPABASE_DEV_ANON_KEY` was updated instead; the dispatched run `38234450578` skipped. The smoke itself passes 6/6 locally against dev on merged `main`.
+- [x] ~~Decide D-31 and confirm D-24~~ — 2026-10-12: D-31 **convertible** (B-38 now P1), D-24 **confirmed**.
+- [ ] **One read-only check in the prod SQL editor** that `0027`'s hole was never used — expect zero rows: `select mr.id, mr.reading_date, mr.created_at, mr.confirmed_at from meter_readings mr join profiles ep on ep.person_id = mr.entered_by and ep.role = 'tenant' where mr.status = 'verified' and (mr.confirmed_by is null or mr.source <> 'tenant' or not exists (select 1 from profiles p where p.person_id = mr.confirmed_by and p.role = 'owner') or mr.confirmed_at - mr.created_at < interval '5 seconds');` — 2026-10-12: a narrower variant (tenant-source rows only) returned 0 rows; run this full query once to close it.
+- [x] ~~Restore drill (issue #40)~~ — done 2026-10-12 by a session on the owner's request: `backup-2026-10-12` restored into a throwaway container, exact row parity on all 30 `public`+`drizzle` tables, `private` schema functions present (see `docs/backup-restore.md`).
 - [ ] **Set `CRON_SECRET`** in Vercel (prod + preview). Before flipping: the overdue query has no date floor, so the first authenticated run alerts once on every historical statement still `issued`/`partially_paid` past due — count them in the Supabase dashboard first (the 2026-09-10 retroactive-issue grace removes most). Tenant-addressed reminders won't deliver until Resend leaves sandbox (next item).
 - [ ] **Buy a domain** (`BACKLOG.md` B-01 — Cloudflare Registrar or Porkbun, not Vercel's registrar) and verify it in Resend. Unblocks real tenant email, the Phase 1 acceptance run, and a non-`vercel.app` URL. The one purchase this review recommends.
 - [ ] **Phase 1 real acceptance run**: one real statement walked photo → verification → statement → email/WhatsApp → payment, total identical to the sheet. Confirm-first, real person involved.
@@ -45,7 +44,9 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 - **Admin analytics, remainder** (PR #33 merged the cumulative "billed vs received" ledger + event timeline): yearly cost/consumption comparison; payment-punctuality chart; rate-history overlay on the consumption chart; rent-vs-pass-through split on the billed curve. **Done means:** each chart renders on the admin tenancy page from real dev data; a unit test guards that nothing under `src/app/(tenant)` imports the analytics loaders (tenant never sees cumulative totals — D-15).
 - **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **D-06 is tentative** (admin-only + audited) — present a short design note and get a go-ahead before the migration. **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
-- **Owner income breakdown for tax**: admin report with period selector (default last full calendar year), basis toggle (rent-only vs all inbound), manual adjusting items, editable PIT rate (default 15%, reconfirm at build), PDF via `@react-pdf`. Income side only. **Done means:** report totals reconcile to the payments table for the period; PDF renders in both locales.
+- **Taxation module** — superseded and widened by `BACKLOG.md` **B-44** (owner request 2026-10-12): taxation basis, cost-deduction method, rate, period aggregates and year-end projection, Hungarian defaults. Ships behind the module switch (B-45, off by default).
+- **Module switches** (`BACKLOG.md` **B-45**) — build before B-42–B-44 so new modules land switchable from day one.
+- **Onboarding wizard** (`B-42`) and **offboarding wizard** (`B-43`) — owner request 2026-10-12.
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).
 - ~~Avatars~~ — moved back to `IDEAS.md` (cost/benefit).
 
@@ -65,7 +66,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ~~6. Remaining screens~~ — built 2026-10-11 in PRs #68–#72 (stacked, pending merge): design/09 7a/b/c, 8a/b, 9, 10a/b, 11 + loading skeletons; error pages (#46) and phone nav (#54) earlier. Deviations filed as `BACKLOG.md` B-39/B-40/B-41. Verified on dev at 390/1440 in both themes, zero console errors.
 
-**Accept (4c):** the owner compares each ported screen against its mockup and signs off; both themes; tenant screens at 390px, admin at 1440px. Items 1–6 are built and functionally verified on dev but **not yet owner-signed-off** — that sign-off is still the Accept gate for 4c as a whole, not a formality.
+**Accept (4c):** ✅ owner signed off items 1–6 on 2026-10-12 (both themes; tenant 390px, admin 1440px). Phase 4c is closed; remaining design deviations are tracked as B-39, B-40, B-41.
 
 ## Phase 5 — AI features + expansion
 

@@ -70,6 +70,17 @@ Validated 2026-07-23 against a real prod dump (flatlord-prod, `zarpjgtcwkndtmlnh
 - `auth.*` restore into a bare container was attempted and found to fail on schema drift (documented above as the known caveat) — not a bug in the backup, a structural limitation of self-hosted restore targets. This is why `auth.sql` is now a separate file from `data.sql`.
 - Containers torn down immediately after each test; nothing persisted outside the throwaway container.
 
+## Restore drill 2026-10-12 (issue #40)
+
+- Backup `backup-2026-10-12` (09:11 UTC, after prod migrations `0026`–`0031`), restored into a throwaway `supabase/postgres:17.6.1.143` container (1 GB memory cap) using steps 1–3 above, unchanged.
+- `schema.sql` and `data.sql` both applied with `ON_ERROR_STOP=1` and no errors.
+- **Exact row-count parity** between the dump's `COPY` blocks and the restored tables for all **30** `public`+`drizzle` tables (530 rows) — the table count has grown from 18 since July.
+- `private` schema present with its 3 functions (the RLS policies from `0029`/`0031` depend on them), plus 122 `public` policies, the `trg_requests_inventory_item_scope` trigger and `inventory_items.kind`.
+- Storage: the archive holds 1 file, which matches prod's content (1 attachment row; 0 contracts; 0 meter readings with a photo). The `storage cp` round-trip against a live bucket was not repeated — it would write to prod storage.
+- Not tested: restoring `auth.sql` (known caveat above) and comparing with *live* prod counts (the dump is the snapshot; no live prod query was run).
+- Container and image removed afterwards; the downloaded copy was kept only inside gitignored `/private` while in use, then deleted.
+- Finding: a manual `backup.yml` run on the same day as the nightly one fails at publish (tag exists) — `BACKLOG.md` B-46.
+
 ## Required secrets (`tmsso/flatlord` repo settings)
 
 | Secret | Purpose |

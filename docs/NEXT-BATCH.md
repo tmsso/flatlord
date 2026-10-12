@@ -1,35 +1,35 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-10-11 after the long batch from the owner's prod-testing notes (PRs #57–#73, a stacked chain). See `docs/DELIVERY-LOG.md` for detail.
+Rewritten 2026-10-12 after the owner merged the 2026-10-11 chain (#57–#73), migrated prod (`0026`–`0031`), signed off Phase 4c and decided D-24/D-31. See `docs/DELIVERY-LOG.md` for detail.
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. **Is the 2026-10-11 chain merged?** `gh pr list` should not show #57–#73. If it does, the owner still has to (a) run `migrate-prod.yml --ref docs/long-batch-2026-10-11` (`0026`–`0031`; `0027` closes a live tenant hole), then (b) run the merge script from that session's handoff. Never do either yourself (D-14, D-30). Don't build on top of unmerged chain branches without saying so.
-2. **Prod migrations ran?** `gh run list --workflow migrate-prod.yml --limit 1` must show a run after 2026-10-11. `0029`–`0031` are frozen once prod has them (D-30).
-3. **Owner visual sign-off on Phase 4c items 1–6** (`design/01`–`06`, `09`). Fold feedback in first — that is item 1 below.
-4. D-24 and D-31 are **proposed**; confirm before touching statements' adjustment flow or inventory `kind`.
-5. Confirm ship-autonomy, and find out early whether `gh pr merge` is allowed in the session's mode (it was classifier-blocked on 2026-10-11 → stacked chain).
+1. `ROADMAP.md` admin checklist: the **full forgery-check query** and the **`SUPABASE_DEV_SERVICE_ROLE_KEY` secret** are still open — remind the owner, don't block on them.
+2. Confirm ship-autonomy, and find out early whether `gh pr merge` is allowed in the session's mode (classifier-blocked on 2026-10-11 → stacked chain + owner merge script).
+3. Any migration in this batch: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
 
 ## The three
 
-### 1. Phase 4c sign-off feedback (S–M)
+### 1. B-38 — facility ↔ item conversion (S)
 
-Whatever the owner flags while comparing screens to the mockups. If nothing, pick **B-41** (reject-with-note) and **B-39** (notice preview / clause picker) — the two design/09 deviations closest to daily use.
+D-31 decided "convertible" on 2026-10-12. Small and self-contained; lets already-logged appliances move into the facilities group (and the repair picker's Facilities section) without losing photos/history. Probably no migration — the owner-owned CHECK already holds.
 
-### 2. B-12 — migration-drift check (ops, S)
+### 2. B-45 — switchable modules (M)
+
+Has to come before B-42–B-44: every new module should land behind a switch from day one, and the onboarding wizard needs to know which modules a new owner has on. Needs a migration (per-owner settings); existing owners default to everything on, so prod sees no change.
+
+### 3. B-12 — migration-drift check (ops, S)
 
 Prod sat three weeks behind on migrations including a security fix (`0027`). A read-only step in `health-check.yml` comparing prod's `drizzle.__drizzle_migrations` count with `supabase/migrations/*.sql` turns that into a red check instead of a memory note.
 
-### 3. B-04 — Sentry free tier (S)
-
-Both users are non-developers; errors still only reach Vercel logs. PII scrubbing for person fields is part of done.
-
 ## Alternatives
 
-- **Phase 4b remainder** (yearly comparison, punctuality chart, rate overlay) — now verifiable on dev thanks to B-30's metered history.
-- **B-38** if the owner decides D-31 the other way; **B-31** skip-photo reason; **B-11** secondary-query errors.
+- **B-04** Sentry (S); **B-41** reject-with-note (S); **B-46** same-day manual backup (S); **B-39** notice preview / clause picker (M).
+- **B-44** taxation module (L) — after B-45; reconfirm the Hungarian rules marked "open for build time" in its entry.
+- **B-42** onboarding / **B-43** offboarding wizards (L each) — after B-45; B-43 benefits from B-13 and B-14 first.
+- **Phase 4b remainder** (yearly comparison, punctuality chart, rate overlay) — verifiable on dev thanks to B-30's metered history.
 
 ## Session logistics
 
