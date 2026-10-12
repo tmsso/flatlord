@@ -1,0 +1,74 @@
+name: E2E smoke (dev)
+
+# B-08: builds the app, serves it on the runner and runs tests/e2e against
+# the DEV Supabase project (route sweep, both roles, both locales). The
+# test helper refuses any non-dev project in code.
+#
+# schedule + workflow_dispatch only, never pull_request: this repo is
+# public and the job needs the dev service-role key (to mint magic links
+# for the playwright-* test accounts). Same trigger discipline as
+# backup.yml / dev-keepalive.yml. No email can leave: RESEND_API_KEY is a
+# deliberately invalid value.
+on:
+  schedule:
+    - cron: "17 4 * * *" # 04:17 UTC nightly (off-the-hour)
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://kqrzqbocruwafvuodatb.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      RESEND_API_KEY: re_invalid_e2e_no_send
+      E2E_BASE_URL: http://localhost:3000
+      E2E_START_SERVER: "1"
+    steps:
+      # Until the owner adds SUPABASE_DEV_SERVICE_ROLE_KEY the run is a
+      # visible no-op rather than a red X every night.
+      - name: Check secrets
+        id: secrets
+        run: |
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "::warning::SUPABASE_DEV_SERVICE_ROLE_KEY / SUPABASE_DEV_ANON_KEY not set — skipping the smoke run."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.secrets.outputs.ready == 'true'
+
+      - uses: pnpm/action-setup@v5
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v5
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm build
+
+      - name: Run smoke
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm exec playwright test
+
+      # No report/trace artifact on purpose: this repo is public, artifacts
+      # are downloadable, and traces would carry dev-data screenshots and
+      # page contents. The list reporter's log names the failing route.
