@@ -1,36 +1,36 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-10-12 after the owner merged the 2026-10-11 chain (#57–#73), migrated prod (`0026`–`0031`), signed off Phase 4c and decided D-24/D-31. See `docs/DELIVERY-LOG.md` for detail.
+Rewritten 2026-10-12 at the end of the "ready for a second owner" long batch (stacked chain #75 → #82, **open**; `0032`–`0034` applied on dev only). See `docs/DELIVERY-LOG.md`.
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. Nightly `e2e-smoke.yml` is live since 2026-10-12 — check its last run is green before building on `main`. Remaining owner items (`CRON_SECRET`, domain B-01) are long-standing; mention, don't block.
-2. Confirm ship-autonomy, and find out early whether `gh pr merge` is allowed in the session's mode (classifier-blocked on 2026-10-11 → stacked chain + owner merge script; allowed again on 2026-10-12 for #74).
-3. Any migration in this batch: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
+1. **Is the 2026-10-12 chain merged and prod migrated to `0034`?** (`gh pr list`, the `migration-drift` job in `health-check.yml`.) If not, remind the owner — everything below builds on it. Don't stack new work on an unmerged chain unless the owner says so.
+2. Nightly `e2e-smoke.yml` green on `main`.
+3. Confirm ship-autonomy; check early whether `gh pr merge` is allowed (blocked 2026-10-11, allowed for #74, not tried 2026-10-12).
+4. Any migration: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
 
 ## The three
 
-### 1. B-38 — facility ↔ item conversion (S)
+### 1. B-47 — ownership bootstrap claim (S)
 
-D-31 decided "convertible" on 2026-10-12. Small and self-contained; lets already-logged appliances move into the facilities group (and the repair picker's Facilities section) without losing photos/history. Probably no migration — the owner-owned CHECK already holds.
+The last owner-isolation hole known: any owner can add the first ownership row to an unowned root property. Small, and it should land before a second owner is actually invited.
 
-### 2. B-45 — switchable modules (M)
+### 2. B-42 — onboarding wizard (L)
 
-Has to come before B-42–B-44: every new module should land behind a switch from day one, and the onboarding wizard needs to know which modules a new owner has on. Needs a migration (per-owner settings); existing owners default to everything on, so prod sees no change.
+Unblocked by this batch: owners are isolated (D-34), modules are switchable with everything-off defaults (D-37), and an invited owner now gets a bare person record (D-38) — the wizard's first step ("own personal data") replaces that stopgap's naming. Compose the existing create forms; resumable from DB state, no wizard table.
 
-### 3. B-12 — migration-drift check (ops, S)
+### 3. B-48 — module loose ends (S)
 
-Prod sat three weeks behind on migrations including a security fix (`0027`). A read-only step in `health-check.yml` comparing prod's `drizzle.__drizzle_migrations` count with `supabase/migrations/*.sql` turns that into a red check instead of a memory note.
+Dashboard queue / counters still show requests with the module off; decide what inventory discrepancies do then.
 
 ## Alternatives
 
-- **B-04** Sentry (S); **B-41** reject-with-note (S); **B-46** same-day manual backup (S); **B-39** notice preview / clause picker (M).
-- **B-44** taxation module (L) — after B-45; reconfirm the Hungarian rules marked "open for build time" in its entry.
-- **B-42** onboarding / **B-43** offboarding wizards (L each) — after B-45; B-43 benefits from B-13 and B-14 first.
-- **Phase 4b remainder** (yearly comparison, punctuality chart, rate overlay) — verifiable on dev thanks to B-30's metered history.
+- **B-44** taxation module (L) — behind the `taxation` switch (reserved in `0033`); reconfirm the Hungarian rules marked "open for build time".
+- **B-04** Sentry (S, needs the owner's DSN); **B-41** reject-with-note (S); **B-49** uninvited Google sign-in hook (S).
+- **B-43** offboarding wizard (L) — benefits from B-13 and B-14 first.
 
 ## Session logistics
 
-`/verify` for lint + typecheck · real verification on **dev** (`kqrzqbocruwafvuodatb`) with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test` — the committed helper is `tests/e2e/helpers.ts`, the route sweep is `pnpm e2e` · tenant-a's contact email is a real inbox — start servers with an invalid `RESEND_API_KEY` · **long sessions: restart `pnpm dev` when it slows (it reached 2.7 GB on this 3.7 GB node and broke magic-link timing); for sweeps prefer `pnpm build` + `E2E_START_SERVER=1 pnpm e2e`** · Base UI Checkbox ids sit on a hidden input — click the label in Playwright · policies that read their own table → SECURITY DEFINER fn in `private` (D-29) · format date ranges on the server only · stop dev servers with TaskStop, not `pkill -f` · prod migrations via `migrate-prod.yml` only · `gh run list` after every push · `/close-session` to end.
+`/verify` for lint + typecheck · DB tests are CI-only · real verification on **dev** (`kqrzqbocruwafvuodatb`) with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test`; a *fresh* owner can be made through the real path (Emma → Settings → owner invite → `auth.admin.createUser`) · start servers with an invalid `RESEND_API_KEY` (tenant-a's contact email is real) · prefer `pnpm build` + `pnpm start` over `pnpm dev` on this node; stop it with TaskStop · Base UI Switch/Checkbox ids sit on a hidden input — click `label[for=…]` · assert on role-scoped locators, not page HTML (RSC payloads contain off-screen data — a false pass happened) · policies that read their own table → SECURITY DEFINER fn in `private` (D-29) · `gh run list` after every push · `/close-session` to end.
