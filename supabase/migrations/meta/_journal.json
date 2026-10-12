@@ -204,6 +204,13 @@
       "when": 1791498089509,
       "tag": "0028_statement-deliveries",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791721231533,
+      "tag": "0029_tenant-write-pins",
+      "breakpoints": true
     }
   ]
 }

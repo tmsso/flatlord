@@ -118,7 +118,7 @@ afterAll(async () => {
   await adminSql`delete from attachments where entity_type = 'inventory_item' and entity_id in (${itemAId}, ${itemBId})`;
   await adminSql`delete from inventory_reconfirmation_items where reconfirmation_id = ${campaignAId}`;
   await adminSql`delete from inventory_reconfirmations where id = ${campaignAId}`;
-  await adminSql`delete from inventory_items where id in (${itemAId}, ${itemBId})`;
+  await adminSql`delete from inventory_items where unit_id in (${flatAId}, ${flatBId})`;
   await adminSql`delete from property_ownership where property_id = ${houseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${strangerOwnerUserId}, ${userAId})`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${strangerOwnerPersonId})`;
@@ -241,5 +241,63 @@ describe("RLS: inventory isolation (migration 0018)", () => {
       select property_id from attachments where entity_type = 'inventory_item' and entity_id = ${itemAId} limit 1
     `;
     expect(row.property_id).toBe(houseId);
+  });
+});
+
+// B-28 (migration 0029): the tenant's reconfirmation-item update had no
+// WITH CHECK. Denial can be a 0-row update (USING didn't match) or a
+// thrown WITH CHECK violation — both count.
+describe("RLS: tenant reconfirmation answers pin other columns (migration 0029)", () => {
+  async function denied(query: (tx: postgres.TransactionSql) => Promise<{ count: number }>) {
+    try {
+      await asUser(userAId, async (tx) => {
+        const result = await query(tx);
+        expect(result.count).toBe(0);
+      });
+    } catch (err) {
+      expect(String(err)).toMatch(/row-level security|permission denied/i);
+    }
+  }
+
+  async function freshPendingItem() {
+    const [item] = await adminSql`insert into inventory_items (unit_id, title) values (${flatAId}, 'RII 0029 item') returning id`;
+    const [row] = await adminSql`
+      insert into inventory_reconfirmation_items (reconfirmation_id, inventory_item_id) values (${campaignAId}, ${item.id}) returning id
+    `;
+    return { itemId: item.id as string, rowId: row.id as string };
+  }
+
+  it("rejects re-pointing the row at another item, or an invalid status", async () => {
+    const { itemId, rowId } = await freshPendingItem();
+    await denied((tx) => tx`update inventory_reconfirmation_items set status = 'confirmed', inventory_item_id = ${itemBId} where id = ${rowId}`);
+    await denied((tx) => tx`update inventory_reconfirmation_items set status = 'pending', tenant_note = 'x' where id = ${rowId}`);
+    const [row] = await adminSql`select status, inventory_item_id from inventory_reconfirmation_items where id = ${rowId}`;
+    expect(row).toMatchObject({ status: "pending", inventory_item_id: itemId });
+  });
+
+  it("accepts the app's answer once, then the row is closed to the tenant", async () => {
+    const { rowId } = await freshPendingItem();
+    await asUser(userAId, async (tx) => {
+      const r = await tx`
+        update inventory_reconfirmation_items set status = 'discrepancy', tenant_note = 'scratched', confirmed_at = now()
+        where id = ${rowId}
+      `;
+      expect(r.count).toBe(1);
+    });
+    // Admin reviews it; the tenant can't flip it back afterwards.
+    await adminSql`update inventory_reconfirmation_items set status = 'confirmed' where id = ${rowId}`;
+    await denied((tx) => tx`update inventory_reconfirmation_items set status = 'discrepancy' where id = ${rowId}`);
+    const [row] = await adminSql`select status from inventory_reconfirmation_items where id = ${rowId}`;
+    expect(row.status).toBe("confirmed");
+  });
+
+  it("rejects answers on a completed campaign", async () => {
+    const { rowId } = await freshPendingItem();
+    await adminSql`update inventory_reconfirmations set status = 'completed' where id = ${campaignAId}`;
+    try {
+      await denied((tx) => tx`update inventory_reconfirmation_items set status = 'confirmed' where id = ${rowId}`);
+    } finally {
+      await adminSql`update inventory_reconfirmations set status = 'open' where id = ${campaignAId}`;
+    }
   });
 });
