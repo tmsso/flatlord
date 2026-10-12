@@ -6,7 +6,9 @@
     "save": "Mentés",
     "cancel": "Mégse",
     "active": "Aktív",
-    "inactive": "Inaktív"
+    "inactive": "Inaktív",
+    "previousMonth": "Előző hónap",
+    "nextMonth": "Következő hónap"
   },
   "auth": {
     "title": "Flatlord",

@@ -6,7 +6,9 @@
     "save": "Save changes",
     "cancel": "Cancel",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month"
   },
   "auth": {
     "title": "Flatlord",
