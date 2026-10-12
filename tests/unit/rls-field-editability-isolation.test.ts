@@ -72,6 +72,7 @@ afterAll(async () => {
   await adminSql`delete from property_ownership where property_id = ${ownerHouseId}`;
   await adminSql`delete from properties where id = ${ownerHouseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${userAId}, ${userBId})`;
+  await adminSql`update persons set managed_by_person_id = null where id = ${personBId}`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${personAId}, ${personBId})`;
   await adminSql`delete from auth.users where id in (${ownerUserId}, ${userAId}, ${userBId})`;
   await adminSql.end();
@@ -132,12 +133,22 @@ describe("RLS: field editability isolation (migration 0021)", () => {
     expect(after.phone).toBeNull();
   });
 
-  it("the owner can still update any person row (owner_update_persons, unaffected by the new self policy)", async () => {
+  it("the owner can still update a person they manage (owner_update_persons, unaffected by the new self policy)", async () => {
+    // Since migration 0032 an owner edits only persons visible to them —
+    // here person B is marked as managed by this owner.
+    await adminSql`update persons set managed_by_person_id = ${ownerPersonId} where id = ${personBId}`;
     await asUser(ownerUserId, async (tx) => {
       const result = await tx`update persons set phone = '+36222222' where id = ${personBId}`;
       expect(result.count).toBe(1);
     });
     const [after] = await adminSql`select phone from persons where id = ${personBId}`;
     expect(after.phone).toBe("+36222222");
+  });
+
+  it("the owner cannot update a person who is neither managed by nor linked to them (migration 0032)", async () => {
+    await asUser(ownerUserId, async (tx) => {
+      const result = await tx`update persons set phone = '+36333333' where id = ${personAId}`;
+      expect(result.count).toBe(0);
+    });
   });
 });
