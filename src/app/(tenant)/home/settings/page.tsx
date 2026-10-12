@@ -2,7 +2,11 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { maskId } from "@/lib/format/mask-id";
-import { getFieldPolicyMap, resolveFieldPolicy } from "@/server/field-editability/get-field-policy-map";
+import {
+  getFieldPolicyMap,
+  resolveFieldPolicy,
+  resolveTenantPolicyPropertyId,
+} from "@/server/field-editability/get-field-policy-map";
 import { PERSON_EDITABLE_FIELDS, PERSON_SENSITIVE_FIELD_KEYS } from "@/lib/field-editability/person-fields";
 import { EditablePersonField } from "@/components/field-editability/editable-person-field";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
@@ -44,7 +48,11 @@ export default async function TenantProfilePage() {
         .is("move_out", null)
     : { data: [] };
 
-  const policyMap = await getFieldPolicyMap(supabase, "person");
+  const policyMap = await getFieldPolicyMap(
+    supabase,
+    "person",
+    await resolveTenantPolicyPropertyId(supabase, profile.personId),
+  );
 
   // One open approval_required request per field at a time (enforced in
   // submit-field-edit.ts) — fetch them all up front so each field row can

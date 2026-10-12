@@ -225,6 +225,13 @@
       "when": 1791722279445,
       "tag": "0031_repair-item-picker",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791810343819,
+      "tag": "0032_owner-isolation",
+      "breakpoints": true
     }
   ]
 }

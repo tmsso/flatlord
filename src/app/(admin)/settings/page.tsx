@@ -5,6 +5,7 @@ import { InviteManager } from "@/components/invite-manager";
 import { BackupExport } from "@/components/backup-export";
 import { FieldPolicyManager } from "@/components/field-editability/field-policy-manager";
 import { getFieldPolicyMap } from "@/server/field-editability/get-field-policy-map";
+import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { NotificationPreferences } from "@/components/notifications/notification-preferences";
 import { OWNER_NOTIFICATION_CATEGORIES } from "@/lib/notifications/notification-categories";
 
@@ -25,8 +26,20 @@ export default async function AdminSettingsPage() {
     .is("revoked_at", null)
     .order("created_at", { ascending: false });
 
-  const personPolicyMap = await getFieldPolicyMap(supabase, "person");
-  const personPolicies = Object.fromEntries(personPolicyMap);
+  // Field policies are per root property (migration 0032); RLS returns only
+  // the properties this owner owns.
+  const { data: rootProperties, error: propertiesError } = await supabase
+    .from("properties")
+    .select("id, name")
+    .is("parent_id", null)
+    .order("name");
+  assertNoQueryError("settings: root properties", propertiesError);
+  const policyManagers = await Promise.all(
+    (rootProperties ?? []).map(async (property) => ({
+      property,
+      policies: Object.fromEntries(await getFieldPolicyMap(supabase, "person", property.id)),
+    })),
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,7 +52,14 @@ export default async function AdminSettingsPage() {
           expiresAt: invite.expires_at,
         }))}
       />
-      <FieldPolicyManager policies={personPolicies} />
+      {policyManagers.map(({ property, policies }) => (
+        <FieldPolicyManager
+          key={property.id}
+          policies={policies}
+          propertyId={property.id}
+          propertyName={policyManagers.length > 1 ? property.name : undefined}
+        />
+      ))}
       <NotificationPreferences categories={OWNER_NOTIFICATION_CATEGORIES} prefs={ownProfile?.notification_prefs ?? {}} />
       <BackupExport />
     </div>

@@ -14,8 +14,17 @@ import { toast } from "sonner";
 // ROADMAP Phase 3 item 3's "3-way policy admin UI" — scoped to entityType
 // = 'person' (the concrete case built out this batch; other entity types
 // stay read_only by field_policies' own default until a future batch
-// wires them up the same way).
-export function FieldPolicyManager({ policies }: { policies: Record<string, FieldPolicy> }) {
+// wires them up the same way). One manager per owned root property since
+// migration 0032; `propertyName` is shown only when the owner has several.
+export function FieldPolicyManager({
+  policies,
+  propertyId,
+  propertyName,
+}: {
+  policies: Record<string, FieldPolicy>;
+  propertyId: string;
+  propertyName?: string;
+}) {
   const t = useTranslations("persons");
   const tf = useTranslations("fieldEditability");
   const router = useRouter();
@@ -26,7 +35,7 @@ export function FieldPolicyManager({ policies }: { policies: Record<string, Fiel
     setSavingField(fieldName);
     startTransition(async () => {
       try {
-        await setFieldPolicy({ entityType: "person", fieldName, policy });
+        await setFieldPolicy({ entityType: "person", fieldName, policy, propertyId });
         toast.success(tf("policySaved"));
         router.refresh();
       } catch (err) {
@@ -40,7 +49,10 @@ export function FieldPolicyManager({ policies }: { policies: Record<string, Fiel
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{tf("policyManagerTitle")}</CardTitle>
+        <CardTitle>
+          {tf("policyManagerTitle")}
+          {propertyName ? ` · ${propertyName}` : null}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-3 text-xs text-muted-foreground">{tf("policyManagerHint")}</p>
@@ -64,7 +76,7 @@ export function FieldPolicyManager({ policies }: { policies: Record<string, Fiel
                       disabled={isPending && savingField === field.key}
                       items={FIELD_POLICIES.map((p) => ({ value: p, label: tf(`policy_${p}`) }))}
                     >
-                      <SelectTrigger id={`policy-${field.key}`} className="w-48">
+                      <SelectTrigger id={`policy-${propertyId}-${field.key}`} className="w-48">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
