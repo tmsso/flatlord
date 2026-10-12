@@ -14,6 +14,7 @@ import {
   registrationTypeEnum,
   tenancyStatusEnum,
 } from "../../src/db/schema/enums";
+import { METER_KINDS } from "../../src/lib/billing/meter-kind";
 import { FIELD_POLICIES } from "../../src/db/schema/field-policies-values";
 import { NOTICE_SEQUENCES, NOTICE_TYPES } from "../../src/db/schema/notices";
 import { REQUEST_CATEGORIES, REQUEST_STATUSES } from "../../src/db/schema/requests";
@@ -87,6 +88,7 @@ const ENUM_KEYS: [string, string, readonly string[]][] = [
   ["notices", "type_", NOTICE_TYPES],
   ["notices", "sequence_", NOTICE_SEQUENCES],
   ["fieldEditability", "policy_", FIELD_POLICIES],
+  ["meterReadings", "kind_", METER_KINDS],
   ["tenancies", "status_", tenancyStatusEnum.enumValues],
   ["tenancies", "registrationType_", registrationTypeEnum.enumValues],
   ["tenancies", "relationship_", ["co_occupant", "guest"]],

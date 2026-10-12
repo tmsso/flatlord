@@ -250,7 +250,12 @@
     "prevMonth": "Előző hónap",
     "nextMonth": "Következő hónap",
     "atRate": "@ {rate}",
-    "statusRetakeRequested": "Újrafotózást kértek"
+    "statusRetakeRequested": "Újrafotózást kértek",
+    "kind_electricity": "Villanyóra",
+    "kind_gas": "Gázóra",
+    "kind_water": "Vízóra",
+    "kind_heat": "Hőmennyiségmérő",
+    "kind_other": "Mérőóra"
   },
   "properties": {
     "title": "Ingatlanok",
