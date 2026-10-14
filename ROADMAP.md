@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-10-12)
+## Status at a glance (2026-10-12, after the long batch)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -13,7 +13,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 2 | Documents, contract, inventory | Shipped. Scanned-contract OCR → Phase 5; move-in/out snapshots → `BACKLOG.md` B-13 |
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete (all cron shapes, auto-draft, PDF). **Unprovable live until `CRON_SECRET` is set** — admin action |
-| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; remainder open |
+| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline) merged; module switches (B-45) built in PR #80 (pending merge); remainder open |
 | 4c | **UI fidelity pass** (new, 2026-09-15) | **Closed 2026-10-12** — items 1–6 shipped and live (item 6: PRs #68–#72, merged 2026-10-12); owner visual sign-off given 2026-10-12 |
 | 5 | AI features + expansion | Not started |
 
@@ -22,6 +22,8 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 The "do not start a phase before its predecessor is accepted" rule was suppressed for every transition so far (1→2 on 2026-08-07, 3→4 on 2026-09-04, 4a/4b split on 2026-09-10) and no phase has ever been formally Accepted. Decided (`docs/DECISIONS.md` D-04, admin 2026-09-15): the gate ritual is dropped; a phase is *closed* when its rows in the checklist below are ticked. Sessions treat the checklist as the operative list and never block on gates.
 
 ### Admin actions pending (only the admin can do these — sessions must not)
+
+- [ ] **Second-owner readiness chain #75 → #82** (long batch 2026-10-12): run the read-only pre-checks in PR #78's body on prod, then `migrate-prod.yml` from the top branch (`0032`–`0034`), re-run the visible-counts check (persons/invites/audit unchanged), then merge in order with the script in `private/merge-chain-2026-10-12.sh`. **Don't invite a second owner before this is merged** — until then any owner sees every person.
 
 - [x] ~~Migrate prod (`0026`–`0031`) and merge the 2026-10-11 chain #57–#73~~ — done 2026-10-12 by the owner (migrate-prod run `38216819825` green, then the merge script). `0029`–`0031` are now frozen (D-30).
 - [x] ~~Add GitHub secret `SUPABASE_DEV_SERVICE_ROLE_KEY`~~ — done 2026-10-12; the first real run exposed a missing build-time `SUPABASE_DB_URL` (fixed in #74), then `e2e-smoke.yml` passed 6/6 on `main` (run `38238163856`). Nightly from now on.
@@ -45,8 +47,8 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - **Admin analytics, remainder** (PR #33 merged the cumulative "billed vs received" ledger + event timeline): yearly cost/consumption comparison; payment-punctuality chart; rate-history overlay on the consumption chart; rent-vs-pass-through split on the billed curve. **Done means:** each chart renders on the admin tenancy page from real dev data; a unit test guards that nothing under `src/app/(tenant)` imports the analytics loaders (tenant never sees cumulative totals — D-15).
 - **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **D-06 is tentative** (admin-only + audited) — present a short design note and get a go-ahead before the migration. **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
 - **Taxation module** — superseded and widened by `BACKLOG.md` **B-44** (owner request 2026-10-12): taxation basis, cost-deduction method, rate, period aggregates and year-end projection, Hungarian defaults. Ships behind the module switch (B-45, off by default).
-- **Module switches** (`BACKLOG.md` **B-45**) — build before B-42–B-44 so new modules land switchable from day one.
-- **Onboarding wizard** (`B-42`) and **offboarding wizard** (`B-43`) — owner request 2026-10-12.
+- ~~Module switches (B-45)~~ — built in PR #80 (`0033`, D-37), pending merge; loose ends in B-48.
+- **Onboarding wizard** (`B-42`) and **offboarding wizard** (`B-43`) — owner request 2026-10-12. B-42 is unblocked: owners are isolated (D-34), modules switchable (D-37), and an invited owner gets a person record (D-38).
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).
 - ~~Avatars~~ — moved back to `IDEAS.md` (cost/benefit).
 
