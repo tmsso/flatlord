@@ -61,6 +61,15 @@ fi
 
 echo "== Bundling archive =="
 STAMP="$(date -u +%Y-%m-%d)"
+# B-46: a manual run on a day the nightly already published used to die at
+# `gh release create` ("tag already exists"). Keep the nightly's plain date
+# tag and give any later same-day run a time suffix — never replace the
+# day's release, an extra backup shouldn't destroy an earlier one. Pruning
+# below matches every `backup-*` tag by publish date, so suffixed ones age
+# out the same way.
+if GH_TOKEN="$BACKUP_REPO_TOKEN" gh release view "backup-${STAMP}" --repo "$BACKUP_REPO" >/dev/null 2>&1; then
+  STAMP="${STAMP}-$(date -u +%H%M%S)"
+fi
 ARCHIVE="$WORKDIR/backup-${STAMP}.tar.gz"
 tar -czf "$ARCHIVE" -C "$WORKDIR" schema.sql data.sql auth.sql storage
 
