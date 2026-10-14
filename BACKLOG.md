@@ -47,10 +47,10 @@ Sizes: S = under half a batch item · M = one batch item · L = more than one.
 
 | ID | Item | Shipped |
 |---|---|---|
-| B-12 | Migration-drift job in `health-check.yml` (migrator's own rule; behind = red, ahead = warning). | PR #75, 2026-10-12 — pending merge. |
-| B-46 | Same-day manual backup gets a time-suffixed tag. | PR #76, 2026-10-12 — pending merge. |
-| B-38 | Item ↔ facility conversion (D-31). | PR #79, 2026-10-12 — pending merge. |
-| B-45 | Per-owner module switches (D-33, D-37), migration `0033`. | PR #80, 2026-10-12 — pending merge + prod migration. |
+| B-12 | Migration-drift job in `health-check.yml` (migrator's own rule; behind = red, ahead = warning). | PR #75, 2026-10-12 — merged 2026-10-14. |
+| B-46 | Same-day manual backup gets a time-suffixed tag. | PR #76, 2026-10-12 — merged 2026-10-14. |
+| B-38 | Item ↔ facility conversion (D-31). | PR #79, 2026-10-12 — merged 2026-10-14. |
+| B-45 | Per-owner module switches (D-33, D-37), migration `0033`. | PR #80, 2026-10-12 — merged + prod-migrated 2026-10-14. |
 | B-28 | Tenant request insert/withdraw + reconfirmation answers pin every other column; stored-row reads via SECURITY DEFINER fns in a new `private` schema (a plain self-subquery recursed). | PR #59 (migration 0029), 2026-10-11 — merged 2026-10-12. |
 | B-32 | Tenant notified (in-app + email per `meter_reading` pref) when a retake is requested. | PR #63, 2026-10-11 — merged 2026-10-12. |
 | B-30 | `seed/seed.dev-metered-history.ts`: 6 months of verified readings + engine-built, paid statements for tenant-a on dev. | PR #67 (already run on dev), 2026-10-11 — merged 2026-10-12. |

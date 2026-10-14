@@ -1,12 +1,12 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-10-12 at the end of the "ready for a second owner" long batch (stacked chain #75 → #82, **open**; `0032`–`0034` applied on dev only). See `docs/DELIVERY-LOG.md`.
+Rewritten 2026-10-12 at the end of the "ready for a second owner" long batch (stacked chain #75 → #82, **merged 2026-10-14**; `0032`–`0034` applied on dev and prod). See `docs/DELIVERY-LOG.md`.
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. **Is the 2026-10-12 chain merged and prod migrated to `0034`?** (`gh pr list`, the `migration-drift` job in `health-check.yml`.) If not, remind the owner — everything below builds on it. Don't stack new work on an unmerged chain unless the owner says so.
+1. ~~Is the 2026-10-12 chain merged and prod migrated to `0034`?~~ — yes, 2026-10-14 (drift check: prod 35/35). Still open: the owner-visibility count on prod (see the delivery log).
 2. Nightly `e2e-smoke.yml` green on `main`.
 3. Confirm ship-autonomy; check early whether `gh pr merge` is allowed (blocked 2026-10-11, allowed for #74, not tried 2026-10-12).
 4. Any migration: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
