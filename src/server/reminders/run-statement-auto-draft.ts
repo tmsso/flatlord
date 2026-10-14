@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createDraftStatementCore } from "@/server/billing/create-draft-statement-core";
 import { notifyStatementDrafted } from "@/server/notifications/notify-statement-drafted";
 import { notifyStatementDraftBlocked } from "@/server/notifications/notify-statement-draft-blocked";
+import { meterKind } from "@/lib/billing/meter-kind";
 import {
   assessAutoDraftReadiness,
   isPastAutoDraftGraceDay,
@@ -59,14 +60,19 @@ export async function runStatementAutoDraft(service: SupabaseClient, today: stri
 
       const { data: meterRows } = await service
         .from("meters")
-        .select("id, label, installed_at, removed_at")
+        .select("id, label, installed_at, removed_at, charge_types(code, unit)")
         .eq("unit_id", tenancy.unit_id);
-      const meters: AutoDraftMeter[] = (meterRows ?? []).map((m) => ({
-        id: m.id as string,
-        label: m.label as string,
-        installedAt: m.installed_at as string,
-        removedAt: (m.removed_at as string | null) ?? null,
-      }));
+      const meters: AutoDraftMeter[] = (meterRows ?? []).map((m) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ct: any = Array.isArray(m.charge_types) ? m.charge_types[0] : m.charge_types;
+        return {
+          id: m.id as string,
+          label: m.label as string,
+          kind: meterKind(ct?.code, ct?.unit),
+          installedAt: m.installed_at as string,
+          removedAt: (m.removed_at as string | null) ?? null,
+        };
+      });
 
       const meterIds = meters.map((m) => m.id);
       const { data: readingRows } = meterIds.length
@@ -108,7 +114,7 @@ export async function runStatementAutoDraft(service: SupabaseClient, today: stri
       await notifyStatementDraftBlocked({
         tenancyId: tenancy.id,
         periodMonth: period,
-        missingMeterLabels: readiness.missingMeterLabels,
+        missingMeters: readiness.missingMeters.map((m) => ({ label: m.label, kind: m.kind ?? "other" })),
       });
       draftBlockedAlerts++;
     } catch (err) {

@@ -723,7 +723,12 @@
     "reconfirmationScheduledOwnerSubject": "Ütemezett leltár-újramegerősítés elindult",
     "reconfirmationScheduledOwnerBody": "Az ismétlődő leltár-újramegerősítési ütemezés lefutott: teljes kampány jött létre, a bérlő {date} napig kapott határidőt a válaszra.",
     "meterRetakeSubject": "Kérjük, olvassa le újra: {meter}",
-    "meterRetakeBody": "A tulajdonos új fotót/leolvasást kér a(z) {meter} mérőóráról. A portál Mérőállások oldalán küldheti be újra."
+    "meterRetakeBody": "A tulajdonos új fotót/leolvasást kér a(z) {meter} mérőóráról. A portál Mérőállások oldalán küldheti be újra.",
+    "meterKind_electricity": "Villanyóra",
+    "meterKind_gas": "Gázóra",
+    "meterKind_water": "Vízóra",
+    "meterKind_heat": "Hőmennyiségmérő",
+    "meterKind_other": "Mérőóra"
   },
   "dashboard": {
     "draftsAwaitingTitle": "Kiállításra váró statementek",

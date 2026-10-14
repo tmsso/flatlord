@@ -5,6 +5,7 @@ import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
 import { createTranslator } from "next-intl";
 import { createNotification } from "@/server/notifications/create-notification";
+import { formatPeriodMonth } from "@/lib/format/format-period-month";
 import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
 
 // Admin-facing "this statement just went overdue" alert (ROADMAP Phase 4
@@ -70,8 +71,9 @@ export async function notifyOverdueStatement(params: { statementId: string }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any = await loadMessages(locale);
       const t = createTranslator({ locale, messages, namespace: "notifications" });
-      const subject = t("overdueSubject", { tenant: tenantName, period: statement.period_month });
-      const body = t("overdueBody", { tenant: tenantName, period: statement.period_month });
+      const period = formatPeriodMonth(statement.period_month, locale);
+      const subject = t("overdueSubject", { tenant: tenantName, period });
+      const body = t("overdueBody", { tenant: tenantName, period });
 
       await createNotification({
         recipientProfileId: profile.id,

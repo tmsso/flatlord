@@ -1,6 +1,7 @@
 import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { notifyOwners } from "@/server/notifications/notify-owners";
+import { formatPeriodMonth } from "@/lib/format/format-period-month";
 
 // "A draft statement for {tenant} ({period}) is ready to issue" — owner
 // alert fired by the daily cron's auto-draft pass (ROADMAP Phase 4a)
@@ -38,10 +39,13 @@ export async function notifyStatementDrafted(params: { statementId: string }) {
       category: "statement_drafted",
       entityType: "statement",
       entityId: statement.id,
-      build: (t) => ({
-        subject: t("statementDraftedSubject", { tenant: tenantName, period: statement.period_month }),
-        body: t("statementDraftedBody", { tenant: tenantName, period: statement.period_month }),
-      }),
+      build: (t, locale) => {
+        const period = formatPeriodMonth(statement.period_month, locale);
+        return {
+          subject: t("statementDraftedSubject", { tenant: tenantName, period }),
+          body: t("statementDraftedBody", { tenant: tenantName, period }),
+        };
+      },
     });
   } catch (err) {
     console.error("notifyStatementDrafted: unexpected failure", err instanceof Error ? err.message : err);

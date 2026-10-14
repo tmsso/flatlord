@@ -6,6 +6,8 @@
 // All dates are "YYYY-MM-DD" strings compared with plain string </>=
 // (chronological for ISO dates); period months are "YYYY-MM-01".
 
+import type { MeterKind } from "@/lib/billing/meter-kind";
+
 /**
  * The just-closed calendar month as a "YYYY-MM-01" period key. Run on any
  * day of month M, this returns month M-1 — the month the cron should now
@@ -64,6 +66,7 @@ export function isPastAutoDraftGraceDay(today: string): boolean {
 export interface AutoDraftMeter {
   id: string;
   label: string;
+  kind?: MeterKind;
   installedAt: string;
   removedAt: string | null;
 }
@@ -76,7 +79,7 @@ export interface AutoDraftReading {
 
 export type AutoDraftReadiness =
   | { ready: true }
-  | { ready: false; missingMeterLabels: string[] };
+  | { ready: false; missingMeterLabels: string[]; missingMeters: AutoDraftMeter[] };
 
 /**
  * Decide whether every meter that was active during `periodMonth` has a
@@ -89,12 +92,14 @@ export function assessAutoDraftReadiness(
   readings: AutoDraftReading[],
 ): AutoDraftReadiness {
   const active = meters.filter((m) => isMeterActiveInPeriod(m.installedAt, m.removedAt, periodMonth));
-  const missingMeterLabels: string[] = [];
+  const missingMeters: AutoDraftMeter[] = [];
   for (const meter of active) {
     const hasVerified = readings.some(
       (r) => r.meterId === meter.id && r.status === "verified" && periodContainsDate(periodMonth, r.readingDate),
     );
-    if (!hasVerified) missingMeterLabels.push(meter.label);
+    if (!hasVerified) missingMeters.push(meter);
   }
-  return missingMeterLabels.length === 0 ? { ready: true } : { ready: false, missingMeterLabels };
+  return missingMeters.length === 0
+    ? { ready: true }
+    : { ready: false, missingMeterLabels: missingMeters.map((m) => m.label), missingMeters };
 }
