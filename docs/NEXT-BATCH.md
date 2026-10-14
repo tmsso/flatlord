@@ -6,7 +6,7 @@ Rewritten 2026-10-12 at the end of the "ready for a second owner" long batch (st
 
 ## Preconditions to check first
 
-1. ~~Is the 2026-10-12 chain merged and prod migrated to `0034`?~~ — yes, 2026-10-14 (drift check: prod 35/35). Still open: the owner-visibility count on prod (see the delivery log).
+1. ~~Is the 2026-10-12 chain merged and prod migrated to `0034`?~~ — yes, 2026-10-14 (drift check: prod 35/35). Owner-visibility count on prod passed (4/4, 1/1, 4/4).
 2. Nightly `e2e-smoke.yml` green on `main`.
 3. Confirm ship-autonomy; check early whether `gh pr merge` is allowed (blocked 2026-10-11, allowed for #74, not tried 2026-10-12).
 4. Any migration: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
