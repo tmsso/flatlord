@@ -1,6 +1,9 @@
 import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { notifyOwners } from "@/server/notifications/notify-owners";
+import type { MeterKind } from "@/lib/billing/meter-kind";
+import { formatPeriodMonth } from "@/lib/format/format-period-month";
+import { formatMeterList } from "@/lib/notifications/meter-list-label";
 
 // "Couldn't auto-draft the {period} statement for {tenant} — these meters
 // still have no verified reading: {labels}" — owner alert fired by the
@@ -11,7 +14,7 @@ import { notifyOwners } from "@/server/notifications/notify-owners";
 export async function notifyStatementDraftBlocked(params: {
   tenancyId: string;
   periodMonth: string;
-  missingMeterLabels: string[];
+  missingMeters: { label: string; kind: MeterKind }[];
 }) {
   try {
     const service = createServiceRoleClient();
@@ -27,17 +30,20 @@ export async function notifyStatementDraftBlocked(params: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const person: any = Array.isArray(tenancy.persons) ? tenancy.persons[0] : tenancy.persons;
     const tenantName = person ? `${person.given_name} ${person.family_name}` : "—";
-    const meters = params.missingMeterLabels.join(", ") || "—";
 
     await notifyOwners({
       propertyId: tenancy.property_id,
       category: "statement_draft_blocked",
       entityType: "tenancy",
       entityId: params.tenancyId,
-      build: (t) => ({
-        subject: t("statementDraftBlockedSubject", { tenant: tenantName, period: params.periodMonth }),
-        body: t("statementDraftBlockedBody", { tenant: tenantName, period: params.periodMonth, meters }),
-      }),
+      build: (t, locale) => {
+        const period = formatPeriodMonth(params.periodMonth, locale);
+        const meters = formatMeterList(params.missingMeters, (kind) => t(`meterKind_${kind}`)) || "—";
+        return {
+          subject: t("statementDraftBlockedSubject", { tenant: tenantName, period }),
+          body: t("statementDraftBlockedBody", { tenant: tenantName, period, meters }),
+        };
+      },
     });
   } catch (err) {
     console.error("notifyStatementDraftBlocked: unexpected failure", err instanceof Error ? err.message : err);

@@ -82,7 +82,7 @@ describe("assessAutoDraftReadiness", () => {
       { meterId: "m-elec", readingDate: "2026-08-27", status: "verified" },
       { meterId: "m-water", readingDate: "2026-08-27", status: "submitted" }, // not verified
     ];
-    expect(assessAutoDraftReadiness(period, meters, readings)).toEqual({
+    expect(assessAutoDraftReadiness(period, meters, readings)).toMatchObject({
       ready: false,
       missingMeterLabels: ["Water"],
     });
@@ -93,7 +93,7 @@ describe("assessAutoDraftReadiness", () => {
       { meterId: "m-elec", readingDate: "2026-08-27", status: "verified" },
       { meterId: "m-water", readingDate: "2026-07-27", status: "verified" }, // previous month
     ];
-    expect(assessAutoDraftReadiness(period, meters, readings)).toEqual({
+    expect(assessAutoDraftReadiness(period, meters, readings)).toMatchObject({
       ready: false,
       missingMeterLabels: ["Water"],
     });
