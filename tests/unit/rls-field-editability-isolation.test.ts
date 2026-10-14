@@ -4,9 +4,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Same asUser/adminSql pattern as rls-requests-isolation.test.ts, extended
 // to the Phase 3 item 3 field_policies write access + persons self-update
-// policies (migration 0021). No properties/tenancies needed here — the
-// policies under test (field_policies read/write, persons self-update)
-// don't depend on tenancy scoping.
+// policies (migration 0021). Since migration 0032 field_policies writes are
+// per root property, so the owner gets one property; persons self-update
+// still doesn't depend on tenancy scoping.
 const adminSql = postgres(process.env.SUPABASE_DB_URL!, { prepare: false });
 
 let personAId: string;
@@ -15,6 +15,7 @@ let personBId: string;
 let userBId: string;
 let ownerPersonId: string;
 let ownerUserId: string;
+let ownerHouseId: string;
 
 async function asUser(userId: string, fn: (tx: postgres.TransactionSql) => Promise<void>) {
   await adminSql.begin(async (tx) => {
@@ -56,11 +57,22 @@ beforeAll(async () => {
   ownerUserId = randomUUID();
   await adminSql`insert into auth.users (id) values (${ownerUserId})`;
   await adminSql`insert into profiles (id, person_id, role, locale) values (${ownerUserId}, ${ownerPersonId}, 'owner', 'hu')`;
+
+  ownerHouseId = randomUUID();
+  await adminSql`
+    insert into properties (id, root_property_id, parent_id, type, name, active)
+    values (${ownerHouseId}, ${ownerHouseId}, null, 'house', 'RRI Test House', true)
+  `;
+  await adminSql`insert into property_ownership (property_id, person_id, percentage) values (${ownerHouseId}, ${ownerPersonId}, 100)`;
 });
 
 afterAll(async () => {
   await adminSql`delete from field_policies where entity_type = 'person' and field_name = 'phone' and scope = 'RRI-test-scope'`;
+  await adminSql`delete from field_policies where property_id = ${ownerHouseId}`;
+  await adminSql`delete from property_ownership where property_id = ${ownerHouseId}`;
+  await adminSql`delete from properties where id = ${ownerHouseId}`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${userAId}, ${userBId})`;
+  await adminSql`update persons set managed_by_person_id = null where id = ${personBId}`;
   await adminSql`delete from persons where id in (${ownerPersonId}, ${personAId}, ${personBId})`;
   await adminSql`delete from auth.users where id in (${ownerUserId}, ${userAId}, ${userBId})`;
   await adminSql.end();
@@ -86,10 +98,11 @@ describe("RLS: field editability isolation (migration 0021)", () => {
     expect(after.policy).toBe("free");
   });
 
-  it("an owner can insert, update, and delete field_policies", async () => {
+  it("an owner can insert, update, and delete field_policies for their own property", async () => {
     await asUser(ownerUserId, async (tx) => {
       const [row] = await tx`
-        insert into field_policies (entity_type, field_name, policy, scope) values ('person', 'phone', 'read_only', 'RRI-test-scope')
+        insert into field_policies (entity_type, field_name, policy, scope, property_id)
+        values ('person', 'phone', 'read_only', 'RRI-test-scope', ${ownerHouseId})
         returning id
       `;
       expect(row.id).toBeTruthy();
@@ -120,12 +133,22 @@ describe("RLS: field editability isolation (migration 0021)", () => {
     expect(after.phone).toBeNull();
   });
 
-  it("the owner can still update any person row (owner_update_persons, unaffected by the new self policy)", async () => {
+  it("the owner can still update a person they manage (owner_update_persons, unaffected by the new self policy)", async () => {
+    // Since migration 0032 an owner edits only persons visible to them —
+    // here person B is marked as managed by this owner.
+    await adminSql`update persons set managed_by_person_id = ${ownerPersonId} where id = ${personBId}`;
     await asUser(ownerUserId, async (tx) => {
       const result = await tx`update persons set phone = '+36222222' where id = ${personBId}`;
       expect(result.count).toBe(1);
     });
     const [after] = await adminSql`select phone from persons where id = ${personBId}`;
     expect(after.phone).toBe("+36222222");
+  });
+
+  it("the owner cannot update a person who is neither managed by nor linked to them (migration 0032)", async () => {
+    await asUser(ownerUserId, async (tx) => {
+      const result = await tx`update persons set phone = '+36333333' where id = ${personAId}`;
+      expect(result.count).toBe(0);
+    });
   });
 });

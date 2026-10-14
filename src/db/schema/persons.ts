@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, date, timestamp, index, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { documentTypeEnum } from "./enums";
 
 // Document-exact identity — spelling corrections against passports are a
@@ -15,6 +15,13 @@ import { documentTypeEnum } from "./enums";
 // change workflow). Sensitive fields here (document number, mothersName,
 // taxId, addressCardNumber) must never be written to audit_log verbatim —
 // see src/server/audit/log.ts.
+//
+// `managedByPersonId` (migration 0032, owner isolation): the owner who
+// created/manages this record. Persons carry no property_id — a person can
+// relate to several tenancies — so an owner sees a person if it is
+// themselves, they manage it, or it is linked (tenant, occupant, co-owner)
+// to a property they own. Set by a BEFORE INSERT trigger from the caller's
+// session; null for service-role/seed inserts (visible through links only).
 export const persons = pgTable("persons", {
   id: uuid("id").primaryKey().defaultRandom(),
   givenName: text("given_name").notNull(),
@@ -32,6 +39,7 @@ export const persons = pgTable("persons", {
   contactEmail: text("contact_email"),
   registeredAddress: text("registered_address"),
   temporaryAddress: text("temporary_address"),
+  managedByPersonId: uuid("managed_by_person_id").references((): AnyPgColumn => persons.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [index("persons_managed_by_person_id_idx").on(table.managedByPersonId)]);

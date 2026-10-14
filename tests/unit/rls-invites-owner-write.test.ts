@@ -14,6 +14,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 const adminSql = postgres(process.env.SUPABASE_DB_URL!, { prepare: false });
 
 let ownerUserId: string;
+let ownerPersonId: string;
 let tenantUserId: string;
 
 async function asUser(userId: string, fn: (tx: postgres.TransactionSql) => Promise<void>) {
@@ -29,7 +30,11 @@ beforeAll(async () => {
   tenantUserId = randomUUID();
   await adminSql`insert into auth.users (id) values (${ownerUserId})`;
   await adminSql`insert into auth.users (id) values (${tenantUserId})`;
-  await adminSql`insert into profiles (id, role, locale) values (${ownerUserId}, 'owner', 'hu')`;
+  // Since migration 0032 an owner invite pins invited_by to the caller's
+  // own person, so the owner needs one.
+  const [ownerPerson] = await adminSql`insert into persons (given_name, family_name) values ('RIW Test', 'Owner') returning id`;
+  ownerPersonId = ownerPerson.id;
+  await adminSql`insert into profiles (id, person_id, role, locale) values (${ownerUserId}, ${ownerPersonId}, 'owner', 'hu')`;
   await adminSql`insert into profiles (id, role, locale) values (${tenantUserId}, 'tenant', 'hu')`;
 });
 
@@ -37,6 +42,7 @@ afterAll(async () => {
   await adminSql`delete from invites where email like '%rls-invite-write-test%'`;
   await adminSql`delete from profiles where id in (${ownerUserId}, ${tenantUserId})`;
   await adminSql`delete from auth.users where id in (${ownerUserId}, ${tenantUserId})`;
+  await adminSql`delete from persons where id = ${ownerPersonId}`;
   await adminSql.end();
 });
 
@@ -47,8 +53,8 @@ describe("RLS + grants: invites owner write path", () => {
 
     await asUser(ownerUserId, async (tx) => {
       const [row] = await tx`
-        insert into invites (email, token_hash, role, expires_at)
-        values (${email}, 'x', 'tenant', now() + interval '7 days')
+        insert into invites (email, token_hash, role, invited_by, expires_at)
+        values (${email}, 'x', 'tenant', ${ownerPersonId}, now() + interval '7 days')
         returning id, revoked_at
       `;
       expect(row.revoked_at).toBeNull();

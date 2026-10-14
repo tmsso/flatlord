@@ -26,10 +26,9 @@ let personBId: string;
 // for entity_type = 'tenancy'.
 let ownerUserId: string;
 let ownerPersonId: string;
-// Owns nothing — negative control for owner scoping on 'tenancy' rows.
-// Still an owner, so (per owner_scope_persons' own "any owner manages
-// every person record" design, migration 0001) it DOES see 'person' rows —
-// that asymmetry is intentional and asserted below, not a bug.
+// Owns nothing — negative control for owner scoping on both 'tenancy' and
+// 'person' rows. Until migration 0032 any owner saw every 'person'
+// attachment (ID scans); now only owners who can see the person do.
 let strangerOwnerUserId: string;
 let strangerOwnerPersonId: string;
 
@@ -213,10 +212,14 @@ describe("RLS: attachments isolation (migration 0017)", () => {
     });
   });
 
-  it("any owner sees person attachments regardless of property ownership (mirrors owner_scope_persons)", async () => {
-    await asUser(strangerOwnerUserId, async (tx) => {
+  it("person attachments are visible to the owner the person is linked to, not to a stranger owner (migration 0032)", async () => {
+    await asUser(ownerUserId, async (tx) => {
       const rows = await tx`select id from attachments where entity_type = 'person' and entity_id = ${personAId}`;
       expect(rows.map((r) => r.id)).toEqual([personAAttachmentId]);
+    });
+    await asUser(strangerOwnerUserId, async (tx) => {
+      const rows = await tx`select id from attachments where entity_type = 'person' and entity_id = ${personAId}`;
+      expect(rows).toHaveLength(0);
     });
   });
 

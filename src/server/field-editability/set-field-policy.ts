@@ -14,6 +14,9 @@ const SetFieldPolicySchema = z.object({
   entityType: z.literal("person"),
   fieldName: z.string().refine(isPersonEditableField, "Unknown field"),
   policy: z.enum(FIELD_POLICIES),
+  // Root property the setting applies to (migration 0032: per-property
+  // policies). RLS only lets the property's owner write it.
+  propertyId: z.string().uuid(),
 });
 
 // select-then-insert-or-update, not a DB upsert on a unique constraint —
@@ -29,6 +32,7 @@ export async function setFieldPolicy(input: z.infer<typeof SetFieldPolicySchema>
     .select("id, policy")
     .eq("entity_type", parsed.entityType)
     .eq("field_name", parsed.fieldName)
+    .eq("property_id", parsed.propertyId)
     .is("scope", null)
     .maybeSingle();
   if (selectError) throw new Error(selectError.message);
@@ -47,7 +51,12 @@ export async function setFieldPolicy(input: z.infer<typeof SetFieldPolicySchema>
   } else {
     const { data: inserted, error } = await supabase
       .from("field_policies")
-      .insert({ entity_type: parsed.entityType, field_name: parsed.fieldName, policy: parsed.policy })
+      .insert({
+        entity_type: parsed.entityType,
+        field_name: parsed.fieldName,
+        policy: parsed.policy,
+        property_id: parsed.propertyId,
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -56,7 +65,7 @@ export async function setFieldPolicy(input: z.infer<typeof SetFieldPolicySchema>
       entityId: inserted.id,
       actorId: personId,
       action: "create",
-      after: { entityType: parsed.entityType, fieldName: parsed.fieldName, policy: parsed.policy },
+      after: { entityType: parsed.entityType, fieldName: parsed.fieldName, policy: parsed.policy, propertyId: parsed.propertyId },
     });
   }
 }

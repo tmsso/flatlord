@@ -6,7 +6,11 @@ import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { logAudit } from "@/server/audit/log";
 import { notifyFieldEdit } from "@/server/notifications/notify-field-edit";
 import { notifyRequestEvent } from "@/server/notifications/notify-request-event";
-import { getFieldPolicyMap, resolveFieldPolicy } from "@/server/field-editability/get-field-policy-map";
+import {
+  getFieldPolicyMap,
+  resolveFieldPolicy,
+  resolveTenantPolicyPropertyId,
+} from "@/server/field-editability/get-field-policy-map";
 import { isPersonEditableField, PERSON_EDITABLE_FIELDS } from "@/lib/field-editability/person-fields";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -30,7 +34,8 @@ export async function submitFieldEdit(input: z.infer<typeof SubmitFieldEditSchem
   const profile = await getCurrentProfile(supabase);
   if (profile.role !== "tenant") throw new Error("Only a tenant can self-edit their own record this way");
 
-  const policyMap = await getFieldPolicyMap(supabase, "person");
+  const policyPropertyId = await resolveTenantPolicyPropertyId(supabase, profile.personId);
+  const policyMap = await getFieldPolicyMap(supabase, "person", policyPropertyId);
   const policy = resolveFieldPolicy(policyMap, parsed.fieldName);
   if (policy === "read_only") throw new Error("This field is not editable");
 
