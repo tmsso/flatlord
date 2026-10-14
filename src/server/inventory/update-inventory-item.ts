@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { logAudit } from "@/server/audit/log";
+import { FACILITY_NEEDS_OWNER } from "@/lib/inventory/errors";
 
 const UpdateInventoryItemSchema = z.object({
   id: z.string().uuid(),
@@ -17,6 +18,8 @@ const UpdateInventoryItemSchema = z.object({
   // Never DELETE (CLAUDE.md §3.5) — "removed"/"transferred" are terminal
   // status values set through this same update path.
   status: z.enum(["active", "removed", "transferred"]),
+  // B-38 / D-31: item ↔ facility is convertible. Omitted = keep stored kind.
+  kind: z.enum(["item", "facility"]).optional(),
 });
 
 export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryItemSchema>) {
@@ -30,14 +33,23 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
     .eq("id", parsed.id)
     .maybeSingle();
 
-  // kind is fixed at creation; a facility stays owner-owned.
-  const ownedBy = before?.kind === "facility" ? "owner" : parsed.ownedBy;
+  // D-31: kind is convertible. A facility is always owner-owned (DB CHECK
+  // inventory_items_facility_owner_owned), so converting an item requires
+  // it to be owner-owned *already* — a renter's or conditional item has to
+  // change owner first, deliberately as its own audited step rather than
+  // silently as a side effect of the conversion.
+  const kind = parsed.kind ?? before?.kind ?? "item";
+  if (kind === "facility" && before?.kind !== "facility" && before?.owned_by !== "owner") {
+    throw new Error(FACILITY_NEEDS_OWNER);
+  }
+  const ownedBy = kind === "facility" ? "owner" : parsed.ownedBy;
 
   const { error } = await supabase
     .from("inventory_items")
     .update({
       title: parsed.title,
       description: parsed.description ?? null,
+      kind,
       owned_by: ownedBy,
       condition: parsed.condition ?? null,
       notes: parsed.notes ?? null,
@@ -54,6 +66,6 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
     actorId: personId,
     action: "update",
     before: before ?? null,
-    after: { title: parsed.title, ownedBy, status: parsed.status },
+    after: { kind, title: parsed.title, ownedBy, status: parsed.status },
   });
 }

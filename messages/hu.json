@@ -544,7 +544,11 @@
     "discrepancyOpensRequest": "Eltérés jelzése automatikusan kérést nyit.",
     "reconfirmationAllDone": "Minden tételre válaszolt — köszönjük!",
     "back": "Vissza",
-    "okShort": "Rendben"
+    "okShort": "Rendben",
+    "kindLabel": "Típus",
+    "kindItem": "Ingóság",
+    "kindFacility": "Felszereltség (beépített)",
+    "facilityNeedsOwner": "Csak a bérbeadó tulajdonában lévő tétel alakítható felszereltséggé. Előbb állítsd a tulajdonost „Bérbeadó”-ra, mentsd, majd alakítsd át."
   },
   "requests": {
     "title": "Kérések",

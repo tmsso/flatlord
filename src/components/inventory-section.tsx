@@ -6,6 +6,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 import { createInventoryItem } from "@/server/inventory/create-inventory-item";
 import { updateInventoryItem } from "@/server/inventory/update-inventory-item";
+import { FACILITY_NEEDS_OWNER } from "@/lib/inventory/errors";
 import { launchReconfirmation } from "@/server/inventory/launch-reconfirmation";
 import { reviewReconfirmationItem } from "@/server/inventory/review-reconfirmation-item";
 import { AttachmentsSection, type AttachmentRow } from "@/components/attachments-section";
@@ -62,8 +63,11 @@ function ItemFormDialog({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const kind = item?.kind ?? newKind;
+  // An existing row can switch kind (B-38 / D-31); a new row's is fixed by
+  // which "Add" button opened the dialog.
+  const [kind, setKind] = useState<"item" | "facility">(item?.kind ?? newKind);
   const isFacility = kind === "facility";
+  const conversionBlocked = !!item && item.kind !== "facility" && isFacility && item.ownedBy !== "owner";
   const addLabel = isFacility ? t("addFacility") : t("addItem");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -71,6 +75,10 @@ function ItemFormDialog({
     const data = new FormData(e.currentTarget);
     const title = String(data.get("title") ?? "").trim();
     if (!title) return;
+    if (conversionBlocked) {
+      setError(t("facilityNeedsOwner"));
+      return;
+    }
     const payload = {
       title,
       description: (String(data.get("description") ?? "").trim() || null) as string | null,
@@ -85,7 +93,7 @@ function ItemFormDialog({
     startTransition(async () => {
       try {
         if (item) {
-          await updateInventoryItem({ id: item.id, ...payload, status: item.status });
+          await updateInventoryItem({ id: item.id, ...payload, status: item.status, kind });
         } else {
           await createInventoryItem({ unitId, kind, ...payload });
         }
@@ -93,13 +101,23 @@ function ItemFormDialog({
         setOpen(false);
         onSaved();
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+        const message = err instanceof Error ? err.message : "";
+        setError(message === FACILITY_NEEDS_OWNER ? t("facilityNeedsOwner") : message || t("errorGeneric"));
       }
     });
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) {
+          setKind(item?.kind ?? newKind);
+          setError(null);
+        }
+      }}
+    >
       <DialogTrigger render={<Button type="button" variant={item ? "ghost" : isFacility ? "outline" : "default"} size="sm" />}>
         {item ? t("edit") : addLabel}
       </DialogTrigger>
@@ -116,6 +134,28 @@ function ItemFormDialog({
             <Label htmlFor="itemDescription">{t("descriptionLabel")}</Label>
             <Textarea id="itemDescription" name="description" defaultValue={item?.description ?? ""} />
           </div>
+          {item && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="itemKind">{t("kindLabel")}</Label>
+              <Select
+                value={kind}
+                onValueChange={(v) => {
+                  setKind(v as "item" | "facility");
+                  setError(null);
+                }}
+                items={{ item: t("kindItem"), facility: t("kindFacility") }}
+              >
+                <SelectTrigger id="itemKind">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="item">{t("kindItem")}</SelectItem>
+                  <SelectItem value="facility">{t("kindFacility")}</SelectItem>
+                </SelectContent>
+              </Select>
+              {conversionBlocked && <p className="text-xs text-destructive">{t("facilityNeedsOwner")}</p>}
+            </div>
+          )}
           {isFacility ? (
             <p className="text-xs text-muted-foreground">{t("facilityOwnerNote")}</p>
           ) : (
