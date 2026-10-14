@@ -9,7 +9,18 @@ import { SidebarNav, type NavItem } from "@/components/nav-link";
 // so a menu button opens the same SidebarNav in a left drawer. Built on
 // Base UI's Dialog for focus trapping, Escape and backdrop-to-close.
 // Clicking any nav link closes it, so the next page isn't covered.
-export function AdminMobileNav({ items, menuLabel, closeLabel }: { items: NavItem[]; menuLabel: string; closeLabel: string }) {
+export function AdminMobileNav({
+  items,
+  menuLabel,
+  closeLabel,
+  footer,
+}: {
+  items: NavItem[];
+  menuLabel: string;
+  closeLabel: string;
+  /** Rendered at the bottom of the drawer (the "Inactive modules" group). */
+  footer?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,6 +47,7 @@ export function AdminMobileNav({ items, menuLabel, closeLabel }: { items: NavIte
           >
             <SidebarNav items={items} rootHref="/dashboard" />
           </div>
+          {footer}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -9,16 +9,20 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getTenantModules } from "@/server/modules/get-modules";
+import type { OptionalModule } from "@/lib/modules";
 
-const tabSpec = [
+// `module`: hidden while the property's owner(s) have it off (B-45).
+const tabSpec: { key: string; href: string; icon: NavItem["icon"]; module?: OptionalModule }[] = [
   { key: "home", href: "/home", icon: "home" },
   { key: "meters", href: "/home/meters", icon: "gauge" },
   // "payments", not "statements": the design's tab bar (design/02) uses the
   // shorter label, and "Elszámolások" clips at 390px in a six-tab bar.
   { key: "payments", href: "/home/statements", icon: "file" },
-  { key: "requests", href: "/home/requests", icon: "message" },
+  { key: "requests", href: "/home/requests", icon: "message", module: "requests" },
   { key: "notices", href: "/home/notices", icon: "bell" },
-] as const;
+];
 // Settings lives in the header (gear), not the tab bar: five tabs is the
 // most a 390px bar fits without clipping Hungarian labels (design/02 also
 // shows five). The tab bar stays the primary navigation.
@@ -28,6 +32,8 @@ export default async function TenantLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const t = await getTranslations("nav");
   const supabase = await createClient();
+  const profile = await getCurrentProfile(supabase);
+  const modules = await getTenantModules(supabase, profile.personId);
 
   // self_scope_notifications RLS already restricts this to the caller's
   // own rows — no extra filter needed here. Logged, not thrown, on error:
@@ -49,14 +55,16 @@ export default async function TenantLayout({
     createdAt: n.created_at,
   }));
 
-  const tabItems: NavItem[] = tabSpec.map((n) => ({ href: n.href, icon: n.icon, label: t(n.key) }));
+  const tabItems: NavItem[] = tabSpec
+    .filter((n) => !n.module || modules.has(n.module))
+    .map((n) => ({ href: n.href, icon: n.icon, label: t(n.key) }));
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="h-14 shrink-0 border-b border-border bg-card flex items-center justify-between px-4">
         <span className="text-[15px] font-semibold">Flatlord</span>
         <div className="flex items-center gap-2">
-          <NotificationBell notifications={notifications} role="tenant" />
+          {modules.has("notifications") && <NotificationBell notifications={notifications} role="tenant" />}
           <LocaleSwitcher />
           <ThemeToggle />
           <Link

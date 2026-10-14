@@ -806,5 +806,20 @@
     "seeAll": "Összes",
     "noNotices": "Még nincs értesítés.",
     "details": "Részletek"
+  },
+  "modules": {
+    "title": "Modulok",
+    "hint": "Az alkalmazás opcionális részei. Kikapcsolva neked és az ingatlanaid bérlőinek sem jelenik meg, és az emlékeztetői sem futnak; az adatai megmaradnak.",
+    "inactiveTitle": "Inaktív modulok ({count})",
+    "enableHint": "Bekapcsolás",
+    "switchedOn": "{module} bekapcsolva",
+    "switchedOff": "{module} kikapcsolva",
+    "errorGeneric": "Valami hiba történt.",
+    "name_inventory": "Leltár és felszereltség",
+    "name_requests": "Kérések",
+    "name_notifications": "Értesítések és emlékeztetők",
+    "desc_inventory": "Tételnyilvántartás, felszereltség, megerősítési kampányok, érintett tétel a javítási kéréseknél.",
+    "desc_requests": "Bérlői kérések és a hozzájuk tartozó üzenetváltások.",
+    "desc_notifications": "Az értesítési csengő és az automatikus emlékeztetők (fizetési határidő, késedelem, mérőóra-leolvasás, szerződés és díjfelülvizsgálat)."
   }
 }

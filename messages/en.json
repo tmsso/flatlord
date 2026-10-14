@@ -806,5 +806,20 @@
     "seeAll": "See all",
     "noNotices": "No notices yet.",
     "details": "Details"
+  },
+  "modules": {
+    "title": "Modules",
+    "hint": "Optional parts of the app. Switching one off hides it for you and for the tenants of your properties, and stops its reminders; its data is kept.",
+    "inactiveTitle": "Inactive modules ({count})",
+    "enableHint": "Switch on",
+    "switchedOn": "{module} switched on",
+    "switchedOff": "{module} switched off",
+    "errorGeneric": "Something went wrong.",
+    "name_inventory": "Inventory & facilities",
+    "name_requests": "Requests",
+    "name_notifications": "Notifications & reminders",
+    "desc_inventory": "Item register, facilities, reconfirmation campaigns, affected item on repair requests.",
+    "desc_requests": "Tenant requests and the conversation threads with them.",
+    "desc_notifications": "The notification bell and the automatic reminders (payment due, overdue, meter readings, contract and rate reviews)."
   }
 }

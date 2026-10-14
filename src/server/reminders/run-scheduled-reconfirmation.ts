@@ -25,7 +25,12 @@ import {
 // facing work. It is gated entirely on explicit per-tenancy config.
 //
 // Best-effort per tenancy: one failure is logged, the loop continues.
-export async function runScheduledReconfirmation(service: SupabaseClient, today: string) {
+export async function runScheduledReconfirmation(
+  service: SupabaseClient,
+  today: string,
+  // B-45: skip properties whose owner(s) have the inventory module off.
+  inventoryOn: (propertyId: string | null) => Promise<boolean> = async () => true,
+) {
   let campaignsLaunched = 0;
 
   const { data: tenancies, error } = await service
@@ -41,6 +46,7 @@ export async function runScheduledReconfirmation(service: SupabaseClient, today:
     try {
       const schedule = resolveReconfirmationSchedule(tenancy.reminder_lead_days);
       if (!schedule) continue;
+      if (!(await inventoryOn(tenancy.property_id))) continue;
 
       const { data: lastCampaign } = await service
         .from("inventory_reconfirmations")
