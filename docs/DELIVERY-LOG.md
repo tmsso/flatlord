@@ -133,3 +133,10 @@ Goal proposed by the session and accepted by the owner ("defaults, no Sentry, go
 - Dev residue (test data): "PW Isolation…" person; `pw-owner-*` / `pw-owner2-*` owner accounts and persons; "PW conv boiler/lamp" items (one boiler left as a facility); revoked `pw-invite-*` / `pw_gate+probe.*` invites.
 - Owner confirmed D-36–D-39 (the built defaults) the same day, before merge.
 - **Merged 2026-10-14** (merge commits, in order; final tree identical to the top branch; CI green on all 8 merge commits; Vercel deployed; `/api/health` ok). Prod migrated first via `migrate-prod.yml` (`0032`–`0034`; drift check prod 35/35). Owner pre-checks passed (audit entity types, `unowned_roots = 0`). **The before/after owner-visibility count was not a valid check:** the query in PR #78 looked up the owner id *after* `set local role authenticated`, so RLS hid `profiles` and the impersonated id was NULL (result 0/0/0 + the 14 global policies). Redone 2026-10-14 with the id looked up first and compared with superuser totals in the same transaction: persons 4/4, invites 1/1, audit 4/4 — pass.
+
+## Owner follow-up 2026-10-14 — chain merged, cron on, email fixes
+
+- Prod migrated `0032`–`0034`, chain #75→#82 merged (see the 2026-10-12 entry). Owner-visibility check passed with a corrected query (persons 4/4, invites 1/1, audit 4/4).
+- `CRON_SECRET` set by the owner. First authorised manual run: 504 (B-50); later run reached auto-draft and the owner received the "couldn't auto-draft" email. 10 historical statements still `issued`/`partially_paid` past due → one-time overdue alerts in the owner's bell.
+- Resend sandbox only delivers to the Resend account's address, so the owner moved their login email to it (SQL on `auth.users`/`auth.identities`). An orphan auth user already held that address (B-49 class) and was deleted first; the owner account kept its id.
+- #83 — owner alerts show the period as a month name ("2026. szeptember") instead of `2026-09-01`, and missing meters as "label (type)" (two real meters share a generic label). Unit-tested; CI green; deployed. A real email with the new wording is not seen yet (September's alert had already gone out).
