@@ -28,6 +28,7 @@ import { notifyRateReview } from "@/server/notifications/notify-rate-review";
 import { notifyInventoryActionBy } from "@/server/notifications/notify-inventory-action-by";
 import { runStatementAutoDraft } from "@/server/reminders/run-statement-auto-draft";
 import { runScheduledReconfirmation } from "@/server/reminders/run-scheduled-reconfirmation";
+import { startCronRun } from "@/server/reminders/cron-run-log";
 import { createPropertyModuleLookup } from "@/server/modules/get-modules";
 import type { OptionalModule } from "@/lib/modules";
 
@@ -57,9 +58,10 @@ export const runtime = "nodejs";
 // it fires once, when the statement first goes overdue (B-50 hotfix,
 // 2026-10-15; before that it re-sent every unpaid statement daily).
 //
-// Each phase logs its duration (B-50): Hobby keeps runtime logs ~30 min,
-// so a timed-out run's last "phase done" line is the only clue to where
-// it stalled.
+// Each phase logs its duration and is recorded in cron_runs (B-50):
+// Hobby keeps runtime logs ~30 min, so the run row — 'running' until the
+// last phase, with every completed phase listed — is the durable clue to
+// where a timed-out run stalled. The health check alerts on it.
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -70,24 +72,38 @@ export async function GET(request: Request) {
   const service = createServiceRoleClient();
   const today = new Date().toISOString().slice(0, 10);
 
-  const moduleOn = createModuleCheck(service);
-  const statements = await timed("statements", () => runStatementReminders(service, today, moduleOn));
-  const leadReminders = await timed("leadReminders", () => runLeadReminders(service, today, moduleOn));
-  // Billing is core (no switch): auto-draft always runs.
-  const autoDraft = await timed("autoDraft", () => runStatementAutoDraft(service, today));
-  const reconfirmation = await timed("reconfirmation", () =>
-    runScheduledReconfirmation(service, today, (propertyId) => moduleOn(propertyId, "inventory")),
-  );
+  // Vercel Cron identifies itself by user agent. Manual triggers (curl,
+  // the owner testing) are logged under their own job name so the health
+  // check — which reads only "daily-reminders" — judges scheduled runs.
+  const scheduled = request.headers.get("user-agent")?.startsWith("vercel-cron/") ?? false;
+  const runLog = await startCronRun(service, scheduled ? "daily-reminders" : "daily-reminders:manual");
+  const timed = async <T,>(phase: string, run: () => Promise<T>): Promise<T> => {
+    const started = Date.now();
+    console.log("daily-reminders: phase start", phase);
+    const result = await run();
+    const ms = Date.now() - started;
+    console.log("daily-reminders: phase done", phase, `${ms} ms`, JSON.stringify(result));
+    await runLog.phaseDone({ phase, ms, result });
+    return result;
+  };
 
-  return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft, ...reconfirmation });
-}
-
-async function timed<T>(phase: string, run: () => Promise<T>): Promise<T> {
-  const started = Date.now();
-  console.log("daily-reminders: phase start", phase);
-  const result = await run();
-  console.log("daily-reminders: phase done", phase, `${Date.now() - started} ms`, JSON.stringify(result));
-  return result;
+  try {
+    const moduleOn = createModuleCheck(service);
+    const statements = await timed("statements", () => runStatementReminders(service, today, moduleOn));
+    const leadReminders = await timed("leadReminders", () => runLeadReminders(service, today, moduleOn));
+    // Billing is core (no switch): auto-draft always runs.
+    const autoDraft = await timed("autoDraft", () => runStatementAutoDraft(service, today));
+    const reconfirmation = await timed("reconfirmation", () =>
+      runScheduledReconfirmation(service, today, (propertyId) => moduleOn(propertyId, "inventory")),
+    );
+    await runLog.finish("ok");
+    return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft, ...reconfirmation });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("daily-reminders: run failed", message);
+    await runLog.finish("failed", message);
+    return NextResponse.json({ ok: false, error: "run failed" }, { status: 500 });
+  }
 }
 
 // B-45 / D-33: reminders are the "notifications" module (inventory
