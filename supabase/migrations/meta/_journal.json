@@ -246,6 +246,13 @@
       "when": 1791812873573,
       "tag": "0034_owner-invite-person",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792104103718,
+      "tag": "0035_b47-property-creator",
+      "breakpoints": true
     }
   ]
 }
