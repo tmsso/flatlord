@@ -18,6 +18,7 @@ import {
   resolveMeterReadingLeadDays,
   resolveMeterReadingWindowStartDay,
   resolveRateReviewLeadDays,
+  hasLaterSchedule,
 } from "@/server/reminders/compute-lead-reminders";
 import { notifyPaymentDueReminder } from "@/server/notifications/notify-payment-due-reminder";
 import { notifyOverdueStatement } from "@/server/notifications/notify-overdue-statement";
@@ -256,11 +257,12 @@ async function runLeadReminders(service: SupabaseClient, today: string, moduleOn
   // 3. fixed-charge rate-review — per fixed charge_schedule with a valid_to
   const { data: schedules } = await service
     .from("charge_schedules")
-    .select("id, tenancy_id, property_id, valid_to, charge_types!inner(kind)")
-    .eq("charge_types.kind", "fixed")
-    .not("valid_to", "is", null);
+    .select("id, tenancy_id, charge_type_id, property_id, valid_from, valid_to, charge_types!inner(kind)")
+    .eq("charge_types.kind", "fixed");
   for (const schedule of schedules ?? []) {
     if (!schedule.valid_to) continue;
+    // Already followed by a scheduled change → nothing to review.
+    if (hasLaterSchedule(schedule, schedules ?? [])) continue;
     if (!(await moduleOn(schedule.property_id, "notifications"))) continue;
     const lead = resolveRateReviewLeadDays(leadByTenancy.get(schedule.tenancy_id));
     if (!isLeadReminderDay(schedule.valid_to, lead, today)) continue;

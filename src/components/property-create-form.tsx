@@ -28,8 +28,11 @@ type FormValues = z.infer<typeof schema>;
 
 export function PropertyCreateForm({
   parentCandidates,
+  onCreated,
 }: {
   parentCandidates: { id: string; name: string; type: string }[];
+  /** Wizard use (B-42): called instead of navigating after create; also hides Cancel. */
+  onCreated?: (id: string) => void;
 }) {
   const t = useTranslations("properties");
   const tc = useTranslations("common");
@@ -60,7 +63,8 @@ export function PropertyCreateForm({
           hrsz: values.type === "room" ? null : (values.hrsz ?? null),
           lettingMode: values.type === "flat" ? values.lettingMode : null,
         });
-        router.push(`/properties/${id}`);
+        if (onCreated) onCreated(id);
+        else router.push(`/properties/${id}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errorGeneric"));
       }
@@ -151,9 +155,11 @@ export function PropertyCreateForm({
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => router.push("/properties")}>
+          {!onCreated && (
+            <Button type="button" variant="outline" onClick={() => router.push("/properties")}>
             {tc("cancel")}
           </Button>
+          )}
           <Button type="submit" disabled={isPending}>
             {tc("save")}
           </Button>

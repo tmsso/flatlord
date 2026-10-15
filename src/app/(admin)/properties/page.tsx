@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function PropertiesPage() {
   const t = await getTranslations("properties");
+  const tOnboarding = await getTranslations("onboarding");
   const supabase = await createClient();
 
   const { data: rows } = await supabase
@@ -27,9 +28,14 @@ export default async function PropertiesPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold">{t("title")}</h1>
-        <Button size="sm" nativeButton={false} render={<Link href="/properties/new" />}>
-          {t("addProperty")}
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href="/onboarding?flow=flat" />}>
+            {tOnboarding("addFlatGuided")}
+          </Button>
+          <Button size="sm" nativeButton={false} render={<Link href="/properties/new" />}>
+            {t("addProperty")}
+          </Button>
+        </div>
       </div>
       <PropertyTree nodes={nodes} />
     </div>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hasLaterSchedule,
   matchedLeadDays,
   isLeadReminderDay,
   isMeterReadingReminderDay,
@@ -112,5 +113,24 @@ describe("meter_reading_config resolvers", () => {
     expect(isMonthlyMeterReading({})).toBe(true);
     expect(isMonthlyMeterReading({ frequency: "monthly" })).toBe(true);
     expect(isMonthlyMeterReading({ frequency: "quarterly" })).toBe(false);
+  });
+});
+
+describe("hasLaterSchedule (rate review only for the last rate)", () => {
+  const closed = { tenancy_id: "t", charge_type_id: "rent", valid_from: "2026-01-01" };
+  it("a closed rate followed by a scheduled change needs no review alert", () => {
+    expect(hasLaterSchedule(closed, [closed, { tenancy_id: "t", charge_type_id: "rent", valid_from: "2027-01-01" }])).toBe(true);
+  });
+  it("a closed rate with nothing after it still alerts", () => {
+    expect(hasLaterSchedule(closed, [closed])).toBe(false);
+  });
+  it("ignores other tenancies and other charge types", () => {
+    expect(
+      hasLaterSchedule(closed, [
+        closed,
+        { tenancy_id: "other", charge_type_id: "rent", valid_from: "2027-01-01" },
+        { tenancy_id: "t", charge_type_id: "common_cost", valid_from: "2027-01-01" },
+      ]),
+    ).toBe(false);
   });
 });

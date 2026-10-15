@@ -31,8 +31,17 @@ export interface TenantReconfirmationItemRow {
 // attachments precedent, see submit-reconfirmation-response.ts.
 // design/09 10b: one pending item at a time — big "OK" / "Discrepancy…"
 // buttons and a dashed optional-photo box. "Discrepancy…" first asks for
-// a note (it auto-opens a request for the owner), then submits.
-function ReconfirmationRow({ row, onResponded }: { row: TenantReconfirmationItemRow; onResponded: () => void }) {
+// a note (it auto-opens a request for the owner while the requests module
+// is on), then submits.
+function ReconfirmationRow({
+  row,
+  requestsOn,
+  onResponded,
+}: {
+  row: TenantReconfirmationItemRow;
+  requestsOn: boolean;
+  onResponded: () => void;
+}) {
   const t = useTranslations("inventory");
   const [note, setNote] = useState("");
   const [flagging, setFlagging] = useState(false);
@@ -123,7 +132,7 @@ function ReconfirmationRow({ row, onResponded }: { row: TenantReconfirmationItem
           onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? null)}
         />
       </label>
-      <p className="text-xs text-muted-foreground">{t("discrepancyOpensRequest")}</p>
+      <p className="text-xs text-muted-foreground">{t(requestsOn ? "discrepancyOpensRequest" : "discrepancyNotifiesOwner")}</p>
     </div>
   );
 }
@@ -131,8 +140,11 @@ function ReconfirmationRow({ row, onResponded }: { row: TenantReconfirmationItem
 export function TenantInventorySection({
   items,
   activeCampaign,
+  requestsOn,
 }: {
   items: TenantInventoryItemRow[];
+  // B-48: with the requests module off a discrepancy opens no request.
+  requestsOn: boolean;
   activeCampaign: { id: string; dueDate: string | null; items: TenantReconfirmationItemRow[] } | null;
 }) {
   const t = useTranslations("inventory");
@@ -168,7 +180,12 @@ export function TenantInventorySection({
               {activeCampaign.dueDate ? t("reconfirmationDueBy", { date: format.dateTime(new Date(`${activeCampaign.dueDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }) }) : t("reconfirmationNoDueDate")}
             </p>
             {nextPending ? (
-              <ReconfirmationRow key={nextPending.id} row={nextPending} onResponded={() => router.refresh()} />
+              <ReconfirmationRow
+                key={nextPending.id}
+                row={nextPending}
+                requestsOn={requestsOn}
+                onResponded={() => router.refresh()}
+              />
             ) : (
               <p className="text-sm text-success">{t("reconfirmationAllDone")}</p>
             )}
