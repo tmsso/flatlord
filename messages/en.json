@@ -875,5 +875,31 @@
     "labelRequired": "Enter a label.",
     "baseValueInvalid": "Enter a reading of 0 or more.",
     "dateRequired": "Pick a date."
+  },
+  "rates": {
+    "title": "Rates",
+    "intro": "Amounts and unit rates for this tenancy. A new rate starts on the 1st of a month and ends the previous one.",
+    "introLocked": "Amounts and unit rates for this tenancy. Billed up to {period} — a new rate can start the month after.",
+    "addRate": "+ New rate",
+    "chargeTypeLabel": "Charge",
+    "fromMonthLabel": "Effective from",
+    "fromMonthHint": "Applies to whole months from the 1st; the current rate ends the day before.",
+    "amountLabel": "Monthly amount (HUF)",
+    "rateLabel": "Rate per {unit} (HUF)",
+    "colFrom": "From",
+    "colTo": "To",
+    "colAmount": "Monthly amount",
+    "colRate": "Rate",
+    "openEnded": "—",
+    "current": "current",
+    "noRates": "No rate yet — this charge isn't billed.",
+    "noChargeTypes": "This unit has no charge types yet.",
+    "goToUnit": "Set them up on the unit page →",
+    "monthRequired": "Pick a month.",
+    "valueInvalid": "Enter 0 or more (whole forints for a monthly amount).",
+    "error_periodLocked": "That month is already billed. Pick a later month, or correct a billed month with an adjustment.",
+    "error_notAfterExisting": "There is already a rate starting in or after that month.",
+    "error_notBillable": "Rates apply to fixed or metered charges only.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

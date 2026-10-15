@@ -8,6 +8,8 @@ import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 import { getTenancyAnalytics } from "@/lib/analytics/get-tenancy-analytics";
 import { CumulativeLedgerChart } from "@/components/analytics/cumulative-ledger-chart";
 import { TenancyTimeline } from "@/components/analytics/tenancy-timeline";
+import { TenancyRates } from "@/components/billing-setup/tenancy-rates";
+import type { ChargeTypeRow } from "@/components/billing-setup/unit-billing-setup";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { getOwnerModules } from "@/server/modules/get-modules";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
@@ -78,6 +80,28 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     ]);
 
   const { consumption, cost, consumptionSeries, meteredSeries } = chartData;
+
+  // Rates (charge_schedules) for this tenancy against its unit's catalog.
+  const [
+    { data: chargeTypeRows, error: chargeTypesError },
+    { data: scheduleRows, error: schedulesError },
+    { data: lastBilled, error: lastBilledError },
+  ] = await Promise.all([
+    supabase.from("charge_types").select("id, code, name, kind, unit, active").eq("unit_id", tenancy.unit_id).order("sort_order"),
+    supabase.from("charge_schedules").select("id, charge_type_id, amount, rate_per_unit, valid_from, valid_to").eq("tenancy_id", id),
+    supabase
+      .from("statements")
+      .select("period_month")
+      .eq("tenancy_id", id)
+      .neq("status", "draft")
+      .is("voided_at", null)
+      .order("period_month", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  assertNoQueryError("tenancies/[id]/charge_types", chargeTypesError);
+  assertNoQueryError("tenancies/[id]/charge_schedules", schedulesError);
+  assertNoQueryError("tenancies/[id]/last_billed", lastBilledError);
   // B-48: requests module off → no request events in the owner UI (D-33).
   const requestsOn = (await getOwnerModules(supabase, (await getCurrentProfile(supabase)).userId)).has("requests");
 
@@ -121,6 +145,29 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           };
         })}
         persons={(persons ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
+      />
+      <TenancyRates
+        tenancyId={id}
+        unitId={tenancy.unit_id}
+        chargeTypes={(chargeTypeRows ?? []).map((c) => ({
+          id: c.id,
+          code: c.code,
+          name: c.name,
+          kind: c.kind as ChargeTypeRow["kind"],
+          unit: c.unit,
+          active: c.active,
+        }))}
+        schedules={(scheduleRows ?? []).map((r) => ({
+          id: r.id,
+          chargeTypeId: r.charge_type_id,
+          amount: r.amount == null ? null : Number(r.amount),
+          ratePerUnit: r.rate_per_unit == null ? null : Number(r.rate_per_unit),
+          validFrom: r.valid_from,
+          validTo: r.valid_to,
+        }))}
+        lastBilledPeriod={lastBilled?.period_month ?? null}
+        termStart={tenancy.term_start}
+        today={new Date().toISOString().slice(0, 10)}
       />
       <ContractsSection
         tenancyId={id}
