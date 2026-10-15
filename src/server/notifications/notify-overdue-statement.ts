@@ -1,5 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -7,6 +7,7 @@ import { createTranslator } from "next-intl";
 import { createNotification } from "@/server/notifications/create-notification";
 import { formatPeriodMonth } from "@/lib/format/format-period-month";
 import { shouldEmailNotification } from "@/lib/notifications/notification-categories";
+import { resolveProfileEmail } from "@/server/notifications/resolve-recipients";
 
 // Admin-facing "this statement just went overdue" alert (ROADMAP Phase 4
 // item 1) — fired by the daily cron. Deliberately just an alert, not an
@@ -65,7 +66,7 @@ export async function notifyOverdueStatement(params: { statementId: string }) {
       return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = createResendClient();
     for (const profile of ownerProfiles) {
       const locale = isLocale(profile.locale) ? profile.locale : defaultLocale;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,12 +86,8 @@ export async function notifyOverdueStatement(params: { statementId: string }) {
       });
 
       if (!shouldEmailNotification(profile.notification_prefs, "overdue")) continue;
-      const { data: userResult, error: userError } = await service.auth.admin.getUserById(profile.id);
-      const ownerEmail = userResult?.user?.email;
-      if (userError || !ownerEmail) {
-        console.error("notifyOverdueStatement: could not resolve owner email", profile.id, userError?.message);
-        continue;
-      }
+      const ownerEmail = await resolveProfileEmail(service, profile.id);
+      if (!ownerEmail) continue;
       const { error: sendError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
         to: ownerEmail,

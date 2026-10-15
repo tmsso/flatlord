@@ -1,5 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -49,7 +49,7 @@ export async function sendInventoryDiscrepancyEmail(params: {
       return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = createResendClient();
 
     for (const profile of ownerProfiles) {
       const locale = isLocale(profile.locale) ? profile.locale : defaultLocale;

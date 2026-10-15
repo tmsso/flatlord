@@ -50,3 +50,11 @@ export function isOverdue(
 ): boolean {
   return isStatementOverdue({ status, dueDate, issuedAt, today });
 }
+
+// The overdue alert fires once per statement — the first cron run on
+// which it is overdue — not every day it stays unpaid (B-50 hotfix). The
+// dashboard's overdue card carries the ongoing state; a repeat alert
+// policy (e.g. weekly) would be a new decision, not a default.
+export function shouldSendOverdueAlert(isOverdueToday: boolean, alreadyAlerted: boolean): boolean {
+  return isOverdueToday && !alreadyAlerted;
+}

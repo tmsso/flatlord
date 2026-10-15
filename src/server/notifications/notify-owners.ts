@@ -1,5 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createTranslator } from "next-intl";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -30,7 +30,7 @@ export async function notifyOwners(params: {
       return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = createResendClient();
 
     for (const owner of owners) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
@@ -26,7 +26,7 @@ export async function sendAmountDueEmail(input: { statementId: string }) {
   const { subject, body, tenantEmail } = context;
   if (!tenantEmail) throw new Error("Tenant has no contact email on file");
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createResendClient();
   const { data, error } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
     to: tenantEmail,
