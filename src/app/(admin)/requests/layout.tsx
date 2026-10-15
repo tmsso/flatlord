@@ -1,13 +1,6 @@
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/current-profile";
-import { getOwnerModules } from "@/server/modules/get-modules";
-
-// B-45: the requests module can be switched off per owner; off = not found
-// for every page under /requests (data is kept, D-33).
-export default async function AdminRequestsLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const profile = await getCurrentProfile(supabase);
-  if (!(await getOwnerModules(supabase, profile.userId)).has("requests")) notFound();
+// B-45 / B-48: the requests module gate lives on the pages, not here —
+// /requests/[id] must stay reachable for field-change approvals, which are
+// core field editability, not the switchable requests module (D-40).
+export default function AdminRequestsLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

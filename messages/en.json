@@ -542,6 +542,7 @@
     "discrepancyNoteLabel": "What's different?",
     "photoOptionalHint": "+ optional photo",
     "discrepancyOpensRequest": "Flagging a discrepancy automatically opens a request.",
+    "discrepancyNotifiesOwner": "Flagging a discrepancy notifies the owner.",
     "reconfirmationAllDone": "All items answered — thank you!",
     "back": "Back",
     "okShort": "OK",

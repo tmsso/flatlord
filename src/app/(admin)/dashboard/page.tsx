@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { getDashboardData } from "@/lib/dashboard/get-dashboard-data";
 import { AdminDashboard } from "@/components/admin-dashboard";
+import { getOwnerModules } from "@/server/modules/get-modules";
 
 function shiftMonth(periodMonth: string, delta: number): string {
   const [year, month] = periodMonth.split("-").map(Number);
@@ -18,7 +19,8 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
   const today = new Date().toISOString().slice(0, 10);
   const viewMonth = month ?? `${today.slice(0, 7)}-01`;
 
-  const data = await getDashboardData(supabase, profile.personId, today, viewMonth);
+  const modules = await getOwnerModules(supabase, profile.userId);
+  const data = await getDashboardData(supabase, profile.personId, today, viewMonth, modules);
 
   return (
     <AdminDashboard

@@ -542,6 +542,7 @@
     "discrepancyNoteLabel": "Mi az eltérés?",
     "photoOptionalHint": "+ opcionális fotó",
     "discrepancyOpensRequest": "Eltérés jelzése automatikusan kérést nyit.",
+    "discrepancyNotifiesOwner": "Eltérés jelzése értesíti a tulajdonost.",
     "reconfirmationAllDone": "Minden tételre válaszolt — köszönjük!",
     "back": "Vissza",
     "okShort": "Rendben",
