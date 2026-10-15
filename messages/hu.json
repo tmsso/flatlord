@@ -875,5 +875,32 @@
     "labelRequired": "Adj meg egy megnevezést.",
     "baseValueInvalid": "Adj meg 0 vagy nagyobb óraállást.",
     "dateRequired": "Válassz dátumot."
+  },
+  "rates": {
+    "title": "Díjszabás",
+    "intro": "A bérlet összegei és egységárai. Az új díj egy hónap 1-jén indul, és lezárja az előzőt.",
+    "introLocked": "A bérlet összegei és egységárai. Elszámolva: {period} — új díj az azt követő hónaptól indulhat.",
+    "addRate": "+ Új díj",
+    "chargeTypeLabel": "Díjtétel",
+    "fromMonthLabel": "Érvényes ettől",
+    "fromMonthHint": "Egész hónapokra vonatkozik, 1-jétől; az aktuális díj az előző napon zárul.",
+    "amountLabel": "Havi összeg (Ft)",
+    "rateLabel": "Egységár / {unit} (Ft)",
+    "colFrom": "Ettől",
+    "colTo": "Eddig",
+    "colAmount": "Havi összeg",
+    "colRate": "Egységár",
+    "openEnded": "—",
+    "current": "aktuális",
+    "noRates": "Még nincs díj — ez a tétel nem számlázódik.",
+    "noChargeTypes": "Az egységnek még nincs díjtétele.",
+    "goToUnit": "Állítsd be az egység oldalán →",
+    "monthRequired": "Válassz hónapot.",
+    "valueInvalid": "Adj meg 0 vagy nagyobb értéket (havi összegnél egész forintot).",
+    "error_periodLocked": "Ez a hónap már el van számolva. Válassz későbbi hónapot, vagy javítsd korrekciós tétellel.",
+    "error_notAfterExisting": "Már van díj, amely ebben vagy egy későbbi hónapban indul.",
+    "error_notBillable": "Díj csak fix vagy mért tételhez adható.",
+    "errorGeneric": "Hiba történt. Próbáld újra.",
+    "error_draftExists": "Arra vagy egy későbbi hónapra van kiállítatlan piszkozat — a régi díjjal számolt. Előbb vesd el a piszkozatot, vagy indítsd a díjat a következő hónaptól."
   }
 }
