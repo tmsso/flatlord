@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PropertyDetail } from "@/components/property-detail";
@@ -11,6 +13,7 @@ import { UnitBillingSetup, type ChargeTypeRow } from "@/components/billing-setup
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations("properties");
+  const tOnboarding = await getTranslations("onboarding");
   const supabase = await createClient();
   // B-45: inventory (incl. facilities) is a switchable module.
   const showInventory = (await getOwnerModules(supabase, (await getCurrentProfile(supabase)).userId)).has("inventory");
@@ -197,6 +200,13 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         tenancyId={tenanciesForUnit?.[0]?.id ?? null}
         persons={(personRows ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
       />
+      {isUnit && (
+        <div className="flex justify-end">
+          <Button size="sm" nativeButton={false} render={<Link href={`/onboarding?flow=tenant&unit=${property.id}`} />}>
+            {tOnboarding("addTenant")}
+          </Button>
+        </div>
+      )}
       {isUnit && (
         <UnitBillingSetup
           unitId={property.id}

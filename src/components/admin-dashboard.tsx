@@ -45,6 +45,7 @@ export function AdminDashboard({
   const t = useTranslations("dashboard");
   const tNav = useTranslations("nav");
   const tStatements = useTranslations("statements");
+  const tOnboarding = useTranslations("onboarding");
   const tRequests = useTranslations("requests");
   const format = useFormatter();
   const router = useRouter();
@@ -97,6 +98,15 @@ export function AdminDashboard({
             </Card>
           )}
           <Card className="p-4 text-sm text-muted-foreground">{t("noActiveTenancy")}</Card>
+          {/* B-42 / decision 5: a CTA, not a forced redirect. The wizard
+              resumes from whatever already exists. */}
+          <Card className="flex flex-col items-start gap-3 p-4 text-sm">
+            <p className="font-semibold">{tOnboarding("dashboardCta")}</p>
+            <p className="text-muted-foreground">{tOnboarding("dashboardCtaBody")}</p>
+            <Button size="sm" nativeButton={false} render={<Link href="/onboarding" />}>
+              {tOnboarding("dashboardCta")}
+            </Button>
+          </Card>
         </div>
       </div>
     );

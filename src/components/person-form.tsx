@@ -48,6 +48,8 @@ export interface PersonFormProps {
   initialValues?: Partial<FormValues>;
   requirements: PersonFormRequirement[];
   requirementLabel?: string; // e.g. "registered inhabitant — main address at Kertész utca 12"
+  /** Wizard use (B-42): called instead of navigating after a save; also hides Cancel. */
+  onSaved?: (id: string) => void;
 }
 
 // snake_case field_requirements.field_name -> the form field it maps to.
@@ -58,7 +60,7 @@ const FIELD_NAME_MAP: Record<string, keyof FormValues> = {
   address_card_number: "addressCardNumber",
 };
 
-export function PersonForm({ mode, personId, initialValues, requirements, requirementLabel }: PersonFormProps) {
+export function PersonForm({ mode, personId, initialValues, requirements, requirementLabel, onSaved }: PersonFormProps) {
   const t = useTranslations("persons");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -111,11 +113,13 @@ export function PersonForm({ mode, personId, initialValues, requirements, requir
       try {
         if (mode === "create") {
           const { id } = await createPerson(payload);
-          router.push(`/persons/${id}`);
+          if (onSaved) onSaved(id);
+          else router.push(`/persons/${id}`);
         } else if (personId) {
           await updatePerson({ id: personId, ...payload });
           toast.success(tc("save"));
-          router.refresh();
+          if (onSaved) onSaved(personId);
+          else router.refresh();
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errorGeneric"));
@@ -224,9 +228,11 @@ export function PersonForm({ mode, personId, initialValues, requirements, requir
         {error && <p className="text-sm text-destructive sm:col-span-2">{error}</p>}
 
         <div className="flex justify-end gap-2 sm:col-span-2">
-          <Button type="button" variant="outline" onClick={() => router.push("/persons")}>
+          {!onSaved && (
+            <Button type="button" variant="outline" onClick={() => router.push("/persons")}>
             {tc("cancel")}
           </Button>
+          )}
           <Button type="submit" disabled={isPending}>
             {tc("save")}
           </Button>
