@@ -64,7 +64,8 @@
     "colActions": "Műveletek",
     "revoke": "Visszavonás",
     "expired": "Lejárt",
-    "errorGeneric": "Hiba történt. Próbáld újra."
+    "errorGeneric": "Hiba történt. Próbáld újra.",
+    "tenantsFromTenancy": "Bérlőt hívnál meg? A bérlet oldaláról tedd, így a belépés a bérlő adataihoz kapcsolódik."
   },
   "statements": {
     "title": "Elszámolások",
@@ -902,5 +903,20 @@
     "error_notBillable": "Díj csak fix vagy mért tételhez adható.",
     "errorGeneric": "Hiba történt. Próbáld újra.",
     "error_draftExists": "Arra vagy egy későbbi hónapra van kiállítatlan piszkozat — a régi díjjal számolt. Előbb vesd el a piszkozatot, vagy indítsd a díjat a következő hónaptól."
+  },
+  "tenantAccess": {
+    "title": "Bérlői portál hozzáférés",
+    "active": "{name} be tud lépni a portálra.",
+    "none": "{name} még nem kapott meghívót a portálra.",
+    "invited": "Meghívva ezzel: {email} — érvényes eddig: {date}.",
+    "emailLabel": "A bérlő e-mail-címe",
+    "invite": "Meghívás",
+    "reinvite": "Újra meghívom",
+    "howTo": "Automatikusan nem megy ki e-mail. Küldd el {name} részére: nyissa meg a(z) {url} oldalt, és lépjen be ezzel: {email}.",
+    "copy": "Útmutató másolása",
+    "copied": "Másolva",
+    "invalidEmail": "Adj meg érvényes e-mail-címet.",
+    "errorGeneric": "Hiba történt. Próbáld újra.",
+    "message": "A Flatlord bérlői portálod: nyisd meg a(z) {url} oldalt, és lépj be ezzel: {email}."
   }
 }
