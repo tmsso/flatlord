@@ -6,6 +6,7 @@ import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { InventorySection } from "@/components/inventory-section";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { getOwnerModules } from "@/server/modules/get-modules";
+import { UnitBillingSetup, type ChargeTypeRow } from "@/components/billing-setup/unit-billing-setup";
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,11 +24,21 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   if (!property) notFound();
 
   const isRoot = property.parent_id === null;
+  // Houses aren't lettable (a tenancy targets a flat or room), so only
+  // units get the charge-type/meter setup.
+  const isUnit = property.type !== "house";
 
   // Stage 1: everything that only needs `property` (already fetched
   // above) — independent of each other, run concurrently (BACKLOG.md B-02).
-  const [{ data: ownershipRows }, { data: personRows }, { data: childRows }, { data: tenanciesForUnit }, { data: inventoryRows }] =
-    await Promise.all([
+  const [
+    { data: ownershipRows },
+    { data: personRows },
+    { data: childRows },
+    { data: tenanciesForUnit },
+    { data: inventoryRows },
+    { data: chargeTypeRows, error: chargeTypesError },
+    { data: meterRows, error: metersError },
+  ] = await Promise.all([
       isRoot
         ? supabase
             .from("property_ownership")
@@ -49,7 +60,19 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         .select("id, kind, title, description, owned_by, condition, notes, action_by_date, action_by_reason, status")
         .eq("unit_id", id)
         .order("created_at", { ascending: false }),
+      isUnit
+        ? supabase.from("charge_types").select("id, code, name, kind, unit, active").eq("unit_id", id).order("sort_order")
+        : Promise.resolve({ data: [], error: null }),
+      isUnit
+        ? supabase
+            .from("meters")
+            .select("id, label, charge_type_id, base_value, installed_at, removed_at")
+            .eq("unit_id", id)
+            .order("installed_at")
+        : Promise.resolve({ data: [], error: null }),
     ]);
+  assertNoQueryError("properties/[id]/charge_types", chargeTypesError);
+  assertNoQueryError("properties/[id]/meters", metersError);
 
   const tenancyIds = (tenanciesForUnit ?? []).map((t) => t.id);
   const inventoryIds = (inventoryRows ?? []).map((i) => i.id);
@@ -174,6 +197,27 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         tenancyId={tenanciesForUnit?.[0]?.id ?? null}
         persons={(personRows ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
       />
+      {isUnit && (
+        <UnitBillingSetup
+          unitId={property.id}
+          chargeTypes={(chargeTypeRows ?? []).map((c) => ({
+            id: c.id,
+            code: c.code,
+            name: c.name,
+            kind: c.kind as ChargeTypeRow["kind"],
+            unit: c.unit,
+            active: c.active,
+          }))}
+          meters={(meterRows ?? []).map((m) => ({
+            id: m.id,
+            label: m.label,
+            chargeTypeId: m.charge_type_id,
+            baseValue: Number(m.base_value),
+            installedAt: m.installed_at,
+            removedAt: m.removed_at,
+          }))}
+        />
+      )}
       {showInventory && (
         <InventorySection
           unitId={property.id}
