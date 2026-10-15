@@ -31,7 +31,23 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-export function TenancyCreateForm({ units, persons }: { units: { id: string; name: string; type: string }[]; persons: { id: string; name: string }[] }) {
+export function TenancyCreateForm({
+  units,
+  persons,
+  defaultUnitId,
+  defaultPersonId,
+  defaultStatus = "draft",
+  onCreated,
+}: {
+  units: { id: string; name: string; type: string }[];
+  persons: { id: string; name: string }[];
+  defaultUnitId?: string;
+  defaultPersonId?: string;
+  /** The wizard (B-42) creates an active tenancy — a draft one isn't visible to the tenant. */
+  defaultStatus?: FormValues["status"];
+  /** Wizard use: called instead of navigating after create; also hides Cancel. */
+  onCreated?: (id: string) => void;
+}) {
   const t = useTranslations("tenancies");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -45,7 +61,14 @@ export function TenancyCreateForm({ units, persons }: { units: { id: string; nam
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { primaryTenantRegistrationType: null, noticeDays: "30", dueDay: "5", status: "draft" },
+    defaultValues: {
+      unitId: defaultUnitId,
+      primaryTenantId: defaultPersonId,
+      primaryTenantRegistrationType: null,
+      noticeDays: "30",
+      dueDay: "5",
+      status: defaultStatus,
+    },
   });
 
   function onSubmit(values: FormValues) {
@@ -62,7 +85,8 @@ export function TenancyCreateForm({ units, persons }: { units: { id: string; nam
           dueDay: Number(values.dueDay),
           status: values.status,
         });
-        router.push(`/tenancies/${id}`);
+        if (onCreated) onCreated(id);
+        else router.push(`/tenancies/${id}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("errorGeneric"));
       }
@@ -197,9 +221,11 @@ export function TenancyCreateForm({ units, persons }: { units: { id: string; nam
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => router.push("/tenancies")}>
+          {!onCreated && (
+            <Button type="button" variant="outline" onClick={() => router.push("/tenancies")}>
             {tc("cancel")}
           </Button>
+          )}
           <Button type="submit" disabled={isPending}>
             {tc("save")}
           </Button>
