@@ -5,12 +5,19 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 
-const CreateInviteSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(["owner", "tenant"]),
-  personId: z.string().uuid().optional(),
-  expiresInDays: z.number().int().positive().default(7),
-});
+const CreateInviteSchema = z
+  .object({
+    email: z.string().email(),
+    role: z.enum(["owner", "tenant"]),
+    personId: z.string().uuid().optional(),
+    expiresInDays: z.number().int().positive().default(7),
+  })
+  // A tenant invite must name the tenant's person: handle_new_user copies
+  // invites.person_id into the new profile, and a tenant profile without a
+  // person has no tenancy — every tenant page fails (long batch
+  // 2026-10-15; owners got a bare person in 0034, tenants can't — they
+  // must be bound to the record the owner created).
+  .refine((v) => v.role !== "tenant" || v.personId, { message: "tenantNeedsPerson", path: ["personId"] });
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");

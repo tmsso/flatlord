@@ -9,6 +9,8 @@ import { getTenancyAnalytics } from "@/lib/analytics/get-tenancy-analytics";
 import { CumulativeLedgerChart } from "@/components/analytics/cumulative-ledger-chart";
 import { TenancyTimeline } from "@/components/analytics/tenancy-timeline";
 import { TenancyRates } from "@/components/billing-setup/tenancy-rates";
+import { TenantAccessCard } from "@/components/tenant-access-card";
+import { getTenantAccess } from "@/server/tenancies/get-tenant-access";
 import type { ChargeTypeRow } from "@/components/billing-setup/unit-billing-setup";
 import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { getOwnerModules } from "@/server/modules/get-modules";
@@ -29,7 +31,7 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select(
-      "id, unit_id, primary_tenant_id, primary_tenant_registration_type, term_start, term_end, notice_days, due_day, status, properties(name), persons(given_name, family_name)",
+      "id, unit_id, primary_tenant_id, primary_tenant_registration_type, term_start, term_end, notice_days, due_day, status, properties(name), persons(given_name, family_name, contact_email)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -102,6 +104,13 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
   assertNoQueryError("tenancies/[id]/charge_types", chargeTypesError);
   assertNoQueryError("tenancies/[id]/charge_schedules", schedulesError);
   assertNoQueryError("tenancies/[id]/last_billed", lastBilledError);
+
+  // Portal access of the primary tenant (invite bound to their person).
+  const tenantAccess = await getTenantAccess(supabase, tenancy.primary_tenant_id);
+  const tenantContactEmail = (() => {
+    const p = (Array.isArray(primaryTenant) ? primaryTenant[0] : primaryTenant) as { contact_email?: string | null } | null;
+    return p?.contact_email ?? null;
+  })();
   // B-48: requests module off → no request events in the owner UI (D-33).
   const requestsOn = (await getOwnerModules(supabase, (await getCurrentProfile(supabase)).userId)).has("requests");
 
@@ -145,6 +154,13 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
           };
         })}
         persons={(persons ?? []).map((p) => ({ id: p.id, name: `${p.given_name} ${p.family_name}` }))}
+      />
+      <TenantAccessCard
+        tenancyId={id}
+        tenantName={primaryTenantName}
+        defaultEmail={tenantContactEmail}
+        access={tenantAccess}
+        loginUrl={`${process.env.NEXT_PUBLIC_APP_URL}/login`}
       />
       <TenancyRates
         tenancyId={id}

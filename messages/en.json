@@ -64,7 +64,8 @@
     "colActions": "Actions",
     "revoke": "Revoke",
     "expired": "Expired",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "tenantsFromTenancy": "Inviting a tenant? Do it from their tenancy page, so the login is linked to their record."
   },
   "statements": {
     "title": "Statements",
@@ -902,5 +903,20 @@
     "error_notBillable": "Rates apply to fixed or metered charges only.",
     "errorGeneric": "Something went wrong. Please try again.",
     "error_draftExists": "There's an unissued draft for that month or later — it was calculated with the old rate. Discard the draft first, or start the rate the month after."
+  },
+  "tenantAccess": {
+    "title": "Tenant portal access",
+    "active": "{name} can sign in to the portal.",
+    "none": "{name} hasn't been invited to the portal yet.",
+    "invited": "Invited as {email} — valid until {date}.",
+    "emailLabel": "Tenant's email",
+    "invite": "Invite",
+    "reinvite": "Invite again",
+    "howTo": "No email is sent automatically. Send {name} this: open {url} and sign in with {email}.",
+    "copy": "Copy instructions",
+    "copied": "Copied",
+    "invalidEmail": "Enter a valid email address.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "message": "Your Flatlord tenant portal: open {url} and sign in with {email}."
   }
 }
