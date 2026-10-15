@@ -80,7 +80,8 @@ jobs:
             echo "::warning::Prod has a migration main doesn't (newest applied $prod_latest > journal $journal_latest) — expected only between migrate-prod and merging its PR (D-30)."
           fi
 
-  # B-50: did the daily cron (vercel.json, 07:00 UTC) run and finish? Vercel
+  # B-50: did the daily cron (vercel.json, 07:00 UTC) run and finish? Only
+  # scheduled runs count (manual triggers log as 'daily-reminders:manual'). Vercel
   # Hobby keeps runtime logs ~30 min, so the app records each run in
   # cron_runs (migration 0036) and this reads the newest one. Read-only:
   # two SELECTs on prod. Fails on: no run in 26 h, a 'failed' run, or a run

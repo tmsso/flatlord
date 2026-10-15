@@ -14,7 +14,7 @@ export const cronRuns = pgTable(
   "cron_runs",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    job: text("job").notNull(), // 'daily-reminders'
+    job: text("job").notNull(), // 'daily-reminders' (Vercel Cron) | 'daily-reminders:manual'
     status: text("status").notNull().default("running"), // 'running' | 'ok' | 'failed'
     // [{ phase, ms, result }] in completion order.
     phases: jsonb("phases").notNull().default(sql`'[]'::jsonb`),

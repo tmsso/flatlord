@@ -71,7 +71,11 @@ export async function GET(request: Request) {
   const service = createServiceRoleClient();
   const today = new Date().toISOString().slice(0, 10);
 
-  const runLog = await startCronRun(service, "daily-reminders");
+  // Vercel Cron identifies itself by user agent. Manual triggers (curl,
+  // the owner testing) are logged under their own job name so the health
+  // check — which reads only "daily-reminders" — judges scheduled runs.
+  const scheduled = request.headers.get("user-agent")?.startsWith("vercel-cron/") ?? false;
+  const runLog = await startCronRun(service, scheduled ? "daily-reminders" : "daily-reminders:manual");
   const timed = async <T,>(phase: string, run: () => Promise<T>): Promise<T> => {
     const started = Date.now();
     console.log("daily-reminders: phase start", phase);
