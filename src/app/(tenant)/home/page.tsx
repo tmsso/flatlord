@@ -366,6 +366,7 @@ export default async function TenantHomePage() {
             condition: i.condition,
           }))}
           activeCampaign={activeCampaign}
+          requestsOn={modules.has("requests")}
         />
       )}
     </div>
