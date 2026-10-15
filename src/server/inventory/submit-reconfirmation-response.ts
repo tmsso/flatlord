@@ -8,6 +8,7 @@ import { storeAttachment } from "@/lib/attachments/store-attachment";
 import { sendInventoryDiscrepancyEmail } from "@/server/notifications/send-inventory-discrepancy-email";
 import { notifyRequestEvent } from "@/server/notifications/notify-request-event";
 import { getTranslations } from "next-intl/server";
+import { getPropertyModules } from "@/server/modules/get-modules";
 
 const SubmitReconfirmationResponseSchema = z.object({
   reconfirmationItemId: z.string().uuid(),
@@ -93,7 +94,12 @@ export async function submitReconfirmationResponse(
   // handoff note to Phase 3) — the owner-notification email above stays
   // as a fast heads-up, this creates the actual trackable request in the
   // same admin dashboard/queue every other request lands in.
-  if (parsed.status === "discrepancy") {
+  // B-48 / D-40: with the requests module off for the property, no request
+  // is opened — the discrepancy stays on the campaign card (inventory page)
+  // and the owner email below still goes out.
+  // A failed lookup keeps the pre-switch behaviour (open the request), the
+  // same fail-open rule as the cron (D-37).
+  if (parsed.status === "discrepancy" && (await requestsModuleOn(supabase, item.property_id))) {
     const t = await getTranslations("requests");
     const { data: request, error: requestError } = await supabase
       .from("requests")
@@ -122,11 +128,22 @@ export async function submitReconfirmationResponse(
       });
       await notifyRequestEvent({ requestId: request.id, event: "opened", actorRole: "tenant" });
     }
+  }
 
+  if (parsed.status === "discrepancy") {
     await sendInventoryDiscrepancyEmail({
       propertyId: item.property_id,
       itemTitle: item.title,
       tenantNote: parsed.tenantNote ?? null,
     });
+  }
+}
+
+async function requestsModuleOn(supabase: Awaited<ReturnType<typeof createClient>>, propertyId: string): Promise<boolean> {
+  try {
+    return (await getPropertyModules(supabase, propertyId)).has("requests");
+  } catch (err) {
+    console.error("submitReconfirmationResponse: module lookup failed, assuming on", err instanceof Error ? err.message : err);
+    return true;
   }
 }

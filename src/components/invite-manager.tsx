@@ -18,13 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type Invite = {
   id: string;
@@ -38,7 +31,10 @@ export function InviteManager({ invites }: { invites: Invite[] }) {
   const format = useFormatter();
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"owner" | "tenant">("tenant");
+  // Tenants are invited from their tenancy page, bound to their person
+  // record (create-invite.ts refuses a tenant invite without one) — this
+  // form only invites co-owners.
+  const role = "owner" as const;
   const [lastCreated, setLastCreated] = useState<{ email: string; role: "owner" | "tenant" } | null>(
     null,
   );
@@ -98,26 +94,11 @@ export function InviteManager({ invites }: { invites: Invite[] }) {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="invite-role">{t("roleLabel")}</Label>
-              <Select
-                value={role}
-                onValueChange={(v) => setRole(v as "owner" | "tenant")}
-                items={{ tenant: t("roleTenant"), owner: t("roleOwner") }}
-              >
-                <SelectTrigger id="invite-role" className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tenant">{t("roleTenant")}</SelectItem>
-                  <SelectItem value="owner">{t("roleOwner")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <Button type="submit" disabled={isPending}>
               {t("send")}
             </Button>
           </form>
+          <p className="mt-2 text-xs text-muted-foreground">{t("tenantsFromTenancy")}</p>
           {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
           {lastCreated && (
             <p className="mt-3 text-xs text-muted-foreground">

@@ -1,36 +1,35 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-10-12 at the end of the "ready for a second owner" long batch (stacked chain #75 → #82, **merged 2026-10-14**; `0032`–`0034` applied on dev and prod). See `docs/DELIVERY-LOG.md`.
+Rewritten 2026-10-15 at the end of the "second owner can set up a flat + tenant" long batch (PRs #84–#91; see `docs/DELIVERY-LOG.md`).
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
 ## Preconditions to check first
 
-1. ~~Is the 2026-10-12 chain merged and prod migrated to `0034`?~~ — yes, 2026-10-14 (drift check: prod 35/35). Owner-visibility count on prod passed (4/4, 1/1, 4/4).
-2. Nightly `e2e-smoke.yml` green on `main`.
-3. Confirm ship-autonomy; check early whether `gh pr merge` is allowed (blocked 2026-10-11, allowed for #74, not tried 2026-10-12).
-4. Any migration: the owner runs `migrate-prod.yml --ref <top branch>` before merging (D-30).
+1. Are `0035`–`0036` on prod and #85 → #86 merged? (`gh pr list`; the health check's `migration-drift` job says how far prod is behind.) If not, remind the owner — don't build on top of the open branches.
+2. B-54: did the owner confirm how sign-in email reaches a non-team address on prod? It decides whether the wizard is usable by a real second owner yet.
+3. `cron_runs` (once `0036` is on prod): any scheduled run not `ok`? That outranks everything below (B-50).
+4. Confirm ship-autonomy and whether `gh pr merge` is allowed (it was, 2026-10-15, with the owner's explicit permission for that session).
 
 ## The three
 
-### 1. B-47 — ownership bootstrap claim (S)
+### 1. B-51 — more than one tenancy per owner in the UI (M)
 
-The last owner-isolation hole known: any owner can add the first ownership row to an unowned root property. Small, and it should land before a second owner is actually invited.
+The wizard can now create a second tenancy, but the statements page drafts only for `tenancies[0]` and the dashboard shows one tenancy. A tenancy picker on both, before any owner actually runs two.
 
-### 2. B-42 — onboarding wizard (L)
+### 2. B-53 — return error codes instead of throwing (S)
 
-Unblocked by this batch: owners are isolated (D-34), modules are switchable with everything-off defaults (D-37), and an invited owner now gets a bare person record (D-38) — the wizard's first step ("own personal data") replaces that stopgap's naming. Compose the existing create forms; resumable from DB state, no wizard table.
+Older forms show `err.message`, which production builds redact. Move the remaining owner-facing actions to the `{ ok:false, error }` pattern the billing-setup and tenant-invite actions use.
 
-### 3. B-48 — module loose ends (S)
+### 3. B-43 — offboarding wizard (L)
 
-Dashboard queue / counters still show requests with the module off; decide what inventory discrepancies do then.
+The mirror of B-42 (final readings, final statement, deposit settlement, handover, end access). Reuse the `/onboarding` pattern: steps derived from DB state, composed of existing components. B-13 (move-out snapshot) can ship as a "manual note" step first.
 
 ## Alternatives
 
-- **B-44** taxation module (L) — behind the `taxation` switch (reserved in `0033`); reconfirm the Hungarian rules marked "open for build time".
-- **B-04** Sentry (S, needs the owner's DSN); **B-41** reject-with-note (S); **B-49** uninvited Google sign-in hook (S).
-- **B-43** offboarding wizard (L) — benefits from B-13 and B-14 first.
+- **B-44** taxation module (L, behind the `taxation` switch) — reconfirm the Hungarian rules marked "open for build time".
+- **B-52** meter replacement link (M; golden tests are the contract). **B-41** reject-with-note (S). **B-49** uninvited Google sign-in hook (S — the hook also fires on admin `createUser`; design for the invite path and RLS tests).
 
 ## Session logistics
 
-`/verify` for lint + typecheck · DB tests are CI-only · real verification on **dev** (`kqrzqbocruwafvuodatb`) with `playwright-owner-emma@flatlord.test` / `playwright-tenant-a@flatlord.test`; a *fresh* owner can be made through the real path (Emma → Settings → owner invite → `auth.admin.createUser`) · start servers with an invalid `RESEND_API_KEY` (tenant-a's contact email is real) · prefer `pnpm build` + `pnpm start` over `pnpm dev` on this node; stop it with TaskStop · Base UI Switch/Checkbox ids sit on a hidden input — click `label[for=…]` · assert on role-scoped locators, not page HTML (RSC payloads contain off-screen data — a false pass happened) · policies that read their own table → SECURITY DEFINER fn in `private` (D-29) · `gh run list` after every push · `/close-session` to end.
+`/verify` for lint + typecheck · DB tests are CI-only · real verification on **dev** (`kqrzqbocruwafvuodatb`): a fresh owner through the real path is `invites` row → `auth.admin.createUser` → `handle_new_user` (a reusable fixture + cleanup lived in the 2026-10-15 session's scratch `pw/fixtures.ts`; the pattern is in that batch's memory) · start servers with an invalid `RESEND_API_KEY` · prefer `pnpm build` + `pnpm start` on this node · Base UI `Button` rendering a `Link` has role **button** in Playwright · admin `notFound()` renders the 404 UI with HTTP 200 (`(admin)/loading.tsx` streams) — assert on the heading · `audit_log`'s timestamp column is `at` · thrown server-action messages are redacted in prod builds — return codes · `gh run list` after every push · `/close-session` to end.
