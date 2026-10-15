@@ -5,6 +5,7 @@ import {
   isPaymentDueReminderDay,
   isOverdue,
   resolvePaymentDueLeadDays,
+  shouldSendOverdueAlert,
   type StatementStatus,
 } from "@/server/reminders/compute-due-reminders";
 import {
@@ -47,10 +48,17 @@ export const runtime = "nodejs";
 // reminder_lead_days.reconfirmation.intervalMonths. Every deferred cron
 // shape from ROADMAP Phase 4 is now shipped.
 //
-// Every notify-*.ts call is best-effort/never-throws; every reminder
-// predicate fires on exactly one calendar day, so the per-day
-// idempotency guard below only has to defend against a same-day manual
-// re-trigger, matching the original statement loop's approach.
+// Every notify-*.ts call is best-effort/never-throws. The lead-time and
+// payment-due predicates fire on exactly one calendar day, so their
+// per-day idempotency guard only has to defend against a same-day manual
+// re-trigger. The overdue alert is different: "overdue" stays true every
+// day after the due date, so it is guarded per statement, not per day —
+// it fires once, when the statement first goes overdue (B-50 hotfix,
+// 2026-10-15; before that it re-sent every unpaid statement daily).
+//
+// Each phase logs its duration (B-50): Hobby keeps runtime logs ~30 min,
+// so a timed-out run's last "phase done" line is the only clue to where
+// it stalled.
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -62,13 +70,23 @@ export async function GET(request: Request) {
   const today = new Date().toISOString().slice(0, 10);
 
   const moduleOn = createModuleCheck(service);
-  const statements = await runStatementReminders(service, today, moduleOn);
-  const leadReminders = await runLeadReminders(service, today, moduleOn);
+  const statements = await timed("statements", () => runStatementReminders(service, today, moduleOn));
+  const leadReminders = await timed("leadReminders", () => runLeadReminders(service, today, moduleOn));
   // Billing is core (no switch): auto-draft always runs.
-  const autoDraft = await runStatementAutoDraft(service, today);
-  const reconfirmation = await runScheduledReconfirmation(service, today, (propertyId) => moduleOn(propertyId, "inventory"));
+  const autoDraft = await timed("autoDraft", () => runStatementAutoDraft(service, today));
+  const reconfirmation = await timed("reconfirmation", () =>
+    runScheduledReconfirmation(service, today, (propertyId) => moduleOn(propertyId, "inventory")),
+  );
 
   return NextResponse.json({ ok: true, ...statements, ...leadReminders, ...autoDraft, ...reconfirmation });
+}
+
+async function timed<T>(phase: string, run: () => Promise<T>): Promise<T> {
+  const started = Date.now();
+  console.log("daily-reminders: phase start", phase);
+  const result = await run();
+  console.log("daily-reminders: phase done", phase, `${Date.now() - started} ms`, JSON.stringify(result));
+  return result;
 }
 
 // B-45 / D-33: reminders are the "notifications" module (inventory
@@ -135,23 +153,29 @@ async function runStatementReminders(service: SupabaseClient, today: string, mod
       .maybeSingle();
     const leadDays = resolvePaymentDueLeadDays(tenancy?.reminder_lead_days);
 
+    // No date floor: "overdue" is checked against every earlier alert for
+    // this statement, "amount_due" only against today's.
     const { data: existing } = await service
       .from("notifications")
-      .select("category")
+      .select("category, created_at")
       .eq("entity_type", "statement")
       .eq("entity_id", statement.id)
-      .in("category", ["amount_due", "overdue"])
-      .gte("created_at", `${today}T00:00:00Z`);
-    const alreadySent = new Set((existing ?? []).map((n) => n.category));
+      .in("category", ["amount_due", "overdue"]);
+    const amountDueSentToday = (existing ?? []).some(
+      (n) => n.category === "amount_due" && n.created_at >= `${today}T00:00:00Z`,
+    );
+    const overdueEverAlerted = (existing ?? []).some((n) => n.category === "overdue");
 
-    if (!alreadySent.has("amount_due") && isPaymentDueReminderDay(statement.due_date, leadDays, today)) {
+    if (!amountDueSentToday && isPaymentDueReminderDay(statement.due_date, leadDays, today)) {
       await notifyPaymentDueReminder({ statementId: statement.id });
       remindersSent++;
     }
 
     if (
-      !alreadySent.has("overdue") &&
-      isOverdue(statement.status as StatementStatus, statement.due_date, today, statement.issued_at)
+      shouldSendOverdueAlert(
+        isOverdue(statement.status as StatementStatus, statement.due_date, today, statement.issued_at),
+        overdueEverAlerted,
+      )
     ) {
       await notifyOverdueStatement({ statementId: statement.id });
       overdueAlertsSent++;

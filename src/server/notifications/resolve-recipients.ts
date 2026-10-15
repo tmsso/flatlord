@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isLocale, defaultLocale, type Locale } from "@/i18n/config";
+import { EXTERNAL_CALL_TIMEOUT_MS, withTimeout } from "@/lib/async/with-timeout";
 
 // Shared recipient resolution for the notify-*.ts fan-out modules. Before
 // this, notify-overdue-statement / notify-notice-issued / etc. each
@@ -85,10 +86,17 @@ export async function resolveTenantRecipient(
 
 /** Resolve a profile id to its Auth login email (owners have no persons.contact_email). Null on failure. */
 export async function resolveProfileEmail(service: SupabaseClient, profileId: string): Promise<string | null> {
-  const { data, error } = await service.auth.admin.getUserById(profileId);
-  if (error || !data?.user?.email) {
-    console.error("resolveProfileEmail: could not resolve email", profileId, error?.message);
+  // Timeout-wrapped (B-50): a hung Auth admin call must not stall the cron.
+  const { email, message } = await withTimeout(
+    service.auth.admin
+      .getUserById(profileId)
+      .then(({ data, error }) => ({ email: data?.user?.email ?? null, message: error?.message })),
+    EXTERNAL_CALL_TIMEOUT_MS,
+    () => ({ email: null, message: `timed out after ${EXTERNAL_CALL_TIMEOUT_MS} ms` }),
+  );
+  if (!email) {
+    console.error("resolveProfileEmail: could not resolve email", profileId, message);
     return null;
   }
-  return data.user.email;
+  return email;
 }

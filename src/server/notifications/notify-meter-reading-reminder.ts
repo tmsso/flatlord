@@ -1,5 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createTranslator } from "next-intl";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -56,7 +56,7 @@ export async function notifyMeterReadingReminder(params: { tenancyId: string }) 
       return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = createResendClient();
     const { error: sendError } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
       to: email,

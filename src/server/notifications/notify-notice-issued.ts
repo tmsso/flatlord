@@ -1,5 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
+import { createResendClient } from "@/lib/email/resend-client";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
@@ -83,7 +83,7 @@ export async function notifyNoticeIssued(params: { noticeId: string }) {
     }
     if (!shouldEmailNotification(tenantProfile.notification_prefs, "notice")) return;
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = createResendClient();
     const { error: sendError } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL ?? "Flatlord <onboarding@resend.dev>",
       to: tenantEmail,

@@ -4,6 +4,7 @@ import {
   resolvePaymentDueLeadDays,
   isPaymentDueReminderDay,
   isOverdue,
+  shouldSendOverdueAlert,
 } from "../../src/server/reminders/compute-due-reminders";
 
 describe("resolvePaymentDueLeadDays", () => {
@@ -58,5 +59,18 @@ describe("isOverdue", () => {
 
   it("fires once the retroactive grace window has elapsed", () => {
     expect(isOverdue("issued", "2026-08-05", "2026-09-20", "2026-09-08T07:00:00Z")).toBe(true);
+  });
+});
+
+describe("shouldSendOverdueAlert", () => {
+  it("alerts on the first overdue run", () => {
+    expect(shouldSendOverdueAlert(true, false)).toBe(true);
+  });
+  it("does not re-alert on later days once a statement has been alerted (B-50)", () => {
+    // Day 2 of the same unpaid statement: still overdue, already alerted.
+    expect(shouldSendOverdueAlert(isOverdue("issued", "2026-09-05", "2026-09-07"), true)).toBe(false);
+  });
+  it("never alerts a statement that isn't overdue", () => {
+    expect(shouldSendOverdueAlert(false, false)).toBe(false);
   });
 });
