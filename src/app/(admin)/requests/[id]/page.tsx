@@ -5,6 +5,8 @@ import { getCurrentProfile } from "@/lib/auth/current-profile";
 import { RequestThread, type RequestDetail, type RequestMessageRow } from "@/components/requests/request-thread";
 import { AttachmentsSection, type AttachmentRow } from "@/components/attachments-section";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
+import { getOwnerModules } from "@/server/modules/get-modules";
+import { isFieldApprovalRequest } from "@/lib/requests/is-field-approval";
 
 export default async function AdminRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,6 +20,9 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
     .maybeSingle();
   assertNoQueryError("requests/[id]", requestError);
   if (!request) notFound();
+  // B-48: with the requests module off only field-change approvals open
+  // (D-40); every other request is hidden, data kept (D-33).
+  if (!isFieldApprovalRequest(request) && !(await getOwnerModules(supabase, profile.userId)).has("requests")) notFound();
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("request_messages")

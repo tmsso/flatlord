@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { ModuleSet } from "@/lib/modules";
+import { isFieldApprovalRequest } from "@/lib/requests/is-field-approval";
 import { getTenancyChartData } from "@/lib/billing/get-tenancy-chart-data";
 import { isStatementOverdue, type StoredStatementStatus } from "@/lib/billing/is-statement-overdue";
 
@@ -81,6 +83,10 @@ export async function getDashboardData(
   // month. Browsing "did June's cycle complete" shouldn't change what
   // "currently outstanding" means.
   viewMonth?: string,
+  // B-48: the owner's own module switches (D-33). Requests off → only
+  // field-change approvals stay in the queue (core editability, D-40);
+  // inventory off → no inventory flags. Omitted = everything on.
+  modules?: ModuleSet,
 ): Promise<DashboardData> {
   // Stage 1: only needs personId (already known).
   const [{ data: ownershipRows }, { data: draftRows }] = await Promise.all([
@@ -273,8 +279,11 @@ export async function getDashboardData(
   const currentCycleStatement = recentStatements.find((s) => s.periodMonth === currentPeriod) ?? null;
 
   const needsAttention: NeedsAttentionItem[] = [];
+  const requestsOn = modules?.has("requests") ?? true;
+  const inventoryOn = modules?.has("inventory") ?? true;
   for (const r of openRequestRows ?? []) {
-    const isApproval = r.category === "personal_data_change" && r.change_payload != null;
+    const isApproval = isFieldApprovalRequest(r);
+    if (!isApproval && !requestsOn) continue;
     needsAttention.push({
       id: r.id,
       kind: isApproval ? "approval" : "request",
@@ -288,7 +297,7 @@ export async function getDashboardData(
       href: isApproval ? `/requests/${r.id}` : `/requests/${r.id}`,
     });
   }
-  for (const i of inventoryFlagRows ?? []) {
+  for (const i of inventoryOn ? (inventoryFlagRows ?? []) : []) {
     needsAttention.push({
       id: i.id,
       kind: "inventory",

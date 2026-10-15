@@ -3,6 +3,9 @@ import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { AdminRequestsDashboard, type AdminRequestRow } from "@/components/requests/admin-requests-dashboard";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
 import { getRequestItemOptions } from "@/lib/requests/get-request-item-options";
+import { notFound } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getOwnerModules } from "@/server/modules/get-modules";
 
 type TenancyRef = {
   properties: { id: string; name: string } | { id: string; name: string }[] | null;
@@ -15,6 +18,9 @@ function one<T>(ref: T | T[] | null): T | null {
 
 export default async function AdminRequestsPage() {
   const supabase = await createClient();
+  // B-45: requests module off = no request list (data kept, D-33).
+  const profile = await getCurrentProfile(supabase);
+  if (!(await getOwnerModules(supabase, profile.userId)).has("requests")) notFound();
 
   const { data: requestRows, error } = await supabase
     .from("requests")

@@ -8,6 +8,8 @@ import { MonthlyCostChart } from "@/components/monthly-cost-chart";
 import { getTenancyAnalytics } from "@/lib/analytics/get-tenancy-analytics";
 import { CumulativeLedgerChart } from "@/components/analytics/cumulative-ledger-chart";
 import { TenancyTimeline } from "@/components/analytics/tenancy-timeline";
+import { getCurrentProfile } from "@/lib/auth/current-profile";
+import { getOwnerModules } from "@/server/modules/get-modules";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
 import { DepositSection } from "@/components/deposit-section";
@@ -76,6 +78,8 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
     ]);
 
   const { consumption, cost, consumptionSeries, meteredSeries } = chartData;
+  // B-48: requests module off → no request events in the owner UI (D-33).
+  const requestsOn = (await getOwnerModules(supabase, (await getCurrentProfile(supabase)).userId)).has("requests");
 
   const contractPaths = (contractRows ?? []).map((c) => c.document_path).filter((p): p is string => !!p);
   const attachmentPaths = (attachmentRows ?? []).map((a) => a.storage_path).filter((p): p is string => !!p);
@@ -170,7 +174,9 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
       {consumptionSeries.length > 0 && <MeterConsumptionChart months={consumption} series={consumptionSeries} />}
       <MonthlyCostChart months={cost} meteredSeries={meteredSeries} />
       <CumulativeLedgerChart points={analytics.ledger} />
-      <TenancyTimeline events={analytics.timeline} />
+      <TenancyTimeline
+        events={requestsOn ? analytics.timeline : analytics.timeline.filter((e) => e.type !== "request_opened")}
+      />
     </div>
   );
 }
