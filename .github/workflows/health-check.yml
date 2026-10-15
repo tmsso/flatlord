@@ -79,3 +79,45 @@ jobs:
           if [ "$prod_latest" -gt "$journal_latest" ]; then
             echo "::warning::Prod has a migration main doesn't (newest applied $prod_latest > journal $journal_latest) — expected only between migrate-prod and merging its PR (D-30)."
           fi
+
+  # B-50: did the daily cron (vercel.json, 07:00 UTC) run and finish? Vercel
+  # Hobby keeps runtime logs ~30 min, so the app records each run in
+  # cron_runs (migration 0036) and this reads the newest one. Read-only:
+  # two SELECTs on prod. Fails on: no run in 26 h, a 'failed' run, or a run
+  # still 'running' after 10 min (killed at Vercel's 300 s limit — its
+  # phases list shows the last completed phase). Before 0036 is on prod it
+  # only warns.
+  cron-last-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the newest daily-reminders run
+        env:
+          SUPABASE_DB_URL_PROD: ${{ secrets.SUPABASE_DB_URL_PROD }}
+        run: |
+          exists=$(psql "$SUPABASE_DB_URL_PROD" -tA -c "select to_regclass('public.cron_runs') is not null")
+          if [ "$exists" != "t" ]; then
+            echo "::warning::cron_runs doesn't exist on prod yet — run migrate-prod.yml (0036)."
+            exit 0
+          fi
+          row=$(psql "$SUPABASE_DB_URL_PROD" -tA -F '|' -c \
+            "select status, extract(epoch from now() - started_at)::int, started_at, phases::text
+               from cron_runs where job = 'daily-reminders' order by started_at desc limit 1")
+          if [ -z "$row" ]; then
+            echo "::warning::No daily-reminders run recorded yet."
+            exit 0
+          fi
+          IFS='|' read -r status age started phases <<< "$row"
+          echo "newest run: status=$status started=$started (${age}s ago)"
+          echo "phases: $phases"
+          if [ "$age" -gt 93600 ]; then
+            echo "::error::No daily-reminders run in the last 26 h — is CRON_SECRET still set / the cron enabled?"
+            exit 1
+          fi
+          if [ "$status" = "failed" ]; then
+            echo "::error::The newest daily-reminders run failed — see the error column in cron_runs."
+            exit 1
+          fi
+          if [ "$status" = "running" ] && [ "$age" -gt 600 ]; then
+            echo "::error::The newest daily-reminders run never finished (likely killed at the 300 s limit) — last completed phase is the last entry above."
+            exit 1
+          fi
