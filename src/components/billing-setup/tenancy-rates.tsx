@@ -159,6 +159,8 @@ export function AddRateDialog({
     switch (code) {
       case BILLING_SETUP_ERRORS.periodLocked:
         return t("error_periodLocked");
+      case BILLING_SETUP_ERRORS.draftExists:
+        return t("error_draftExists");
       case BILLING_SETUP_ERRORS.notAfterExisting:
         return t("error_notAfterExisting");
       case BILLING_SETUP_ERRORS.notBillable:

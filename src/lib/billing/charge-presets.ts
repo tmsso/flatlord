@@ -38,6 +38,7 @@ export const BILLING_SETUP_ERRORS = {
   notBillable: "BILLING_SETUP_NOT_BILLABLE",
   notAfterExisting: "BILLING_SETUP_NOT_AFTER_EXISTING",
   periodLocked: "BILLING_SETUP_PERIOD_LOCKED",
+  draftExists: "BILLING_SETUP_DRAFT_EXISTS",
 } as const;
 
 export type BillingSetupError = (typeof BILLING_SETUP_ERRORS)[keyof typeof BILLING_SETUP_ERRORS];

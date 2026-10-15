@@ -14,7 +14,7 @@ export interface ExistingSchedule {
 
 export type RateChangePlan =
   | { ok: true; closeScheduleId: string | null; closeOn: string | null }
-  | { ok: false; reason: "notAfterExisting" | "periodLocked" };
+  | { ok: false; reason: "notAfterExisting" | "periodLocked" | "draftExists" };
 
 export function lastDayOfPreviousMonth(monthStart: string): string {
   const d = new Date(`${monthStart}T00:00:00Z`);
@@ -27,9 +27,19 @@ export function lastDayOfPreviousMonth(monthStart: string): string {
  * @param lastBilledPeriod the latest period_month with an issued (non-draft,
  *   non-voided) statement on this tenancy, or null. Billed months are
  *   immutable (CLAUDE.md §3.3), so a rate may only start after it.
+ * @param lastDraftPeriod the latest period_month with an open draft, or
+ *   null. A draft stores its line items when created and issuing keeps
+ *   them, so a rate starting in or before that month would silently miss
+ *   it — the owner discards the draft first.
  */
-export function planRateChange(validFrom: string, existing: ExistingSchedule[], lastBilledPeriod: string | null): RateChangePlan {
+export function planRateChange(
+  validFrom: string,
+  existing: ExistingSchedule[],
+  lastBilledPeriod: string | null,
+  lastDraftPeriod: string | null = null,
+): RateChangePlan {
   if (lastBilledPeriod && validFrom <= lastBilledPeriod) return { ok: false, reason: "periodLocked" };
+  if (lastDraftPeriod && validFrom <= lastDraftPeriod) return { ok: false, reason: "draftExists" };
   // Append-only: never insert before or between existing rates — history
   // is changed by adjustments, not by rewriting schedules.
   if (existing.some((s) => s.validFrom >= validFrom)) return { ok: false, reason: "notAfterExisting" };

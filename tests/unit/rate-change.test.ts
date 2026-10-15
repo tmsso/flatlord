@@ -25,6 +25,11 @@ describe("planRateChange", () => {
     expect(planRateChange("2026-09-01", [open], "2026-10-01")).toEqual({ ok: false, reason: "periodLocked" });
   });
 
+  it("rejects a start in or before an open draft's month (drafts freeze their lines)", () => {
+    expect(planRateChange("2026-10-01", [open], "2026-08-01", "2026-10-01")).toEqual({ ok: false, reason: "draftExists" });
+    expect(planRateChange("2026-11-01", [open], "2026-08-01", "2026-10-01")).toEqual({ ok: true, closeScheduleId: "a", closeOn: "2026-10-31" });
+  });
+
   it("is append-only: not on or before an existing rate's start", () => {
     expect(planRateChange("2026-01-01", [open], null)).toEqual({ ok: false, reason: "notAfterExisting" });
     expect(planRateChange("2025-12-01", [open], null)).toEqual({ ok: false, reason: "notAfterExisting" });

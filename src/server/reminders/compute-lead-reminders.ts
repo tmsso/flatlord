@@ -47,6 +47,21 @@ export function isLeadReminderDay(targetDate: string, leadDays: number, today: s
   return matchedLeadDays(targetDate, [leadDays], today) !== null;
 }
 
+/**
+ * A fixed rate whose valid_to is followed by a later rate for the same
+ * tenancy + charge type has already been reviewed — the owner scheduled
+ * the change (B2 rates UI closes the old rate the day before the new one).
+ * Only a rate with nothing after it needs a "rate review due" alert.
+ */
+export function hasLaterSchedule(
+  schedule: { tenancy_id: string; charge_type_id: string; valid_from: string },
+  all: { tenancy_id: string; charge_type_id: string; valid_from: string }[],
+): boolean {
+  return all.some(
+    (s) => s.tenancy_id === schedule.tenancy_id && s.charge_type_id === schedule.charge_type_id && s.valid_from > schedule.valid_from,
+  );
+}
+
 function nextMonthPrefix(monthPrefix: string): string {
   const year = Number(monthPrefix.slice(0, 4));
   const month = Number(monthPrefix.slice(5, 7));

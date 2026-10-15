@@ -900,6 +900,7 @@
     "error_periodLocked": "That month is already billed. Pick a later month, or correct a billed month with an adjustment.",
     "error_notAfterExisting": "There is already a rate starting in or after that month.",
     "error_notBillable": "Rates apply to fixed or metered charges only.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "error_draftExists": "There's an unissued draft for that month or later — it was calculated with the old rate. Discard the draft first, or start the rate the month after."
   }
 }

@@ -900,6 +900,7 @@
     "error_periodLocked": "Ez a hónap már el van számolva. Válassz későbbi hónapot, vagy javítsd korrekciós tétellel.",
     "error_notAfterExisting": "Már van díj, amely ebben vagy egy későbbi hónapban indul.",
     "error_notBillable": "Díj csak fix vagy mért tételhez adható.",
-    "errorGeneric": "Hiba történt. Próbáld újra."
+    "errorGeneric": "Hiba történt. Próbáld újra.",
+    "error_draftExists": "Arra vagy egy későbbi hónapra van kiállítatlan piszkozat — a régi díjjal számolt. Előbb vesd el a piszkozatot, vagy indítsd a díjat a következő hónaptól."
   }
 }

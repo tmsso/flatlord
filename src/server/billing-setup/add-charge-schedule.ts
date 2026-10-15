@@ -44,7 +44,11 @@ export async function addChargeSchedule(input: z.infer<typeof AddChargeScheduleS
     return { ok: false, error: BILLING_SETUP_ERRORS.notBillable };
   }
 
-  const [{ data: schedules, error: schedulesError }, { data: lastBilled, error: lastBilledError }] = await Promise.all([
+  const [
+    { data: schedules, error: schedulesError },
+    { data: lastBilled, error: lastBilledError },
+    { data: lastDraft, error: lastDraftError },
+  ] = await Promise.all([
     supabase
       .from("charge_schedules")
       .select("id, valid_from, valid_to")
@@ -59,7 +63,17 @@ export async function addChargeSchedule(input: z.infer<typeof AddChargeScheduleS
       .order("period_month", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("statements")
+      .select("period_month")
+      .eq("tenancy_id", parsed.tenancyId)
+      .eq("status", "draft")
+      .is("voided_at", null)
+      .order("period_month", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
+  if (lastDraftError) throw new Error(lastDraftError.message);
   if (schedulesError) throw new Error(schedulesError.message);
   if (lastBilledError) throw new Error(lastBilledError.message);
 
@@ -67,9 +81,15 @@ export async function addChargeSchedule(input: z.infer<typeof AddChargeScheduleS
     parsed.validFrom,
     (schedules ?? []).map((s) => ({ id: s.id, validFrom: s.valid_from, validTo: s.valid_to })),
     lastBilled?.period_month ?? null,
+    lastDraft?.period_month ?? null,
   );
   if (!plan.ok) {
-    return { ok: false, error: plan.reason === "periodLocked" ? BILLING_SETUP_ERRORS.periodLocked : BILLING_SETUP_ERRORS.notAfterExisting };
+    const error = {
+      periodLocked: BILLING_SETUP_ERRORS.periodLocked,
+      draftExists: BILLING_SETUP_ERRORS.draftExists,
+      notAfterExisting: BILLING_SETUP_ERRORS.notAfterExisting,
+    }[plan.reason];
+    return { ok: false, error };
   }
 
   // Two statements, no transaction across supabase-js calls: close first
