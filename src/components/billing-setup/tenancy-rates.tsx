@@ -27,6 +27,15 @@ export interface ChargeScheduleRow {
 
 const showUnit = (u: string | null) => (u === "m3" ? "m³" : (u ?? ""));
 
+/** Last day of the month a date falls in. The engine bills whole months: a
+ * rate with valid_to anywhere in a month covers that whole month — and the
+ * sheet importer closes historical runs with the month's 1st, the rates UI
+ * with its last day. Showing the month end reads right for both. */
+function monthEnd(date: string): string {
+  const d = new Date(`${date.slice(0, 7)}-01T00:00:00Z`);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+}
+
 /** "YYYY-MM" of the month after a "YYYY-MM-01" period. */
 function monthAfter(period: string): string {
   const base = new Date(`${period}T00:00:00Z`);
@@ -61,6 +70,7 @@ export function TenancyRates({
   const billable = chargeTypes.filter((c) => c.kind === "fixed" || c.kind === "metered");
   const money = (n: number) => format.number(n, { style: "currency", currency: "HUF", maximumFractionDigits: 0 });
   const date = (d: string) => format.dateTime(new Date(d), { dateStyle: "medium" });
+  const monthStart = `${today.slice(0, 7)}-01`;
 
   return (
     <Card>
@@ -109,10 +119,11 @@ export function TenancyRates({
                 ]}
                 rows={rows.map((s) => ({
                   id: s.id,
-                  isCurrent: s.validFrom <= today && (s.validTo == null || s.validTo >= today),
+                  // Same rule as the engine's pickActiveSchedule for this month.
+                  isCurrent: s.validFrom <= monthStart && (s.validTo == null || s.validTo >= monthStart),
                   cells: {
                     from: date(s.validFrom),
-                    to: s.validTo ? date(s.validTo) : t("openEnded"),
+                    to: s.validTo ? date(monthEnd(s.validTo)) : t("openEnded"),
                     value:
                       c.kind === "fixed"
                         ? money(s.amount ?? 0)
