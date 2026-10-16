@@ -88,7 +88,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 ## Handoff notes for sessions
 
 - Start with `docs/NEXT-BATCH.md`; it is valid while `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md`. Otherwise re-derive from this file.
-- Within a batch: schema/migration → server logic + tests → UI → **headless Playwright click-through against the dev project** (`playwright-owner-emma@flatlord.test`, `playwright-tenant-a@flatlord.test`, login via `auth.admin.generateLink`) → PR. "CI green" is not "verified live".
+- Within a batch: schema/migration → server logic + tests → UI → **headless Playwright click-through against the dev project** (`playwright-owner-emma@flatlord.test`, `playwright-tenant-a@flatlord.test`, login via `auth.admin.generateLink`; a brand-new owner via `tests/e2e/fresh-owner.ts`) → PR. "CI green" is not "verified live".
 - Prod migrations only via `.github/workflows/migrate-prod.yml` (D-14). Never hand-apply.
 - Golden tests are the billing engine's contract: never merge with a mismatching month.
 - Privacy rule (`CLAUDE.md` §0) is absolute — including test names and commit messages.
