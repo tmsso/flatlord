@@ -10,6 +10,8 @@ import { isAllowedForRole } from "@/lib/auth/route-access";
  *    and bounce to /login (Supabase creates an auth.users row on any
  *    OAuth/magic-link completion, but handle_new_user only creates a
  *    profile when a live invite matched).
+ *  - Tenant whose every tenancy has ended (B-43 offboarding) -> sign out
+ *    and bounce to /login.
  *  - owner -> /dashboard, tenant -> /home (root `/` and the wrong shell
  *    redirect to the correct one).
  */
@@ -66,6 +68,28 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/login";
     url.searchParams.set("error", "not_invited");
     return NextResponse.redirect(url);
+  }
+
+  if (profile.role === "tenant") {
+    // B-43: an offboarded tenant loses access. Positive evidence only — at
+    // least one tenancy, all ended/terminated (RLS returns just their own).
+    // A failed query or a tenant with no tenancy yet lets the request
+    // through, so a database blip can't sign every tenant out. One extra
+    // round-trip for tenants; folds into B-03's no-network proxy later.
+    const { data: tenancies, error: tenancyError } = await supabase.from("tenancies").select("status");
+    const allEnded =
+      !tenancyError && !!tenancies?.length && tenancies.every((t) => t.status === "ended" || t.status === "terminated");
+    if (allEnded) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.search = "";
+      url.searchParams.set("error", "tenancy_ended");
+      const redirect = NextResponse.redirect(url);
+      // Carry the cleared session cookies onto the redirect.
+      for (const cookie of supabaseResponse.cookies.getAll()) redirect.cookies.set(cookie);
+      return redirect;
+    }
   }
 
   const homeForRole = profile.role === "owner" ? "/dashboard" : "/home";

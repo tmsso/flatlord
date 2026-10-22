@@ -14,6 +14,11 @@ export const ACTION_ERRORS = [
   "nothingOutstanding",
   "tenantHasNoEmail",
   "changeAlreadyPending",
+  "tenancyNotActive",
+  "endBeforeStart",
+  "noProRataCredit",
+  "offboardingIncomplete",
+  "noDepositToApply",
 ] as const;
 
 export type ActionErrorCode = (typeof ACTION_ERRORS)[number];

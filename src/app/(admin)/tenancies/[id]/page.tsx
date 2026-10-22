@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +18,7 @@ import { getOwnerModules } from "@/server/modules/get-modules";
 import { assertNoQueryError } from "@/lib/supabase/require-row";
 import { ContractsSection } from "@/components/contracts-section";
 import { DepositSection } from "@/components/deposit-section";
+import { Button } from "@/components/ui/button";
 import { AttachmentsSection } from "@/components/attachments-section";
 import { DeclarationGenerator } from "@/components/declaration-generator";
 
@@ -127,7 +129,14 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-xs text-muted-foreground">{t("title")}</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-xs text-muted-foreground">{t("title")}</div>
+        {tenancy.status === "active" && (
+          <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/offboarding?tenancy=${id}`} />}>
+            {t("offboard")}
+          </Button>
+        )}
+      </div>
       <TenancyDetail
         tenancy={{
           id: tenancy.id,
