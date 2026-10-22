@@ -584,6 +584,8 @@
     "withdraw": "Withdraw",
     "resolve": "Mark resolved",
     "reject": "Reject",
+    "rejectNoteLabel": "Note to the tenant (optional) — it is added to the thread and to their notification.",
+    "rejectConfirm": "Confirm rejection",
     "threadTitle": "Conversation",
     "replyPlaceholder": "Write a reply…",
     "reply": "Reply",
@@ -602,6 +604,7 @@
     "notifyTenant_resolvedBody": "Your request \"{title}\" has been marked resolved.",
     "notifyTenant_rejectedSubject": "Request rejected: {title}",
     "notifyTenant_rejectedBody": "Your request \"{title}\" has been rejected. Contact the landlord for details.",
+    "notifyTenant_rejectedWithNoteBody": "Your request \"{title}\" has been rejected. Note from the landlord: {note}",
     "changeRequestDiffTitle": "Proposed change: {field}",
     "changeRequestOld": "Current",
     "changeRequestNew": "Proposed",
@@ -971,7 +974,8 @@
     "endBeforeStart": "The move-out date is before the tenancy started.",
     "noProRataCredit": "There is no pro-rata credit to add (no rent rate, or the statement is already issued).",
     "offboardingIncomplete": "Resolve or skip every step before ending the tenancy.",
-    "noDepositToApply": "There is no deposit left to apply."
+    "noDepositToApply": "There is no deposit left to apply.",
+    "requestNotOpen": "This request is no longer open."
   },
   "tenancyPicker": {
     "label": "Tenancy"

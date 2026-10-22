@@ -9,6 +9,8 @@ export interface RequestEventMessageParams {
   event: "opened" | "message" | "resolved" | "rejected" | "withdrawn";
   title: string;
   forOwner: boolean;
+  // B-41: the owner's optional reject note, quoted in the tenant's body.
+  note?: string | null;
 }
 
 // One shared template set for both notification directions (ROADMAP
@@ -20,8 +22,12 @@ export interface RequestEventMessageParams {
 export function buildRequestEventMessage(params: RequestEventMessageParams): { subject: string; body: string } {
   const t = createTranslator({ locale: params.locale, messages: params.messages, namespace: "requests" });
   const prefix = params.forOwner ? "notifyOwner" : "notifyTenant";
+  const note = params.note?.trim();
+  const withNote = note && !params.forOwner && params.event === "rejected";
   return {
     subject: t(`${prefix}_${params.event}Subject`, { title: params.title }),
-    body: t(`${prefix}_${params.event}Body`, { title: params.title }),
+    body: withNote
+      ? t(`${prefix}_${params.event}WithNoteBody`, { title: params.title, note })
+      : t(`${prefix}_${params.event}Body`, { title: params.title }),
   };
 }

@@ -584,6 +584,8 @@
     "withdraw": "Visszavonás",
     "resolve": "Megoldottnak jelölés",
     "reject": "Elutasítás",
+    "rejectNoteLabel": "Megjegyzés a bérlőnek (nem kötelező) — bekerül a beszélgetésbe és az értesítésébe.",
+    "rejectConfirm": "Elutasítás megerősítése",
     "threadTitle": "Beszélgetés",
     "replyPlaceholder": "Írj választ…",
     "reply": "Válasz",
@@ -602,6 +604,7 @@
     "notifyTenant_resolvedBody": "A(z) „{title}” kérésed megoldottként lett megjelölve.",
     "notifyTenant_rejectedSubject": "Kérés elutasítva: {title}",
     "notifyTenant_rejectedBody": "A(z) „{title}” kérésedet elutasították. A részletekért keresd a bérbeadót.",
+    "notifyTenant_rejectedWithNoteBody": "A(z) „{title}” kérésedet elutasították. A bérbeadó megjegyzése: {note}",
     "changeRequestDiffTitle": "Javasolt módosítás: {field}",
     "changeRequestOld": "Jelenlegi",
     "changeRequestNew": "Javasolt",
@@ -971,7 +974,8 @@
     "endBeforeStart": "A kiköltözés napja a bérlet kezdete előtti.",
     "noProRataCredit": "Nincs hozzáadható időarányos jóváírás (nincs bérleti díj, vagy az elszámolás már ki van állítva).",
     "offboardingIncomplete": "A bérlet lezárása előtt zárj le vagy hagyj ki minden lépést.",
-    "noDepositToApply": "Nincs felhasználható kaució."
+    "noDepositToApply": "Nincs felhasználható kaució.",
+    "requestNotOpen": "Ez a kérés már nincs nyitott állapotban."
   },
   "tenancyPicker": {
     "label": "Bérlet"
