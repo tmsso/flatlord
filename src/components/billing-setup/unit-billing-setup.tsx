@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { createChargeType } from "@/server/billing-setup/create-charge-type";
 import { createMeter } from "@/server/billing-setup/create-meter";
 import { retireMeter } from "@/server/billing-setup/retire-meter";
+import { replaceMeter } from "@/server/billing-setup/replace-meter";
 import {
   BILLING_SETUP_ERRORS,
   CHARGE_PRESETS,
@@ -39,6 +40,8 @@ export interface MeterRow {
   baseValue: number;
   installedAt: string;
   removedAt: string | null;
+  // B-52: the meter this one replaced, if any (onboarding doesn't load it).
+  replacesMeterId?: string | null;
 }
 
 const showUnit = (u: string | null) => (u === "m3" ? "m³" : (u ?? ""));
@@ -59,6 +62,10 @@ function useErrorMessage() {
         return t("error_removedBeforeInstalled");
       case BILLING_SETUP_ERRORS.readingsAfterRemoval:
         return t("error_readingsAfterRemoval");
+      case BILLING_SETUP_ERRORS.finalRequired:
+        return t("error_finalRequired");
+      case BILLING_SETUP_ERRORS.finalBelowPrevious:
+        return t("error_finalBelowPrevious");
       default:
         return t("errorGeneric");
     }
@@ -159,9 +166,13 @@ export function UnitBillingSetup({
               <TableBody>
                 {meters.map((m) => {
                   const ct = byId.get(m.chargeTypeId);
+                  const replaced = m.replacesMeterId ? meters.find((o) => o.id === m.replacesMeterId) : undefined;
                   return (
                     <TableRow key={m.id}>
-                      <TableCell>{m.label}</TableCell>
+                      <TableCell>
+                        {m.label}
+                        {replaced && <span className="block text-xs text-muted-foreground">{t("replacesLabel", { label: replaced.label })}</span>}
+                      </TableCell>
                       <TableCell>{ct ? label(ct) : "—"}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {format.number(m.baseValue)} {showUnit(ct?.unit ?? null)}
@@ -177,7 +188,12 @@ export function UnitBillingSetup({
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {!m.removedAt && <RetireMeterDialog meter={m} onSaved={() => router.refresh()} />}
+                        {!m.removedAt && (
+                          <div className="flex justify-end gap-1">
+                            <ReplaceMeterDialog meter={m} onSaved={() => router.refresh()} />
+                            <RetireMeterDialog meter={m} onSaved={() => router.refresh()} />
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -478,6 +494,112 @@ function RetireMeterDialog({ meter, onSaved }: { meter: MeterRow; onSaved: () =>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor={`retire-${meter.id}`}>{t("removedAtLabel")}</Label>
             <Input id={`retire-${meter.id}`} name="removedAt" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <Button type="submit" disabled={isPending}>
+              {tc("save")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// B-52: one dialog for the whole swap (see replace-meter.ts). When the
+// chosen date falls in a month that already has a statement, the server
+// answers with the earliest open date; the dialog moves the date there and
+// keeps the originally entered one as the physical swap date for the audit
+// trail (D-46).
+function ReplaceMeterDialog({ meter, onSaved }: { meter: MeterRow; onSaved: () => void }) {
+  const t = useTranslations("billingSetup");
+  const tc = useTranslations("common");
+  const format = useFormatter();
+  const errorMessage = useErrorMessage();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [actualSwapDate, setActualSwapDate] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const parseNumber = (raw: FormDataEntryValue | null) => {
+    const text = String(raw ?? "").trim().replace(",", ".");
+    if (text === "") return null;
+    const n = Number(text);
+    return Number.isFinite(n) && n >= 0 ? n : NaN;
+  };
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const finalValue = parseNumber(data.get("finalValue"));
+    const newBaseValue = parseNumber(data.get("newBaseValue"));
+    const newLabel = String(data.get("newLabel") ?? "").trim();
+    if (!date) return setError(t("dateRequired"));
+    if (!newLabel) return setError(t("labelRequired"));
+    if (newBaseValue == null || Number.isNaN(newBaseValue) || Number.isNaN(finalValue)) return setError(t("baseValueInvalid"));
+    setError(null);
+    startTransition(async () => {
+      try {
+        const result = await replaceMeter({ meterId: meter.id, replacedAt: date, finalValue, newLabel, newBaseValue, actualSwapDate });
+        if (!result.ok) {
+          if (result.error === BILLING_SETUP_ERRORS.replacementMonthBilled && result.earliestDate) {
+            setActualSwapDate((prev) => prev ?? date);
+            setDate(result.earliestDate);
+            return setError(
+              t("error_replacementMonthBilled", {
+                date: format.dateTime(new Date(`${result.earliestDate}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }),
+              }),
+            );
+          }
+          return setError(errorMessage(result.error));
+        }
+        toast.success(tc("save"));
+        setOpen(false);
+        onSaved();
+      } catch (err) {
+        setError(errorMessage(err));
+      }
+    });
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) {
+          setError(null);
+          setDate(new Date().toISOString().slice(0, 10));
+          setActualSwapDate(null);
+        }
+      }}
+    >
+      <DialogTrigger render={<Button type="button" variant="ghost" size="sm" />}>{t("replace")}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {t("replaceTitle")} — {meter.label}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <p className="text-[13px] text-muted-foreground">{t("replaceHint")}</p>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`replace-date-${meter.id}`}>{t("replacedAtLabel")}</Label>
+            <Input id={`replace-date-${meter.id}`} name="replacedAt" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`replace-final-${meter.id}`}>{t("finalValueLabel")}</Label>
+            <Input id={`replace-final-${meter.id}`} name="finalValue" inputMode="decimal" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`replace-label-${meter.id}`}>{t("newLabelLabel")}</Label>
+            <Input id={`replace-label-${meter.id}`} name="newLabel" defaultValue={meter.label} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`replace-base-${meter.id}`}>{t("newBaseValueLabel")}</Label>
+            <Input id={`replace-base-${meter.id}`} name="newBaseValue" inputMode="decimal" />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>

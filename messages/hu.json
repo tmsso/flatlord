@@ -859,7 +859,7 @@
     "removedAtLabel": "Üzemen kívül ettől",
     "retire": "Leszerelés",
     "retireTitle": "Mérőóra leszerelése",
-    "retireHint": "A leolvasások megmaradnak; e nap után a mérő nem számlázódik. Cserénél szereld le, és add hozzá az újat a saját kezdő óraállásával.",
+    "retireHint": "A leolvasások megmaradnak; e nap után a mérő nem számlázódik. Új óra beszerelésénél inkább a Csere gombot használd.",
     "noMeters": "Még nincs mérőóra.",
     "noMeterableTypes": "Előbb adj hozzá egy mért díjtételt (pl. Áram).",
     "colName": "Megnevezés",
@@ -880,7 +880,18 @@
     "nameRequired": "Adj meg egy megnevezést.",
     "labelRequired": "Adj meg egy megnevezést.",
     "baseValueInvalid": "Adj meg 0 vagy nagyobb óraállást.",
-    "dateRequired": "Válassz dátumot."
+    "dateRequired": "Válassz dátumot.",
+    "replace": "Csere",
+    "replaceTitle": "Mérőóra cseréje",
+    "replaceHint": "Rögzíti a régi óra záró állását, kivezeti, és ugyanarra a napra felveszi az új órát. A csere hónapja mindkét óra alapján kerül elszámolásra.",
+    "replacedAtLabel": "Csere dátuma",
+    "finalValueLabel": "Régi óra — záró állás",
+    "newLabelLabel": "Új óra — megnevezés",
+    "newBaseValueLabel": "Új óra — kezdő állás",
+    "replacesLabel": "{label} helyett",
+    "error_replacementMonthBilled": "Arra a hónapra már van elszámolás, így a záró állás soha nem kerülne elszámolásra. A dátumot a legkorábbi nyitott napra állítottuk: {date}. Fogyasztás nem vész el — a teljes különbözet abban a hónapban kerül elszámolásra.",
+    "error_finalRequired": "Add meg a régi óra záró állását.",
+    "error_finalBelowPrevious": "A záró állás kisebb, mint az óra utolsó ellenőrzött állása."
   },
   "rates": {
     "title": "Díjszabás",
