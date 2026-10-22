@@ -31,7 +31,7 @@ export default async function AdminLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const t = await getTranslations("nav");
   const supabase = await createClient();
-  const profile = await getCurrentProfile(supabase);
+  const profile = await getCurrentProfile(supabase, { verify: "claims" });
   const modules = await getOwnerModules(supabase, profile.userId);
   const inactiveModules = OPTIONAL_MODULES.filter((m) => !modules.has(m));
 
