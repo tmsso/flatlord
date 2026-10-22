@@ -10,21 +10,34 @@ export interface CurrentProfile {
 // across the M4 server actions (record-payment.ts, submit-meter-reading.ts,
 // verify-meter-reading.ts) — those aren't refactored to use this (out of
 // scope for a UI milestone), but new pages use it going forward.
+//
+// B-03: layouts pass { verify: "claims" } — the proxy has already checked
+// the session on this request, so a local JWT verification is enough to
+// render. Server actions keep the default getUser() round trip (defence in
+// depth for writes).
 export async function getCurrentProfile(
   supabase: Awaited<ReturnType<typeof createClient>>,
+  options: { verify?: "user" | "claims" } = {},
 ): Promise<CurrentProfile> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  let userId: string | undefined;
+  if (options.verify === "claims") {
+    const { data } = await supabase.auth.getClaims();
+    userId = data?.claims.sub;
+  } else {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id;
+  }
+  if (!userId) throw new Error("Not authenticated");
 
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("person_id, role")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
   if (error) throw new Error(error.message);
   if (!profile.person_id) throw new Error("Caller has no person record");
 
-  return { userId: user.id, personId: profile.person_id, role: profile.role };
+  return { userId, personId: profile.person_id, role: profile.role };
 }
