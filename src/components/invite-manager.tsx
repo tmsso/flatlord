@@ -55,8 +55,8 @@ export function InviteManager({ invites }: { invites: Invite[] }) {
         setLastCreated({ email, role });
         setEmail("");
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -68,8 +68,8 @@ export function InviteManager({ invites }: { invites: Invite[] }) {
       try {
         await revokeInvite({ inviteId: id });
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       } finally {
         setRevokingId(null);
       }

@@ -65,8 +65,8 @@ export function IssueNoticeDialog({ tenancyOptions }: { tenancyOptions: { id: st
         setRequiresAck(false);
         setFileName(null);
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

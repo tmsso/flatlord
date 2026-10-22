@@ -15,6 +15,7 @@ import { isPersonEditableField, PERSON_EDITABLE_FIELDS } from "@/lib/field-edita
 import { isLocale, defaultLocale } from "@/i18n/config";
 import { loadMessages } from "@/lib/notifications/load-messages";
 import { createTranslator } from "next-intl";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const SubmitFieldEditSchema = z.object({
   fieldName: z.string().refine(isPersonEditableField, "Unknown field"),
@@ -28,7 +29,9 @@ const SubmitFieldEditSchema = z.object({
 // and admin-driven edits go through the existing admin persons CRUD UI,
 // which is unrestricted by field_policies entirely (CLAUDE.md §3.5 is a
 // tenant-visibility concept — the owner can always edit anything).
-export async function submitFieldEdit(input: z.infer<typeof SubmitFieldEditSchema>) {
+export async function submitFieldEdit(
+  input: z.infer<typeof SubmitFieldEditSchema>,
+): Promise<ActionResult<{ applied: true } | { applied: false; requestId: string }>> {
   const parsed = SubmitFieldEditSchema.parse(input);
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
@@ -96,7 +99,7 @@ export async function submitFieldEdit(input: z.infer<typeof SubmitFieldEditSchem
     });
 
     await notifyFieldEdit({ propertyId, fieldLabel, personName });
-    return { applied: true as const };
+    return { ok: true, applied: true as const };
   }
 
   // approval_required: one pending request per field at a time — a second
@@ -110,7 +113,7 @@ export async function submitFieldEdit(input: z.infer<typeof SubmitFieldEditSchem
     .eq("category", "personal_data_change")
     .contains("change_payload", { entityType: "person", entityId: profile.personId, fieldName: parsed.fieldName })
     .maybeSingle();
-  if (pending) throw new Error("A change request for this field is already pending");
+  if (pending) return fail("changeAlreadyPending");
 
   if (!tenancy) throw new Error("No active tenancy found");
 
@@ -149,5 +152,5 @@ export async function submitFieldEdit(input: z.infer<typeof SubmitFieldEditSchem
   });
 
   await notifyRequestEvent({ requestId: request.id, event: "opened", actorRole: "tenant" });
-  return { applied: false as const, requestId: request.id as string };
+  return { ok: true, applied: false as const, requestId: request.id as string };
 }

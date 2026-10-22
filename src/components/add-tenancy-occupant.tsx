@@ -42,8 +42,8 @@ export function AddTenancyOccupant({ tenancyId, persons }: { tenancyId: string; 
         toast.success(tc("save"));
         setOpen(false);
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

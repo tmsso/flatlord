@@ -95,6 +95,7 @@ function daysBetween(from: string, to: string): number {
 // note on the left; payments, delivery log and history on the right.
 export function StatementDetail({ statement, lineItems, payments, deliveries, today, waLink, canSendEmail }: StatementDetailProps) {
   const t = useTranslations("statements");
+  const tErr = useTranslations("actionErrors");
   const format = useFormatter();
   const router = useRouter();
   const [isIssuing, startIssuing] = useTransition();
@@ -167,8 +168,8 @@ export function StatementDetail({ statement, lineItems, payments, deliveries, to
         await issueStatement({ statementId: statement.id });
         toast.success(t("issueSuccess"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -179,8 +180,8 @@ export function StatementDetail({ statement, lineItems, payments, deliveries, to
         await discardDraftStatement({ statementId: statement.id });
         toast.success(t("discardSuccess"));
         router.push("/statements");
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -188,10 +189,11 @@ export function StatementDetail({ statement, lineItems, payments, deliveries, to
   function handleSendEmail() {
     startSendingEmail(async () => {
       try {
-        await sendAmountDueEmail({ statementId: statement.id });
-        toast.success(t("sendEmailSuccess"));
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+        const result = await sendAmountDueEmail({ statementId: statement.id });
+        if (result.ok) toast.success(t("sendEmailSuccess"));
+        else toast.error(tErr(result.error));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
       // Refresh either way: a failed send is logged too.
       router.refresh();
@@ -453,8 +455,8 @@ function RecordPaymentDialog({ statementId, variant = "default", size = "default
         setOpen(false);
         reset();
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

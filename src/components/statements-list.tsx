@@ -44,6 +44,7 @@ export function StatementsList({
   const t = useTranslations("statements");
   const format = useFormatter();
   const tc = useTranslations("common");
+  const tErr = useTranslations("actionErrors");
   const router = useRouter();
   const [draftMonth, setDraftMonth] = useState(currentMonthStart());
   const [error, setError] = useState<string | null>(null);
@@ -54,12 +55,16 @@ export function StatementsList({
     setError(null);
     startTransition(async () => {
       try {
-        const { statementId } = await createDraftStatement({ tenancyId: activeTenancyId, periodMonth: draftMonth });
-        router.push(`/statements/${statementId}`);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : t("errorGeneric");
-        setError(message);
-        toast.error(message);
+        const result = await createDraftStatement({ tenancyId: activeTenancyId, periodMonth: draftMonth });
+        if (!result.ok) {
+          setError(tErr(result.error));
+          toast.error(tErr(result.error));
+          return;
+        }
+        router.push(`/statements/${result.statementId}`);
+      } catch {
+        setError(t("errorGeneric"));
+        toast.error(t("errorGeneric"));
       }
     });
   }

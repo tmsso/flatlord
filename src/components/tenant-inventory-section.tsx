@@ -58,8 +58,8 @@ function ReconfirmationRow({
         );
         toast.success(t("responseRecorded"));
         onResponded();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

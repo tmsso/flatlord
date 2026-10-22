@@ -65,8 +65,8 @@ export function PropertyCreateForm({
         });
         if (onCreated) onCreated(id);
         else router.push(`/properties/${id}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { logAudit } from "@/server/audit/log";
 import { extractPdfText } from "@/lib/contracts/extract-pdf-text";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const CreateContractSchema = z.object({
   tenancyId: z.string().uuid(),
@@ -26,7 +27,7 @@ const CreateContractSchema = z.object({
 export async function createContract(
   input: z.infer<typeof CreateContractSchema>,
   file: File,
-) {
+): Promise<ActionResult<{ id: string }>> {
   const parsed = CreateContractSchema.parse(input);
   const supabase = await createClient();
   const { personId } = await requireOwnerPersonId(supabase);
@@ -43,7 +44,7 @@ export async function createContract(
       .single();
     if (predecessorError) throw new Error(predecessorError.message);
     if (predecessor.tenancy_id !== parsed.tenancyId) {
-      throw new Error("predecessorTenancyMismatch");
+      return fail("predecessorTenancyMismatch");
     }
     version = predecessor.version + 1;
   }
@@ -100,5 +101,5 @@ export async function createContract(
     after: { tenancyId: parsed.tenancyId, version, status: "draft" },
   });
 
-  return { id: contract.id as string };
+  return { ok: true, id: contract.id as string };
 }

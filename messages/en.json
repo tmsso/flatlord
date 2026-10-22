@@ -954,6 +954,18 @@
     "addTenant": "+ Add a tenant",
     "addFlatGuided": "Guided setup"
   },
+  "actionErrors": {
+    "draftExists": "A statement for this month already exists.",
+    "readingBelowPrevious": "The new reading is lower than the previous verified reading.",
+    "facilityNeedsOwner": "Only an item owned by the owner can become a facility. Set its owner to “Owner” first, save, then convert it.",
+    "subsetRequiresItems": "Pick at least one item for a partial reconfirmation.",
+    "noItemsInScope": "There are no active items to reconfirm.",
+    "predecessorTenancyMismatch": "The previous contract belongs to a different tenancy.",
+    "onlyDraftCanActivate": "Only a draft contract can be activated.",
+    "nothingOutstanding": "Nothing is outstanding on this statement.",
+    "tenantHasNoEmail": "The tenant has no contact email on file.",
+    "changeAlreadyPending": "A change request for this field is already pending."
+  },
   "tenancyPicker": {
     "label": "Tenancy"
   }

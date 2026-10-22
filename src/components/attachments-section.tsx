@@ -68,8 +68,8 @@ export function AttachmentsSection({
         setOpen(false);
         form.reset();
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -80,8 +80,8 @@ export function AttachmentsSection({
         await deleteAttachment({ id });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

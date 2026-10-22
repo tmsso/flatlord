@@ -33,6 +33,7 @@ export interface ContractRow {
 export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; contracts: ContractRow[] }) {
   const t = useTranslations("contracts");
   const tc = useTranslations("common");
+  const tErr = useTranslations("actionErrors");
   const format = useFormatter();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -63,8 +64,8 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
     startSearching(async () => {
       try {
         setHits(await searchContractText({ tenancyId, query }));
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -116,7 +117,7 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
     }
     startTransition(async () => {
       try {
-        await createContract(
+        const result = await createContract(
           {
             tenancyId,
             predecessorContractId: latest?.id ?? null,
@@ -129,13 +130,17 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
           },
           file,
         );
+        if (!result.ok) {
+          setError(tErr(result.error));
+          return;
+        }
         toast.success(tc("save"));
         setOpen(false);
         setParseResult(null);
         form.reset();
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -143,11 +148,15 @@ export function ContractsSection({ tenancyId, contracts }: { tenancyId: string; 
   function handleActivate(contractId: string) {
     startTransition(async () => {
       try {
-        await activateContract({ contractId });
+        const result = await activateContract({ contractId });
+        if (!result.ok) {
+          toast.error(tErr(result.error));
+          return;
+        }
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

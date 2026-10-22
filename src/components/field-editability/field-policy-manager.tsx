@@ -38,8 +38,8 @@ export function FieldPolicyManager({
         await setFieldPolicy({ entityType: "person", fieldName, policy, propertyId });
         toast.success(tf("policySaved"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tf("errorGeneric"));
+      } catch {
+        toast.error(tf("errorGeneric"));
       } finally {
         setSavingField(null);
       }

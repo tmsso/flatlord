@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { logAudit } from "@/server/audit/log";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const ActivateContractSchema = z.object({
   contractId: z.string().uuid(),
@@ -22,7 +23,7 @@ const ActivateContractSchema = z.object({
 // them leaves inconsistent state; contracts_one_active_per_tenancy
 // (migration 0015) at least guarantees it can never be *two* active
 // versions, only possibly zero.
-export async function activateContract(input: z.infer<typeof ActivateContractSchema>) {
+export async function activateContract(input: z.infer<typeof ActivateContractSchema>): Promise<ActionResult<{ id: string }>> {
   const parsed = ActivateContractSchema.parse(input);
   const supabase = await createClient();
   const { personId } = await requireOwnerPersonId(supabase);
@@ -33,7 +34,7 @@ export async function activateContract(input: z.infer<typeof ActivateContractSch
     .eq("id", parsed.contractId)
     .single();
   if (contractError) throw new Error(contractError.message);
-  if (contract.status !== "draft") throw new Error("onlyDraftCanActivate");
+  if (contract.status !== "draft") return fail("onlyDraftCanActivate");
 
   const { data: currentActive } = await supabase
     .from("contracts")
@@ -78,5 +79,5 @@ export async function activateContract(input: z.infer<typeof ActivateContractSch
     after: { status: "active", tenancyId: contract.tenancy_id },
   });
 
-  return { id: contract.id as string };
+  return { ok: true, id: contract.id as string };
 }

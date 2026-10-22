@@ -75,8 +75,8 @@ export function DepositSection({ tenancyId, transactions }: { tenancyId: string;
         form.reset();
         setType("paid");
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
