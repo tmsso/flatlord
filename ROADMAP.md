@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-10-22, after the long batch)
+## Status at a glance (2026-10-23, after the long batch)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -24,10 +24,12 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 ### Admin actions pending (only the admin can do these — sessions must not)
 
 - [x] ~~Migrate prod `0035`–`0036`, merge #85 → #86~~ — done 2026-10-22 (migrate-prod run `39824691967`, then merged).
-- [ ] **Sign-in email on prod (B-54)**: custom SMTP via Resend configured by the owner 2026-10-22 (domain `tmsso.com` verified in Resend). Still open: Supabase prod Auth URL configuration (add `https://flatlord.tmsso.com/**` to Redirect URLs, keep the vercel.app entries, then switch the Site URL) and one real login link sent to a non-team inbox (B-54's "done means").
+- [ ] **Sign-in email on prod (B-54)**: custom SMTP via Resend configured by the owner 2026-10-22 (domain `tmsso.com` verified in Resend). Redirect URL `https://flatlord.tmsso.com/**` added 2026-10-22. Still open: Site URL switch confirmed, and one real login link sent to an invited non-team inbox (B-54's "done means").
 - [ ] **Confirm D-40** (field-change approvals stay reachable with the requests module off) — built default.
+- [ ] **Merge the 2026-10-23 chain** #99 → #100 → #101 → docs (B-41, B-52, B-03): run `migrate-prod.yml --ref feat/b03-proxy-claims` (`0037`, additive) first, then the merge script from the hand-off. Afterwards enable the access-token hook (Authentication → Hooks → Customize Access Token → `public.custom_access_token_hook`) on dev and prod; until then the proxy falls back to the profiles query. **Do not revoke the legacy JWT secret** (D-47).
+- [ ] **Confirm D-46** (meter replacement can't be dated in a billed month; earliest open date + physical date in audit) — built default, B-52.
 - [ ] **Confirm D-44 / D-45** (offboarding wizard state in `audit_log`, final-statement and pro-rata rules, tenant lockout; "settle from deposit" also records the payment) — built defaults, B-43.
-- [ ] **Tenant email is live** since 2026-10-22: prod sends from `noreply@tmsso.com`, so payment-due and meter-reading reminders now really reach the tenant. Keep, or point `RESEND_FROM_EMAIL` back at the sandbox sender until the Phase 1 acceptance run.
+- [x] ~~Tenant email live~~ — 2026-10-22: sender kept; the owner pointed the real tenant's `contact_email` on prod at their own alias until the acceptance run (read-only check matched).
 - [x] ~~Second-owner readiness chain #75 → #82~~ — migrated and merged 2026-10-14 (owner-visibility check passed).
 
 - [x] ~~Migrate prod (`0026`–`0031`) and merge the 2026-10-11 chain #57–#73~~ — done 2026-10-12 by the owner (migrate-prod run `38216819825` green, then the merge script). `0029`–`0031` are now frozen (D-30).
