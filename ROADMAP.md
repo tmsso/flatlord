@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-10-15, after the long batch)
+## Status at a glance (2026-10-22, after the long batch)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -13,7 +13,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 | 2 | Documents, contract, inventory | Shipped. Scanned-contract OCR → Phase 5; move-in/out snapshots → `BACKLOG.md` B-13 |
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete. `CRON_SECRET` set 2026-10-14; overdue-alert storm fixed 2026-10-15 (PR #84); scheduled-run health tracked by B-50 |
-| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline); module switches (B-45, PR #80); onboarding wizard (B-42, PRs #88–#91, 2026-10-15); remainder open |
+| 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline); module switches (B-45, PR #80); onboarding wizard (B-42, PRs #88–#91); offboarding wizard (B-43, PR #97, 2026-10-22); remainder open |
 | 4c | **UI fidelity pass** (new, 2026-09-15) | **Closed 2026-10-12** — items 1–6 shipped and live (item 6: PRs #68–#72, merged 2026-10-12); owner visual sign-off given 2026-10-12 |
 | 5 | AI features + expansion | Not started |
 
@@ -23,9 +23,11 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 
 ### Admin actions pending (only the admin can do these — sessions must not)
 
-- [ ] **Migrate prod `0035`–`0036`, then merge #85 → #86** (long batch 2026-10-15): `migrate-prod.yml --ref feat/b50-cron-run-log` (the top of the two), then merge #85, retarget #86 to `main`, merge #86 — script in the batch handoff. Both migrations are additive; the code on `main` doesn't need them.
-- [ ] **Sign-in email on prod (B-54)**: check whether Supabase Auth on prod has custom SMTP (Authentication → Emails) and whether the Google provider is on. Without one of them an invited second owner or tenant can't receive a login link.
+- [x] ~~Migrate prod `0035`–`0036`, merge #85 → #86~~ — done 2026-10-22 (migrate-prod run `39824691967`, then merged).
+- [ ] **Sign-in email on prod (B-54)**: custom SMTP via Resend configured by the owner 2026-10-22 (domain `tmsso.com` verified in Resend). Still open: Supabase prod Auth URL configuration (add `https://flatlord.tmsso.com/**` to Redirect URLs, keep the vercel.app entries, then switch the Site URL) and one real login link sent to a non-team inbox (B-54's "done means").
 - [ ] **Confirm D-40** (field-change approvals stay reachable with the requests module off) — built default.
+- [ ] **Confirm D-44 / D-45** (offboarding wizard state in `audit_log`, final-statement and pro-rata rules, tenant lockout; "settle from deposit" also records the payment) — built defaults, B-43.
+- [ ] **Tenant email is live** since 2026-10-22: prod sends from `noreply@tmsso.com`, so payment-due and meter-reading reminders now really reach the tenant. Keep, or point `RESEND_FROM_EMAIL` back at the sandbox sender until the Phase 1 acceptance run.
 - [x] ~~Second-owner readiness chain #75 → #82~~ — migrated and merged 2026-10-14 (owner-visibility check passed).
 
 - [x] ~~Migrate prod (`0026`–`0031`) and merge the 2026-10-11 chain #57–#73~~ — done 2026-10-12 by the owner (migrate-prod run `38216819825` green, then the merge script). `0029`–`0031` are now frozen (D-30).
@@ -34,7 +36,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - [x] ~~Read-only forgery check for `0027`'s hole~~ — done 2026-10-12 by the owner: the full query returned **0 rows** (the hole was never used).
 - [x] ~~Restore drill (issue #40)~~ — done 2026-10-12 by a session on the owner's request: `backup-2026-10-12` restored into a throwaway container, exact row parity on all 30 `public`+`drizzle` tables, `private` schema functions present (see `docs/backup-restore.md`).
 - [ ] **`CRON_SECRET`** — set in Vercel prod by the owner 2026-10-14. Left open until scheduled runs are proven healthy (B-50): the likely 504 cause (overdue alert re-firing daily) is fixed and live (PR #84, 2026-10-15); once `0036` is on prod, `cron_runs` + the health check's `cron-last-run` job record every scheduled run. Tenant-addressed email still needs the domain (next item).
-- [ ] **Buy a domain** (`BACKLOG.md` B-01 — Cloudflare Registrar or Porkbun, not Vercel's registrar) and verify it in Resend. Unblocks real tenant email, the Phase 1 acceptance run, and a non-`vercel.app` URL. The one purchase this review recommends.
+- [x] ~~Buy a domain~~ — `tmsso.com` (Cloudflare), verified in Resend 2026-10-22; app live at `https://flatlord.tmsso.com` (B-01, see delivery log). `flatlord.vercel.app` keeps working.
 - [ ] **Phase 1 real acceptance run**: one real statement walked photo → verification → statement → email/WhatsApp → payment, total identical to the sheet. Confirm-first, real person involved.
 - [ ] **Retire the Google Sheet** to read-only after that run.
 - [ ] **Deposit-ledger real backfill** from `/private` (writes real financial data to prod).
@@ -51,7 +53,8 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - **Ad-hoc notes** on tenancy / property / person — undated, dated, period-based. Reuse `logAudit()` + field-policy machinery, not a fresh audit path. Joins the event timeline when built. **D-06 is tentative** (admin-only + audited) — present a short design note and get a go-ahead before the migration. **Done means:** create/edit/void a note of each flavour as admin; timeline shows it; tenant visibility matches the decision.
 - **Taxation module** — superseded and widened by `BACKLOG.md` **B-44** (owner request 2026-10-12): taxation basis, cost-deduction method, rate, period aggregates and year-end projection, Hungarian defaults. Ships behind the module switch (B-45, off by default).
 - ~~Module switches (B-45)~~ — built in PR #80 (`0033`, D-37), merged + prod-migrated 2026-10-14; loose ends in B-48.
-- ~~Onboarding wizard (B-42)~~ — `/onboarding`, PRs #88–#91 (2026-10-15), dev-verified; prod use depends on B-54 (sign-in email). **Offboarding wizard** (`B-43`) still open.
+- ~~Onboarding wizard (B-42)~~ — `/onboarding`, PRs #88–#91 (2026-10-15), dev-verified; prod use depends on B-54 (sign-in email).
+- ~~Offboarding wizard (B-43)~~ — `/offboarding`, PR #97 (2026-10-22), dev-verified; D-44/D-45 to confirm. Move-in/out photo snapshots (B-13) still open — the wizard's handover step is a note for now.
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).
 - ~~Avatars~~ — moved back to `IDEAS.md` (cost/benefit).
 
