@@ -7,7 +7,7 @@ Rewritten 2026-10-23 at the end of the "B-41 / B-52 / B-03" long batch (PRs #99�
 ## Preconditions to check first
 
 1. Is the 2026-10-23 chain merged (#99 → #100 → #101 → docs) and is prod at `0037`? If not, remind the owner — don't build on the chain's branches.
-2. Access-token hook enabled on dev (and prod)? Re-run `tests/e2e/verify-b03.local.ts` (git-excluded; recreate from PR #101's description if missing) and expect a `user_role` claim.
+2. Access-token hook enabled on dev (and prod)? It is optional (D-47). If enabled, re-run `tests/e2e/verify-b03.local.ts` (git-excluded, exists only on the owner's machine) and expect a `user_role` claim.
 3. `cron_runs` on prod: any scheduled run not `ok`? That outranks everything below (B-50 needs five consecutive ok runs).
 4. B-54 real send, D-40, D-44, D-45, D-46 confirmed or changed by the owner?
 5. Ask about ship autonomy and whether `gh pr merge` is allowed (classifier-blocked on 2026-10-23; allowed on 2026-10-22).
