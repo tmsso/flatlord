@@ -54,6 +54,11 @@ export const properties = pgTable(
     paymentInstructions: text("payment_instructions"),
     lettingMode: lettingModeEnum("letting_mode"),
     active: boolean("active").notNull().default(true),
+    // auth.uid() of the creating session, forced by a BEFORE INSERT trigger
+    // (0035, B-47) — not client-settable. Only the creator may add the
+    // first ownership row of an unowned root property; NULL (service-role
+    // seeds/imports, rows before 0035) means nobody can bootstrap-claim it.
+    createdBy: uuid("created_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
