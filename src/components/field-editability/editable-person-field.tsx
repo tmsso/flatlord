@@ -31,6 +31,7 @@ export interface EditablePersonFieldProps {
 // same editor but routes through a pending change request instead.
 export function EditablePersonField({ fieldKey, label, value, policy, inputType, masked, pendingNewValue }: EditablePersonFieldProps) {
   const tf = useTranslations("fieldEditability");
+  const tErr = useTranslations("actionErrors");
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? "");
@@ -47,11 +48,15 @@ export function EditablePersonField({ fieldKey, label, value, policy, inputType,
           value: draft.trim() || null,
           note: policy === "approval_required" ? note.trim() || null : undefined,
         });
+        if (!result.ok) {
+          toast.error(tErr(result.error));
+          return;
+        }
         toast.success(result.applied ? tf("editApplied") : tf("editSubmittedForApproval"));
         setEditing(false);
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : tf("errorGeneric"));
+      } catch {
+        toast.error(tf("errorGeneric"));
       }
     });
   }

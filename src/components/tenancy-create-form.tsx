@@ -87,8 +87,8 @@ export function TenancyCreateForm({
         });
         if (onCreated) onCreated(id);
         else router.push(`/tenancies/${id}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { resolveAmountDueContext } from "@/server/notifications/resolve-amount-due-context";
 import { logStatementDelivery } from "@/server/billing/log-statement-delivery";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const SendAmountDueEmailSchema = z.object({
   statementId: z.string().uuid(),
@@ -16,15 +17,15 @@ const SendAmountDueEmailSchema = z.object({
 // sending domain is a separate, later decision (ROADMAP.md Phase 1
 // status). The wa.me button in send-amount-due-buttons.tsx has no such
 // restriction and works today regardless.
-export async function sendAmountDueEmail(input: { statementId: string }) {
+export async function sendAmountDueEmail(input: { statementId: string }): Promise<ActionResult> {
   const parsed = SendAmountDueEmailSchema.parse(input);
   const supabase = await createClient();
   const { personId } = await requireOwnerPersonId(supabase);
 
   const context = await resolveAmountDueContext(supabase, parsed.statementId);
-  if (!context) throw new Error("Nothing outstanding on this statement");
+  if (!context) return fail("nothingOutstanding");
   const { subject, body, tenantEmail } = context;
-  if (!tenantEmail) throw new Error("Tenant has no contact email on file");
+  if (!tenantEmail) return fail("tenantHasNoEmail");
 
   const resend = createResendClient();
   const { data, error } = await resend.emails.send({

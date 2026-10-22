@@ -86,8 +86,8 @@ export function PropertyDetail({ property, childProperties, owners, inhabitants,
         });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

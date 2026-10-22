@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { evaluateMeterReadingEntry } from "@/lib/billing/evaluate-meter-reading-entry";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const SubmitMeterReadingSchema = z.object({
   meterId: z.string().uuid(),
@@ -28,7 +29,7 @@ export async function submitMeterReading(input: {
   enteredValue: number;
   photoPath?: string;
   override?: boolean;
-}) {
+}): Promise<ActionResult> {
   const parsed = SubmitMeterReadingSchema.parse(input);
   const supabase = await createClient();
 
@@ -80,7 +81,8 @@ export async function submitMeterReading(input: {
     callerRole: callerProfile.role,
     override: parsed.override,
   });
-  if (!evaluation.allowed) throw new Error(evaluation.reason);
+  // The English reason stays in the server log; the client gets a code.
+  if (!evaluation.allowed) return fail("readingBelowPrevious");
 
   const { error } = await supabase.from("meter_readings").insert({
     meter_id: parsed.meterId,
@@ -93,4 +95,5 @@ export async function submitMeterReading(input: {
     source: callerProfile.role === "owner" ? "admin" : "tenant",
   });
   if (error) throw new Error(error.message);
+  return { ok: true };
 }

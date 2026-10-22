@@ -64,6 +64,7 @@ export function MeterVerificationPanel({
   submittedAt?: string | null;
 }) {
   const t = useTranslations("meterReadings");
+  const tErr = useTranslations("actionErrors");
   const format = useFormatter();
   const router = useRouter();
   const [zoom, setZoom] = useState(1);
@@ -127,8 +128,8 @@ export function MeterVerificationPanel({
         toast.success(t("verifySuccess"));
         router.refresh();
         advanceToNextPending();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -141,8 +142,8 @@ export function MeterVerificationPanel({
         toast.success(t("rejectSuccess"));
         router.refresh();
         advanceToNextPending();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -150,10 +151,14 @@ export function MeterVerificationPanel({
   function handleDraftStatement() {
     startDrafting(async () => {
       try {
-        const { statementId } = await createDraftStatement({ tenancyId, periodMonth: `${periodMonth}-01` });
-        router.push(`/statements/${statementId}`);
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+        const result = await createDraftStatement({ tenancyId, periodMonth: `${periodMonth}-01` });
+        if (!result.ok) {
+          toast.error(tErr(result.error));
+          return;
+        }
+        router.push(`/statements/${result.statementId}`);
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

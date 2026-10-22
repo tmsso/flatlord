@@ -6,7 +6,6 @@ import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 import { createInventoryItem } from "@/server/inventory/create-inventory-item";
 import { updateInventoryItem } from "@/server/inventory/update-inventory-item";
-import { FACILITY_NEEDS_OWNER } from "@/lib/inventory/errors";
 import { launchReconfirmation } from "@/server/inventory/launch-reconfirmation";
 import { reviewReconfirmationItem } from "@/server/inventory/review-reconfirmation-item";
 import { AttachmentsSection, type AttachmentRow } from "@/components/attachments-section";
@@ -60,6 +59,7 @@ function ItemFormDialog({
 }) {
   const t = useTranslations("inventory");
   const tc = useTranslations("common");
+  const tErr = useTranslations("actionErrors");
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -93,16 +93,19 @@ function ItemFormDialog({
     startTransition(async () => {
       try {
         if (item) {
-          await updateInventoryItem({ id: item.id, ...payload, status: item.status, kind });
+          const result = await updateInventoryItem({ id: item.id, ...payload, status: item.status, kind });
+          if (!result.ok) {
+            setError(tErr(result.error));
+            return;
+          }
         } else {
           await createInventoryItem({ unitId, kind, ...payload });
         }
         toast.success(tc("save"));
         setOpen(false);
         onSaved();
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "";
-        setError(message === FACILITY_NEEDS_OWNER ? t("facilityNeedsOwner") : message || t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -208,12 +211,13 @@ function ItemFormDialog({
 function StatusButton({ item, onChanged }: { item: InventoryItemRow; onChanged: () => void }) {
   const t = useTranslations("inventory");
   const tc = useTranslations("common");
+  const tErr = useTranslations("actionErrors");
   const [isPending, startTransition] = useTransition();
 
   function setStatus(status: "active" | "removed" | "transferred") {
     startTransition(async () => {
       try {
-        await updateInventoryItem({
+        const result = await updateInventoryItem({
           id: item.id,
           title: item.title,
           description: item.description,
@@ -224,10 +228,14 @@ function StatusButton({ item, onChanged }: { item: InventoryItemRow; onChanged: 
           actionByReason: item.actionByReason,
           status,
         });
+        if (!result.ok) {
+          toast.error(tErr(result.error));
+          return;
+        }
         toast.success(tc("save"));
         onChanged();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -249,6 +257,7 @@ function StatusButton({ item, onChanged }: { item: InventoryItemRow; onChanged: 
 function LaunchReconfirmationDialog({ tenancyId, items, onLaunched }: { tenancyId: string; items: InventoryItemRow[]; onLaunched: () => void }) {
   const t = useTranslations("inventory");
   const tc = useTranslations("common");
+  const tErr = useTranslations("actionErrors");
   const [open, setOpen] = useState(false);
   const [scope, setScope] = useState<"full" | "subset">("full");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -262,19 +271,23 @@ function LaunchReconfirmationDialog({ tenancyId, items, onLaunched }: { tenancyI
     setError(null);
     startTransition(async () => {
       try {
-        await launchReconfirmation({
+        const result = await launchReconfirmation({
           tenancyId,
           scope,
           itemIds: scope === "subset" ? Array.from(selected) : undefined,
           dueDate: (String(data.get("dueDate") ?? "").trim() || null) as string | null,
           note: (String(data.get("note") ?? "").trim() || null) as string | null,
         });
+        if (!result.ok) {
+          setError(tErr(result.error));
+          return;
+        }
         toast.success(tc("save"));
         setOpen(false);
         setSelected(new Set());
         onLaunched();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -358,8 +371,8 @@ function ReconfirmationCampaignCard({ campaign, onChanged }: { campaign: Reconfi
         await reviewReconfirmationItem({ id });
         toast.success(tc("save"));
         onChanged();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

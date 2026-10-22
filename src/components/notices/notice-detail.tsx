@@ -45,8 +45,8 @@ export function NoticeDetail({ notice, role }: { notice: NoticeDetailData; role:
         await acknowledgeNotice({ id: notice.id });
         toast.success(t("acknowledge"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

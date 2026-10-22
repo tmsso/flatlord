@@ -136,9 +136,10 @@ export async function createDraftStatementCore(
     adjustments,
   });
 
-  // The (tenancy_id, period_month) unique constraint naturally rejects a
-  // duplicate draft here — let it surface as the standard thrown-Error
-  // path, no pre-check needed.
+  // The partial (tenancy_id, period_month) unique index naturally rejects
+  // a second live statement here — no pre-check needed. The PostgREST
+  // error rides along as `cause` so the owner-facing wrapper can turn the
+  // unique violation into a returned code (B-53).
   const { data: statement, error: statementError } = await supabase
     .from("statements")
     .insert({
@@ -149,7 +150,7 @@ export async function createDraftStatementCore(
     })
     .select("id")
     .single();
-  if (statementError) throw new Error(statementError.message);
+  if (statementError) throw new Error(statementError.message, { cause: statementError });
 
   if (result.lineItems.length > 0) {
     const { error: lineItemsError } = await supabase.from("statement_line_items").insert(

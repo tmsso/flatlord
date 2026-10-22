@@ -94,8 +94,8 @@ export function TenancyDetail({ tenancy, occupants, persons }: TenancyDetailProp
         });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -106,8 +106,8 @@ export function TenancyDetail({ tenancy, occupants, persons }: TenancyDetailProp
       try {
         await endTenancyOccupancy({ id: occupantId, moveOut: new Date().toISOString().slice(0, 10) });
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       } finally {
         setEndingId(null);
       }

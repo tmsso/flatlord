@@ -31,8 +31,8 @@ export function DeclarationGenerator({ tenancyId, occupants }: { tenancyId: stri
         await generateDeclaration({ tenancyId, occupantPersonId: occupantId });
         toast.success(t("generated"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

@@ -100,8 +100,8 @@ export function RequestThread({
         (e.target as HTMLFormElement).reset();
         setFileName(null);
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }
@@ -112,8 +112,8 @@ export function RequestThread({
         await withdrawRequest({ id: request.id });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -124,8 +124,8 @@ export function RequestThread({
         await updateRequest({ id: request.id, status });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -140,8 +140,8 @@ export function RequestThread({
         await approveFieldChange(request.id);
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -152,8 +152,8 @@ export function RequestThread({
         await updateRequest({ id: request.id, status: "rejected" });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -170,8 +170,8 @@ export function RequestThread({
         });
         toast.success(tc("save"));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

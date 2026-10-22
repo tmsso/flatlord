@@ -75,8 +75,8 @@ export function NewRequestDialog({
         setFileName(null);
         (e.target as HTMLFormElement).reset();
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

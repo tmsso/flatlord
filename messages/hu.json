@@ -954,6 +954,18 @@
     "addTenant": "+ Új bérlő",
     "addFlatGuided": "Lépésenkénti beállítás"
   },
+  "actionErrors": {
+    "draftExists": "Erre a hónapra már van elszámolás.",
+    "readingBelowPrevious": "Az új óraállás kisebb, mint az előző ellenőrzött érték.",
+    "facilityNeedsOwner": "Csak a bérbeadó tulajdonában lévő tétel alakítható felszereltséggé. Előbb állítsd a tulajdonost „Bérbeadó”-ra, mentsd, majd alakítsd át.",
+    "subsetRequiresItems": "Részleges megerősítéshez válassz legalább egy tételt.",
+    "noItemsInScope": "Nincs megerősítendő aktív tétel.",
+    "predecessorTenancyMismatch": "Az előző szerződés egy másik bérlethez tartozik.",
+    "onlyDraftCanActivate": "Csak piszkozat szerződés aktiválható.",
+    "nothingOutstanding": "Ezen az elszámoláson nincs fennálló tartozás.",
+    "tenantHasNoEmail": "A bérlőnek nincs megadott e-mail címe.",
+    "changeAlreadyPending": "Erre a mezőre már van függőben lévő módosítási kérelem."
+  },
   "tenancyPicker": {
     "label": "Bérlet"
   }

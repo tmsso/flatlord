@@ -186,8 +186,8 @@ export function MeterReadingFlow({
         setNotedMeterIds((prev) => new Set(prev).add(current.id));
         setNoteOpen(false);
         toast.success(t("noteSent"));
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
@@ -210,13 +210,17 @@ export function MeterReadingFlow({
         const value = parseValue(entry.value);
         if (value == null) continue;
         try {
-          await submitMeterReading({
+          const result = await submitMeterReading({
             meterId: meter.id,
             tenancyId: activeTenancyId,
             readingDate: new Date().toISOString().slice(0, 10),
             enteredValue: value,
             photoPath: entry.photoPath ?? undefined,
           });
+          if (!result.ok) {
+            failedLabels.push(meter.label);
+            continue;
+          }
           setSubmittedIds((prev) => new Set(prev).add(meter.id));
         } catch {
           failedLabels.push(meter.label);

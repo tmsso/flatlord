@@ -23,8 +23,8 @@ export function ModuleSettings({ enabled }: { enabled: readonly OptionalModule[]
         await setModuleEnabled({ module, enabled: checked });
         toast.success(checked ? t("switchedOn", { module: t(`name_${module}`) }) : t("switchedOff", { module: t(`name_${module}`) }));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

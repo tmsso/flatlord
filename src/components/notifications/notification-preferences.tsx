@@ -26,8 +26,8 @@ export function NotificationPreferences({
       try {
         await setNotificationPreference({ category, email: checked });
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }

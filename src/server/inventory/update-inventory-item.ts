@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { logAudit } from "@/server/audit/log";
-import { FACILITY_NEEDS_OWNER } from "@/lib/inventory/errors";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const UpdateInventoryItemSchema = z.object({
   id: z.string().uuid(),
@@ -22,7 +22,7 @@ const UpdateInventoryItemSchema = z.object({
   kind: z.enum(["item", "facility"]).optional(),
 });
 
-export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryItemSchema>) {
+export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryItemSchema>): Promise<ActionResult> {
   const parsed = UpdateInventoryItemSchema.parse(input);
   const supabase = await createClient();
   const { personId } = await requireOwnerPersonId(supabase);
@@ -40,7 +40,7 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
   // silently as a side effect of the conversion.
   const kind = parsed.kind ?? before?.kind ?? "item";
   if (kind === "facility" && before?.kind !== "facility" && before?.owned_by !== "owner") {
-    throw new Error(FACILITY_NEEDS_OWNER);
+    return fail("facilityNeedsOwner");
   }
   const ownedBy = kind === "facility" ? "owner" : parsed.ownedBy;
 
@@ -68,4 +68,5 @@ export async function updateInventoryItem(input: z.infer<typeof UpdateInventoryI
     before: before ?? null,
     after: { kind, title: parsed.title, ownedBy, status: parsed.status },
   });
+  return { ok: true };
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnerPersonId } from "@/server/auth/require-owner";
 import { logAudit } from "@/server/audit/log";
+import { fail, type ActionResult } from "@/lib/action-result";
 
 const LaunchReconfirmationSchema = z.object({
   tenancyId: z.string().uuid(),
@@ -20,10 +21,10 @@ const LaunchReconfirmationSchema = z.object({
 // reconfirmation UI just lists whatever rows already exist for the open
 // campaign, no separate "which items are in this campaign" resolution
 // needed client-side.
-export async function launchReconfirmation(input: z.infer<typeof LaunchReconfirmationSchema>) {
+export async function launchReconfirmation(input: z.infer<typeof LaunchReconfirmationSchema>): Promise<ActionResult<{ id: string }>> {
   const parsed = LaunchReconfirmationSchema.parse(input);
   if (parsed.scope === "subset" && (!parsed.itemIds || parsed.itemIds.length === 0)) {
-    throw new Error("subsetRequiresItems");
+    return fail("subsetRequiresItems");
   }
   const supabase = await createClient();
   const { personId } = await requireOwnerPersonId(supabase);
@@ -48,7 +49,7 @@ export async function launchReconfirmation(input: z.infer<typeof LaunchReconfirm
     if (itemsError) throw new Error(itemsError.message);
     itemIds = (activeItems ?? []).map((i) => i.id);
   }
-  if (itemIds.length === 0) throw new Error("noItemsInScope");
+  if (itemIds.length === 0) return fail("noItemsInScope");
 
   const { data: campaign, error: campaignError } = await supabase
     .from("inventory_reconfirmations")
@@ -79,5 +80,5 @@ export async function launchReconfirmation(input: z.infer<typeof LaunchReconfirm
     after: { tenancyId: parsed.tenancyId, scope: parsed.scope, itemCount: itemIds.length },
   });
 
-  return { id: campaign.id as string };
+  return { ok: true, id: campaign.id as string };
 }

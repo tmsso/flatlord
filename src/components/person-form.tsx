@@ -121,8 +121,8 @@ export function PersonForm({ mode, personId, initialValues, requirements, requir
           if (onSaved) onSaved(personId);
           else router.refresh();
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        setError(t("errorGeneric"));
       }
     });
   }

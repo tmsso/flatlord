@@ -22,8 +22,8 @@ export function InactiveModules({ modules }: { modules: readonly OptionalModule[
         await setModuleEnabled({ module, enabled: true });
         toast.success(t("switchedOn", { module: t(`name_${module}`) }));
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errorGeneric"));
+      } catch {
+        toast.error(t("errorGeneric"));
       }
     });
   }
