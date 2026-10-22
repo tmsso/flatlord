@@ -32,6 +32,7 @@ const OWNER_PREFIXES = [
   "/notices",
   "/settings",
   "/onboarding",
+  "/offboarding",
   "/api/admin",
 ];
 

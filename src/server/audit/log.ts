@@ -66,4 +66,7 @@ export async function logAudit(
   if (error) {
     console.error(`audit_log insert failed for ${params.entityType}:${params.entityId}`, error.message);
   }
+  // Returned for callers whose audit row *is* the state (the offboarding
+  // wizard, D-44) and must not lose it silently; everyone else ignores it.
+  return { error };
 }
