@@ -14,9 +14,8 @@ const RetireMeterSchema = z.object({
 // Takes a meter out of service from a date (removed_at). The billing
 // engine and auto-draft already treat a meter as active only between
 // installed_at and removed_at. Never deletes: readings and issued
-// statements keep pointing at it. A replacement is "retire + add a new
-// meter with its own base value"; linking the two (replaces_meter_id) and
-// the cross-meter delta are a separate backlog item.
+// statements keep pointing at it. Swapping in a new meter is
+// replace-meter.ts (B-52); this is for a meter that simply goes away.
 export async function retireMeter(input: z.infer<typeof RetireMeterSchema>): Promise<BillingSetupResult> {
   const parsed = RetireMeterSchema.parse(input);
   const supabase = await createClient();
