@@ -16,7 +16,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center gap-3.5 border-b border-border bg-card px-6 py-3.5", className)}>
+    <div className={cn("flex flex-wrap items-center gap-3.5 border-b border-border bg-card px-6 py-3.5", className)}>
       <h1 className="text-[19px] font-semibold">{title}</h1>
       {monthPicker}
       <div className="flex-1" />

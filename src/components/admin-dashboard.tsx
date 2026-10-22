@@ -6,6 +6,8 @@ import { useTranslations, useFormatter } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { TenancyPicker } from "@/components/tenancy-picker";
+import type { TenancyOption } from "@/lib/tenancies/list-active-tenancies";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { StatusPill, StatementStatusBadge } from "@/components/status-badge";
 import { LifecycleStepper, type LifecycleStep } from "@/components/lifecycle-stepper";
@@ -35,12 +37,16 @@ export function AdminDashboard({
   viewMonth,
   previousMonthHref,
   nextMonthHref,
+  tenancyOptions,
+  selectedTenancyId,
 }: {
   data: DashboardData;
   today: string;
   viewMonth: string;
   previousMonthHref: string;
   nextMonthHref: string;
+  tenancyOptions: TenancyOption[];
+  selectedTenancyId: string | null;
 }) {
   const t = useTranslations("dashboard");
   const tNav = useTranslations("nav");
@@ -84,10 +90,12 @@ export function AdminDashboard({
     />
   );
 
+  const tenancyPicker = <TenancyPicker options={tenancyOptions} selectedId={selectedTenancyId} />;
+
   if (!data.tenancy) {
     return (
       <div className="flex flex-col">
-        <PageHeader title={tNav("dashboard")} monthPicker={monthPicker} />
+        <PageHeader title={tNav("dashboard")} monthPicker={monthPicker} actions={tenancyPicker} />
         <div className="flex flex-col gap-4 p-6">
           {data.draftCount > 0 && (
             <Card className="flex flex-col items-start gap-3 p-4 text-sm">
@@ -152,7 +160,7 @@ export function AdminDashboard({
 
   return (
     <div className="flex flex-col">
-      <PageHeader title={tNav("dashboard")} monthPicker={monthPicker} />
+      <PageHeader title={tNav("dashboard")} monthPicker={monthPicker} actions={tenancyPicker} />
       <div className="flex flex-col gap-4 p-6">
       {data.draftCount > 0 && (
         <div className="flex items-center gap-3 rounded-md border border-info-border bg-info-bg px-4 py-3 text-[13px]">

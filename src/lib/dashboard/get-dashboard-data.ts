@@ -66,12 +66,9 @@ function periodBounds(periodMonth: string): { start: string; end: string } {
 // queries are grouped into Promise.all stages per BACKLOG.md B-02 — see
 // the comments at each stage boundary for what depends on what.
 //
-// Scoping note: this app's UI still assumes one property/one tenancy in
-// practice (ROADMAP handoff notes) even though the schema is already
-// multi-property-ready. When an owner has more than one active tenancy
-// this picks the most recently started one — real multi-property
-// dashboarding (a picker, aggregated widgets) is Phase 5 scope
-// (`second property onboarding`), not this batch.
+// Scoping: the dashboard shows one tenancy at a time. With more than one
+// active tenancy the page passes the picker's choice as `tenancyId`
+// (B-51); without one it falls back to the longest-running tenancy.
 export async function getDashboardData(
   supabase: SupabaseClient,
   personId: string,
@@ -87,6 +84,9 @@ export async function getDashboardData(
   // field-change approvals stay in the queue (core editability, D-40);
   // inventory off → no inventory flags. Omitted = everything on.
   modules?: ModuleSet,
+  // B-51: the tenancy picked on the page. Still constrained to the
+  // caller's own root properties below, so a foreign id just finds nothing.
+  tenancyId?: string | null,
 ): Promise<DashboardData> {
   // Stage 1: only needs personId (already known).
   const [{ data: ownershipRows }, { data: draftRows }] = await Promise.all([
@@ -116,19 +116,16 @@ export async function getDashboardData(
   // tenancy under any of the admin's owned root properties.
   type PropertyRef = { name: string; address_line: string | null };
   type PersonRef = { given_name: string; family_name: string };
-  // Ascending term_start: prefer the longest-running active tenancy as
-  // "the" one this dashboard represents. This is a real, documented
-  // limitation, not just a hedge — an owner letting a house by room (or
-  // any owner with more than one simultaneously active tenancy) genuinely
-  // has more than one "current" cycle, and picking any single one here is
-  // arbitrary. A real fix (a tenancy switcher, aggregated widgets) is
-  // Phase 5's "second property onboarding" scope; today's ROADMAP still
-  // has the whole admin UI assuming one property/tenancy.
-  const { data: tenancyRow } = await supabase
+  // Ascending term_start: without an explicit pick, the longest-running
+  // active tenancy is "the" one this dashboard represents (matches
+  // listActiveTenancies' order, so the picker shows the same default).
+  let tenancyQuery = supabase
     .from("tenancies")
     .select("id, unit_id, term_end, due_day, properties(name, address_line), persons(given_name, family_name)")
     .in("property_id", rootPropertyIds)
-    .eq("status", "active")
+    .eq("status", "active");
+  if (tenancyId) tenancyQuery = tenancyQuery.eq("id", tenancyId);
+  const { data: tenancyRow } = await tenancyQuery
     .order("term_start", { ascending: true })
     .limit(1)
     .maybeSingle();

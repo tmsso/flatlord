@@ -953,5 +953,8 @@
     "dashboardCtaBody": "A guided setup: your details, the flat, its charges and meters, the tenant and their portal access.",
     "addTenant": "+ Add a tenant",
     "addFlatGuided": "Guided setup"
+  },
+  "tenancyPicker": {
+    "label": "Tenancy"
   }
 }
