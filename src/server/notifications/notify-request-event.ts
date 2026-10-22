@@ -28,6 +28,8 @@ export async function notifyRequestEvent(params: {
   // actorRole is passed explicitly rather than re-derived so callers stay
   // the single source of truth for who just acted.
   actorRole: "owner" | "tenant";
+  // B-41: owner's reject note, quoted in the tenant's notification.
+  note?: string | null;
 }) {
   try {
     const service = createServiceRoleClient();
@@ -135,6 +137,7 @@ export async function notifyRequestEvent(params: {
         event: params.event,
         title: request.title,
         forOwner: false,
+        note: params.note,
       });
 
       await createNotification({

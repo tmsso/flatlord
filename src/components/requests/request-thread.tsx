@@ -10,6 +10,7 @@ import { addRequestMessage } from "@/server/requests/add-request-message";
 import { withdrawRequest } from "@/server/requests/withdraw-request";
 import { updateRequest } from "@/server/requests/update-request";
 import { approveFieldChange } from "@/server/field-editability/approve-field-change";
+import { rejectRequest } from "@/server/requests/reject-request";
 import { PERSON_EDITABLE_FIELDS, PERSON_SENSITIVE_FIELD_KEYS } from "@/lib/field-editability/person-fields";
 import { maskId } from "@/lib/format/mask-id";
 import type { RequestCategory, RequestStatus } from "@/db/schema/requests";
@@ -73,6 +74,7 @@ export function RequestThread({
   const t = useTranslations("requests");
   const tc = useTranslations("common");
   const tPersonLabels = useTranslations("persons");
+  const tErr = useTranslations("actionErrors");
   const format = useFormatter();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -81,6 +83,9 @@ export function RequestThread({
   const fileRef = useRef<HTMLInputElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  // B-41: Reject first opens an optional note box; the second click rejects.
+  const [isRejecting, setIsRejecting] = useState(false);
+  const rejectNoteRef = useRef<HTMLTextAreaElement>(null);
   // appointment_date is timestamptz but collected as a date (stored as
   // UTC midnight): show and edit it as a date in UTC.
   const appointmentDay = request.appointmentDate ? request.appointmentDate.slice(0, 10) : "";
@@ -118,10 +123,10 @@ export function RequestThread({
     });
   }
 
-  function handleStatus(status: "resolved" | "rejected") {
+  function handleResolve() {
     startTransition(async () => {
       try {
-        await updateRequest({ id: request.id, status });
+        await updateRequest({ id: request.id, status: "resolved" });
         toast.success(tc("save"));
         router.refresh();
       } catch {
@@ -146,11 +151,19 @@ export function RequestThread({
     });
   }
 
-  function handleRejectChange() {
+  // Both plain and field-change requests reject through rejectRequest, which
+  // never touches the target entity.
+  function handleReject() {
+    const note = rejectNoteRef.current?.value.trim() || undefined;
     startTransition(async () => {
       try {
-        await updateRequest({ id: request.id, status: "rejected" });
+        const result = await rejectRequest({ id: request.id, note });
+        if (!result.ok) {
+          toast.error(tErr(result.error));
+          return;
+        }
         toast.success(tc("save"));
+        setIsRejecting(false);
         router.refresh();
       } catch {
         toast.error(t("errorGeneric"));
@@ -270,30 +283,53 @@ export function RequestThread({
               </Button>
             </form>
           ) : null}
+          {isRejecting && (canResolveOrReject || canApproveOrReject) && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="rejectNote">{t("rejectNoteLabel")}</Label>
+              <Textarea id="rejectNote" ref={rejectNoteRef} name="rejectNote" rows={3} maxLength={2000} autoFocus />
+            </div>
+          )}
           <div className="flex items-center gap-2 self-end">
+            {isRejecting && (canResolveOrReject || canApproveOrReject) && (
+              <>
+                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => setIsRejecting(false)}>
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive-border text-destructive hover:text-destructive"
+                  disabled={isPending}
+                  onClick={handleReject}
+                >
+                  {t("rejectConfirm")}
+                </Button>
+              </>
+            )}
             {canWithdraw && (
               <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={handleWithdraw}>
                 {t("withdraw")}
               </Button>
             )}
-            {canResolveOrReject && (
+            {canResolveOrReject && !isRejecting && (
               <>
-                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => handleStatus("rejected")}>
+                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => setIsRejecting(true)}>
                   {t("reject")}
                 </Button>
-                <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => handleStatus("resolved")}>
+                <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={handleResolve}>
                   {t("resolve")}
                 </Button>
               </>
             )}
-            {canApproveOrReject && (
+            {canApproveOrReject && !isRejecting && (
               <>
                 <Button
                   type="button"
                   variant="outline"
                   className="border-destructive-border text-destructive hover:text-destructive"
                   disabled={isPending}
-                  onClick={handleRejectChange}
+                  onClick={() => setIsRejecting(true)}
                 >
                   {t("reject")}
                 </Button>
