@@ -9,6 +9,8 @@ import { createDraftStatement } from "@/server/billing/create-draft-statement";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { TenancyPicker } from "@/components/tenancy-picker";
+import type { TenancyOption } from "@/lib/tenancies/list-active-tenancies";
 import { addMonths } from "@/lib/month";
 import { StatementStatusBadge, type StatementDisplayStatus } from "@/components/status-badge";
 import { deriveStatementDisplayStatus, type StoredStatementStatus } from "@/lib/billing/derive-statement-display-status";
@@ -31,10 +33,12 @@ function currentMonthStart(): string {
 export function StatementsList({
   statements,
   activeTenancyId,
+  tenancyOptions,
   today,
 }: {
   statements: StatementRow[];
   activeTenancyId: string | null;
+  tenancyOptions: TenancyOption[];
   today: string;
 }) {
   const t = useTranslations("statements");
@@ -63,6 +67,7 @@ export function StatementsList({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
+        <TenancyPicker options={tenancyOptions} selectedId={activeTenancyId} />
         <MonthPicker
           label={format.dateTime(new Date(`${draftMonth}T00:00:00Z`), { year: "numeric", month: "long", timeZone: "UTC" })}
           onPrevious={() => setDraftMonth(addMonths(draftMonth, -1))}

@@ -953,5 +953,8 @@
     "dashboardCtaBody": "Lépésről lépésre: saját adataid, a lakás, díjai és mérőórái, a bérlő és a portál hozzáférése.",
     "addTenant": "+ Új bérlő",
     "addFlatGuided": "Lépésenkénti beállítás"
+  },
+  "tenancyPicker": {
+    "label": "Bérlet"
   }
 }
