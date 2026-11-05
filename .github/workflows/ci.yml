@@ -29,6 +29,12 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Fails on a known high/critical advisory in a runtime dependency
+      # (dev-only tooling is excluded on purpose). Fix by upgrading the
+      # parent, or with a floor in pnpm-workspace.yaml `overrides`.
+      - name: Dependency audit (runtime, high+)
+        run: pnpm audit --prod --audit-level=high
+
       # The real Supabase Postgres image, not a bare postgres container: our
       # tests depend on the real `auth` schema and RLS roles (auth.users
       # insert, `set local role authenticated`), which come from Supabase's
