@@ -166,3 +166,16 @@ Goal (owner: "defaults on all"): the app on its own domain with real email, then
 - **#97 — B-43 offboarding wizard** (merged): 7-step checklist from DB state; skips need a note; pro-rata rent credit proposed for a mid-month end; "Settle from deposit" records applied deposit + payment (D-45); End tenancy → `ended`, invites revoked, proxy signs the tenant out (positive evidence only). No migration (D-44: wizard records are `audit_log` rows). Dev: 29 checks incl. −103 226 credit, total 103 774, statement paid from deposit, ledger 0, tenant bounced (existing session + fresh sign-in), no fixture residue.
 - **Scope cuts / follow-ups:** B-13 handover snapshot is a note step for now; deposit `applied` outside the wizard still doesn't create a payment (D-45 alternative); the tenant lockout adds one query per tenant request (fold into B-03).
 - **Not verified:** a real login link to a non-team inbox (B-54) and magic-link redirect on `flatlord.tmsso.com` — wait for the owner's Supabase Auth URL change; prod reminder config (no prod DB credentials locally) — whether a tenant email goes out on a given day was inferred from code defaults only.
+
+## Long batch 2026-10-23 — B-41 / B-52 / B-03
+
+Goal (owner: "defaults on all"): the three NEXT-BATCH items, ordered small → owner-dependent. `gh pr merge` was classifier-blocked this session → stacked chain #99 → #100 → #101 → docs, merged by the owner.
+
+- **Pre-flight:** owner pointed the real tenant's `contact_email` on prod at their own alias (read-only query confirmed every tenancy) and added `https://flatlord.tmsso.com/**` to Supabase prod Redirect URLs.
+- **#99 — B-41 reject with note:** `rejectRequest` (status-guarded, `ActionResult`), note → thread message + quoted in the tenant notification. Dev 12/12.
+- **#100 — B-52 meter replacement:** Replace dialog/action; the engine already split the change month per meter, so no engine or schema change; billed-month guard (D-46). Dev 12/12 incl. a real draft of the change month.
+- **#101 — B-03 proxy without Auth round trips:** `getClaims()` + `user_role` hook (`0037`, applied to dev) with profiles fallback (D-47). Found on dev: the no-profile sign-out redirect looped once verification became local (cleared cookies weren't carried) — fixed. Dev: zero Auth calls on a warm session; B-43 lockout script 29/29.
+- **Gotchas:** `next dev` hung compiling a route on this low-RAM node → verify against `next build && next start`; a failed `pnpm build` (it typechecks untracked `verify-*.local.ts`) leaves the old `.next`, so `next start` silently serves stale code — check `.next/BUILD_ID`'s time.
+- **New backlog:** B-55 (readings dated in a billed month are never billed; includes the window before a future-dated replacement's `installed_at`, observed on dev).
+- **Known limitation:** `replaceMeter` has no upper bound on the date (a far-future date is accepted).
+- **Not verified:** the `user_role` claim end to end (hook not yet enabled in either dashboard); anything on prod (chain unmerged at hand-off).
