@@ -32,7 +32,7 @@ export default async function TenantLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const t = await getTranslations("nav");
   const supabase = await createClient();
-  const profile = await getCurrentProfile(supabase);
+  const profile = await getCurrentProfile(supabase, { verify: "claims" });
   const modules = await getTenantModules(supabase, profile.personId);
 
   // self_scope_notifications RLS already restricts this to the caller's

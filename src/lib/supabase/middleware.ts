@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAllowedForRole } from "@/lib/auth/route-access";
+import { roleFromClaims } from "@/lib/auth/claims-role";
 
 /**
  * Refreshes the Supabase session on every request and enforces the
@@ -14,6 +15,15 @@ import { isAllowedForRole } from "@/lib/auth/route-access";
  *    and bounce to /login.
  *  - owner -> /dashboard, tenant -> /home (root `/` and the wrong shell
  *    redirect to the correct one).
+ *
+ * B-03: the session is checked with getClaims(), which verifies the JWT
+ * locally once the project signs with asymmetric keys (JWKS cached for
+ * 10 min per server instance) and falls back to getUser()'s Auth round
+ * trip while it still uses the legacy shared secret. The role comes from
+ * the access-token hook's `user_role` claim (0037); without it we query
+ * profiles as before. Trade-off (D-47): a deleted profile keeps its role
+ * until the access token expires (≤ 1 h). The tenant lockout below stays
+ * a live query so offboarding takes effect immediately.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -39,15 +49,14 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims;
 
   const { pathname } = request.nextUrl;
   const isLoginPath = pathname.startsWith("/login");
   const isAuthCallback = pathname.startsWith("/auth/callback");
 
-  if (!user) {
+  if (!claims?.sub) {
     if (!isLoginPath && !isAuthCallback) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -56,18 +65,27 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
+  let profile: { role: "owner" | "tenant" } | null = null;
+  const claimedRole = roleFromClaims(claims);
+  if (claimedRole) {
+    profile = { role: claimedRole };
+  } else {
+    const { data } = await supabase.from("profiles").select("role").eq("id", claims.sub).maybeSingle();
+    profile = data;
+  }
 
   if (!profile) {
     await supabase.auth.signOut();
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("error", "not_invited");
-    return NextResponse.redirect(url);
+    // Carry the cleared session cookies onto the redirect. Required since
+    // B-03: getClaims() verifies the JWT locally, so a token whose session
+    // was just revoked still verifies — without the cleared cookies /login
+    // would sign out and redirect again, forever.
+    const redirect = NextResponse.redirect(url);
+    for (const cookie of supabaseResponse.cookies.getAll()) redirect.cookies.set(cookie);
+    return redirect;
   }
 
   if (profile.role === "tenant") {
