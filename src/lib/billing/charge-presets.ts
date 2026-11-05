@@ -39,6 +39,9 @@ export const BILLING_SETUP_ERRORS = {
   notAfterExisting: "BILLING_SETUP_NOT_AFTER_EXISTING",
   periodLocked: "BILLING_SETUP_PERIOD_LOCKED",
   draftExists: "BILLING_SETUP_DRAFT_EXISTS",
+  replacementMonthBilled: "BILLING_SETUP_REPLACEMENT_MONTH_BILLED",
+  finalRequired: "BILLING_SETUP_FINAL_REQUIRED",
+  finalBelowPrevious: "BILLING_SETUP_FINAL_BELOW_PREVIOUS",
 } as const;
 
 export type BillingSetupError = (typeof BILLING_SETUP_ERRORS)[keyof typeof BILLING_SETUP_ERRORS];

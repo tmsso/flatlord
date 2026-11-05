@@ -69,7 +69,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       isUnit
         ? supabase
             .from("meters")
-            .select("id, label, charge_type_id, base_value, installed_at, removed_at")
+            .select("id, label, charge_type_id, base_value, installed_at, removed_at, replaces_meter_id")
             .eq("unit_id", id)
             .order("installed_at")
         : Promise.resolve({ data: [], error: null }),
@@ -225,6 +225,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             baseValue: Number(m.base_value),
             installedAt: m.installed_at,
             removedAt: m.removed_at,
+            replacesMeterId: m.replaces_meter_id,
           }))}
         />
       )}

@@ -859,7 +859,7 @@
     "removedAtLabel": "Out of service from",
     "retire": "Retire",
     "retireTitle": "Retire meter",
-    "retireHint": "Readings stay; the meter isn't billed after this date. To replace a meter, retire it and add the new one with its own starting reading.",
+    "retireHint": "Readings stay; the meter isn't billed after this date. To swap in a new meter, use Replace instead.",
     "noMeters": "No meters yet.",
     "noMeterableTypes": "Add a metered charge type first (e.g. Electricity).",
     "colName": "Name",
@@ -880,7 +880,18 @@
     "nameRequired": "Enter a name.",
     "labelRequired": "Enter a label.",
     "baseValueInvalid": "Enter a reading of 0 or more.",
-    "dateRequired": "Pick a date."
+    "dateRequired": "Pick a date.",
+    "replace": "Replace",
+    "replaceTitle": "Replace meter",
+    "replaceHint": "Records the old meter's final reading, retires it and adds the new meter on the same date. The month of the swap is billed across both meters.",
+    "replacedAtLabel": "Replacement date",
+    "finalValueLabel": "Old meter — final reading",
+    "newLabelLabel": "New meter — name",
+    "newBaseValueLabel": "New meter — starting reading",
+    "replacesLabel": "replaces {label}",
+    "error_replacementMonthBilled": "That month already has a statement, so the final reading would never be billed. The date has been set to {date}, the earliest open date — no consumption is lost; the whole difference is billed in that month.",
+    "error_finalRequired": "Enter the old meter's final reading.",
+    "error_finalBelowPrevious": "The final reading is lower than the meter's last verified reading."
   },
   "rates": {
     "title": "Rates",
