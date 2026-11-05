@@ -8,12 +8,13 @@ import { notifyRequestEvent } from "@/server/notifications/notify-request-event"
 
 const UpdateRequestSchema = z.object({
   id: z.string().uuid(),
-  // resolve/reject are the only owner-driven status transitions this
-  // action allows — withdraw is tenant-only (withdraw-request.ts), and
+  // resolve is the only status transition this action allows — reject
+  // goes through reject-request.ts (B-41, optional note), withdraw is
+  // tenant-only (withdraw-request.ts), and
   // there's deliberately no way back to 'open' (CLAUDE.md §3.5: never
   // hard-delete/un-resolve, a corrected decision is a new action, not a
   // status flip-flop).
-  status: z.enum(["resolved", "rejected"]).optional(),
+  status: z.literal("resolved").optional(),
   externalCaseRef: z.string().trim().min(1).nullable().optional(),
   appointmentDate: z.string().min(1).nullable().optional(),
 });

@@ -19,6 +19,7 @@ export const ACTION_ERRORS = [
   "noProRataCredit",
   "offboardingIncomplete",
   "noDepositToApply",
+  "requestNotOpen",
 ] as const;
 
 export type ActionErrorCode = (typeof ACTION_ERRORS)[number];

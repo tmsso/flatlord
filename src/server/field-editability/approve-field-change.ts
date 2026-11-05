@@ -16,7 +16,7 @@ const ChangePayloadSchema = z.object({
 });
 
 // The only action that actually applies an approval_required change —
-// rejecting one is just updateRequest({status: 'rejected'}), which
+// rejecting one is rejectRequest (reject-request.ts, B-41), which
 // correctly touches nothing on the target entity. This one deliberately
 // does NOT reuse updateRequest's generic 'resolved' transition: a plain
 // resolve on a field-change request would mark it done without ever
