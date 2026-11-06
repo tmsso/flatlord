@@ -23,8 +23,12 @@ export default async function TenantMetersPage() {
 
   // Stage 1: everything that only needs `tenancy` (already fetched above)
   // — independent of each other, run concurrently (BACKLOG.md B-02).
+  const today = new Date().toISOString().slice(0, 10);
   const [{ data: meterRows }, { data: scheduleRows }] = await Promise.all([
-    supabase.from("meters").select("id, label, base_value, charge_type_id").eq("unit_id", tenancy.unit_id).is("removed_at", null),
+    supabase.from("meters").select("id, label, base_value, charge_type_id").eq("unit_id", tenancy.unit_id)
+      // B-55: by date window, so a future-dated replacement shows the old meter until the swap.
+      .lte("installed_at", today)
+      .or(`removed_at.is.null,removed_at.gt.${today}`),
     // D1: tenant_scope_metered_charge_schedules (0011) grants read access to
     // just the currently active metered rate for this tenancy — nothing
     // else. pickActiveSchedule applies the same "covers today" rule the
@@ -92,7 +96,6 @@ export default async function TenantMetersPage() {
   const doneThisMonth = new Set([...latestThisMonth].filter(([, status]) => status !== "rejected").map(([id]) => id));
   const retakeRequested = new Set([...latestThisMonth].filter(([, status]) => status === "rejected").map(([id]) => id));
 
-  const today = new Date().toISOString().slice(0, 10);
 
   const flowMeters: MeterFlowMeter[] = meters.map((m) => {
     const verified = latestVerifiedByMeter.get(m.id);

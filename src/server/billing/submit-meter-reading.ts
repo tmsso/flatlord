@@ -4,11 +4,14 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { evaluateMeterReadingEntry } from "@/lib/billing/evaluate-meter-reading-entry";
 import { fail, type ActionResult } from "@/lib/action-result";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { billableReadingDate } from "@/lib/billing/meter-replacement";
+import { logAudit } from "@/server/audit/log";
 
 const SubmitMeterReadingSchema = z.object({
   meterId: z.string().uuid(),
   tenancyId: z.string().uuid(),
-  readingDate: z.string(),
+  readingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   enteredValue: z.number(),
   photoPath: z.string().optional(),
   override: z.boolean().default(false),
@@ -29,7 +32,7 @@ export async function submitMeterReading(input: {
   enteredValue: number;
   photoPath?: string;
   override?: boolean;
-}): Promise<ActionResult> {
+}): Promise<ActionResult<{ redatedTo?: string }>> {
   const parsed = SubmitMeterReadingSchema.parse(input);
   const supabase = await createClient();
 
@@ -84,16 +87,57 @@ export async function submitMeterReading(input: {
   // The English reason stays in the server log; the client gets a code.
   if (!evaluation.allowed) return fail("readingBelowPrevious");
 
-  const { error } = await supabase.from("meter_readings").insert({
+  // B-55: move a reading dated in an already-drafted/issued month (or
+  // before its meter's installation) to the first open date, so its
+  // consumption lands on the next draft instead of being lost. The tenancy
+  // read goes through the caller's RLS (proves access); the statement
+  // months come from the service-role client because tenants can't see
+  // draft statements (B-26) — a read-only lookup scoped to that unit.
+  const { data: tenancy, error: tenancyError } = await supabase
+    .from("tenancies")
+    .select("unit_id")
+    .eq("id", parsed.tenancyId)
+    .single();
+  if (tenancyError) throw new Error(tenancyError.message);
+  const admin = createServiceRoleClient();
+  const [meterRes, unitTenanciesRes] = await Promise.all([
+    admin.from("meters").select("installed_at, unit_id").eq("id", parsed.meterId).single(),
+    admin.from("tenancies").select("id").eq("unit_id", tenancy.unit_id),
+  ]);
+  if (meterRes.error) throw new Error(meterRes.error.message);
+  if (unitTenanciesRes.error) throw new Error(unitTenanciesRes.error.message);
+  if (meterRes.data.unit_id !== tenancy.unit_id) throw new Error("Meter is not on this tenancy's unit");
+  const { data: statements, error: statementsError } = await admin
+    .from("statements")
+    .select("period_month")
+    .in("tenancy_id", (unitTenanciesRes.data ?? []).map((t) => t.id))
+    .is("voided_at", null);
+  if (statementsError) throw new Error(statementsError.message);
+  const readingDate = billableReadingDate({
+    readingDate: parsed.readingDate,
+    installedAt: (meterRes.data.installed_at as string | null) ?? null,
+    statementMonths: (statements ?? []).map((s) => s.period_month as string),
+  });
+
+  const { data: inserted, error } = await supabase.from("meter_readings").insert({
     meter_id: parsed.meterId,
     tenancy_id: parsed.tenancyId,
-    reading_date: parsed.readingDate,
+    reading_date: readingDate,
     entered_value: parsed.enteredValue,
     entered_by: callerProfile.person_id,
     photo_path: parsed.photoPath ?? null,
     status: "submitted",
     source: callerProfile.role === "owner" ? "admin" : "tenant",
-  });
+  }).select("id").single();
   if (error) throw new Error(error.message);
-  return { ok: true };
+  if (readingDate === parsed.readingDate) return { ok: true };
+  await logAudit(supabase, {
+    entityType: "meter_reading",
+    entityId: inserted.id,
+    actorId: callerProfile.person_id,
+    action: "reading_redate",
+    before: { readingDate: parsed.readingDate },
+    after: { readingDate },
+  });
+  return { ok: true, redatedTo: readingDate };
 }

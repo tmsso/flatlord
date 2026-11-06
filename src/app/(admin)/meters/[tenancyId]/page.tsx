@@ -36,8 +36,12 @@ export default async function AdminMeterVerificationPage({
 
   // Stage 1: everything that only needs `tenancy` (already fetched above)
   // — independent of each other, run concurrently (BACKLOG.md B-02).
+  const today = new Date().toISOString().slice(0, 10);
   const [{ data: meterRows }, { data: scheduleRows }] = await Promise.all([
-    supabase.from("meters").select("id, label, base_value, charge_type_id").eq("unit_id", tenancy.unit_id).is("removed_at", null),
+    supabase.from("meters").select("id, label, base_value, charge_type_id").eq("unit_id", tenancy.unit_id)
+      // B-55: by date window, so a future-dated replacement shows the old meter until the swap.
+      .lte("installed_at", today)
+      .or(`removed_at.is.null,removed_at.gt.${today}`),
     // Owner has full charge_schedules access — the rate this period's
     // statement will actually use, via the same pickActiveSchedule rule.
     supabase.from("charge_schedules").select("id, charge_type_id, amount, rate_per_unit, valid_from, valid_to").eq("tenancy_id", tenancy.id),

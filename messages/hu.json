@@ -198,6 +198,7 @@
     "reviewNote": "Beküldés után a tulajdonos ellenőrzi az értékeket — csak az ellenőrzött mérőállások kerülnek be a számlába.",
     "submitAllCount": "Mind a {count} beküldése",
     "submitSuccessTitle": "Sikeresen beküldve!",
+    "readingRedated": "Az a hónap már el van számolva, ezért ez a leolvasás {date} dátummal számít — a következő elszámolásban szerepel.",
     "submitSuccessBody": "A tulajdonos értesítést kapott; a havi számla az ellenőrzés után készül el.",
     "backHome": "Vissza a főoldalra",
     "submitError": "Ezt a mérőállást nem sikerült beküldeni",

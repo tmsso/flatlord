@@ -20,6 +20,26 @@ function nextMonthStart(month: string): string {
  * meter's installation or its latest reading, and not inside any month
  * that already has a (non-discarded) statement on the unit.
  */
+/**
+ * B-55: the date a reading is billed on. The engine bills a reading in its
+ * reading_date's month and never recomputes a month that already has a
+ * (non-discarded) statement, so a reading dated inside such a month — or
+ * before its meter was installed — moves to the first date that is still
+ * open. The physical date is kept in the audit log by the caller (same rule
+ * as D-46 for replacements).
+ */
+export function billableReadingDate(params: {
+  readingDate: string;
+  installedAt: string | null;
+  statementMonths: string[]; // period_month of every non-voided statement on the unit
+}): string {
+  const candidates = [params.readingDate];
+  if (params.installedAt) candidates.push(params.installedAt);
+  const lastBilled = params.statementMonths.reduce<string | null>((max, m) => (max == null || m > max ? m : max), null);
+  if (lastBilled) candidates.push(nextMonthStart(lastBilled));
+  return candidates.reduce((max, d) => (d > max ? d : max));
+}
+
 export function earliestReplacementDate(params: {
   installedAt: string;
   latestReadingDate: string | null;

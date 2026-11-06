@@ -204,6 +204,7 @@ export function MeterReadingFlow({
   function handleSubmitAll() {
     startSubmitting(async () => {
       const failedLabels: string[] = [];
+      let redatedTo: string | undefined;
       for (const meter of meters) {
         const entry = entries[meter.id];
         if (!entry || submittedIds.has(meter.id)) continue;
@@ -221,6 +222,7 @@ export function MeterReadingFlow({
             failedLabels.push(meter.label);
             continue;
           }
+          if (result.redatedTo) redatedTo = result.redatedTo;
           setSubmittedIds((prev) => new Set(prev).add(meter.id));
         } catch {
           failedLabels.push(meter.label);
@@ -228,6 +230,8 @@ export function MeterReadingFlow({
       }
       if (failedLabels.length === 0) {
         toast.success(t("submitSuccessTitle"));
+        // B-55: the month was already billed — say where the reading went.
+        if (redatedTo) toast.info(t("readingRedated", { date: format.dateTime(new Date(redatedTo), { dateStyle: "medium" }) }));
         router.refresh();
         setStep("success");
       } else {
