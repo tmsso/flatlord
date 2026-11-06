@@ -198,6 +198,7 @@
     "reviewNote": "After submission the owner verifies the values — only verified readings enter the statement.",
     "submitAllCount": "Submit all {count}",
     "submitSuccessTitle": "Successfully submitted!",
+    "readingRedated": "That month is already billed, so this reading counts from {date} — it will be on the next statement.",
     "submitSuccessBody": "The owner has been notified; the monthly statement is drafted after verification.",
     "backHome": "Back to home",
     "submitError": "Could not submit this reading",
