@@ -28,6 +28,11 @@ export default async function LoginPage({
               {t("errorTenancyEnded")}
             </p>
           )}
+          {error === "not_invited" && (
+            <p className="text-sm text-destructive" role="alert">
+              {t("notInvited")}
+            </p>
+          )}
           {error === "auth_failed" && (
             <p className="text-sm text-destructive" role="alert">
               {t("errorGeneric")}

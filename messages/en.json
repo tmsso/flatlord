@@ -20,6 +20,7 @@
     "magicLinkSubmit": "Send sign-in link",
     "magicLinkNote": "You will get a one-time sign-in link by email — no password needed.",
     "magicLinkSent": "Check your email for the sign-in link.",
+    "notInvited": "This account has no invitation. Ask the owner to invite this email address, then sign in again.",
     "privateNote": "Private app: no self-signup. Your account is created by the owner; a tenant sees only their own tenancy.",
     "roleNote": "After sign-in, role decides the interface: tenant → portal · owner → admin.",
     "errorNotInvited": "This account doesn't have a valid invite.",

@@ -32,5 +32,9 @@ export async function GET(request: NextRequest) {
     if (!error) return redirectTo("/");
   }
 
+  // B-49: the before-user-created hook refuses an uninvited sign-up; Auth
+  // forwards its message as error_description. Say so instead of "failed".
+  const description = request.nextUrl.searchParams.get("error_description") ?? "";
+  if (/invitation/i.test(description)) return redirectTo("/login?error=not_invited");
   return redirectTo("/login?error=auth_failed");
 }
