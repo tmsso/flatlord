@@ -267,6 +267,13 @@
       "when": 1792709824302,
       "tag": "0037_b03-access-token-hook",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793923578334,
+      "tag": "0038_b49-before-user-created-hook",
+      "breakpoints": true
     }
   ]
 }
