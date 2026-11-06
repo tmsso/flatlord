@@ -1036,10 +1036,10 @@
     "desc_handover": "Key return, inventory check and condition of the flat. A note for now; photo snapshots come later.",
     "inventoryCount": "{count, plural, =0 {No active inventory items.} one {# active inventory item —} other {# active inventory items —}}",
     "openTenancy": "check them on the tenancy page",
-    "handoverLabel": "Handover note",
+    "handoverLabel": "Handover note (optional)",
     "handoverPlaceholder": "Keys returned, items checked, meter photos taken, condition…",
-    "handoverRecord": "Record handover",
-    "handoverUpdate": "Update note",
+    "handoverRecord": "Take move-out snapshot",
+    "handoverUpdate": "Take a new snapshot",
     "step_access": "End tenancy",
     "desc_access": "Marks the tenancy ended and revokes unused invites; the tenant can no longer sign in. Nothing is deleted.",
     "endBlocked": "Resolve or skip every step above first.",
@@ -1056,5 +1056,21 @@
     "undoSkip": "Undo skip",
     "settleFromDeposit": "Settle {amount} from the deposit",
     "depositAppliedNote": "Deposit applied at move-out"
+  },
+  "handover": {
+    "title": "Handover protocol",
+    "description": "A snapshot freezes the inventory (condition, ownership, photos) and the meter readings at move-in or move-out. It can't be changed afterwards; the PDF is bilingual.",
+    "empty": "No snapshot yet.",
+    "kind": {
+      "move_in": "Move-in",
+      "move_out": "Move-out"
+    },
+    "kindLabel": "Type",
+    "noteLabel": "Note (optional)",
+    "take": "Take snapshot",
+    "taken": "Snapshot saved",
+    "counts": "{items} items · {meters} meters",
+    "downloadPdf": "Download PDF",
+    "errorGeneric": "Could not save the snapshot"
   }
 }

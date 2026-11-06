@@ -1,6 +1,6 @@
 # Next batch — recommended next three items
 
-Rewritten 2026-11-06 at the end of the "security patch / B-55 / B-49" long batch (PRs #104–#107 + this docs PR, all merged by the session; see `docs/DELIVERY-LOG.md`).
+Rewritten 2026-11-06 at the end of the "security patch / B-55 / B-49" long batch (PRs #104–#108 + the B-13 PR, all merged by the session; see `docs/DELIVERY-LOG.md`).
 
 **Valid while** `git log -1 --format=%h -- ROADMAP.md` equals `git log -1 --format=%h -- docs/NEXT-BATCH.md` (both changed in the same commit). If they differ, the roadmap moved on — re-derive from `ROADMAP.md` + `BACKLOG.md` instead of trusting this file, and say so.
 
@@ -13,21 +13,21 @@ Rewritten 2026-11-06 at the end of the "security patch / B-55 / B-49" long batch
 
 ## The three
 
-### 1. B-13 — move-in / move-out snapshots (M)
-
-`handover_snapshots` (tenancy/property scoped, `kind` text+CHECK, immutable: no UPDATE policy + explicit GRANTs), inventory + meter baselines as jsonb, photos as references to existing attachment paths, PDF via the `generate-declaration.ts` pattern; tenancy-page section + the offboarding handover step records a move-out snapshot. Tenant reads their own (propose as a decision). RLS test: no foreign-tenancy read.
-
-### 2. B-57 — dashboard misses next-month readings (S)
+### 1. B-57 — dashboard misses next-month readings (S)
 
 Follow-up of B-55: the needs-attention queue / stepper should include submitted readings dated after the current month.
 
-### 3. B-11 — `assertNoQueryError` on secondary queries (M)
+### 2. B-11 — `assertNoQueryError` on secondary queries (M)
 
 Mechanical, low risk.
 
+### 3. B-04 — Sentry (S)
+
+Needs the owner's Sentry project/DSN first (third-party data, confirm-first). Without it, take B-09 (generated Supabase types) instead.
+
 ## Alternatives
 
-- **B-04** Sentry (S) — needs the owner's Sentry project/DSN (third-party data, confirm-first).
+- **B-09** generated Supabase types (M).
 - **B-44** taxation module (L).
 
 ## Session logistics

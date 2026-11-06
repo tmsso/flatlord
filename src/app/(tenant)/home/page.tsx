@@ -18,6 +18,8 @@ import { TenantContractsList } from "@/components/tenant-contracts-list";
 import { TenantDepositStatus } from "@/components/tenant-deposit-status";
 import { TenantAttachmentsList } from "@/components/tenant-attachments-list";
 import { TenantInventorySection } from "@/components/tenant-inventory-section";
+import { HandoverSection } from "@/components/handover-section";
+import { loadHandoverSnapshots } from "@/server/handover/load-handover-snapshots";
 
 export default async function TenantHomePage() {
   const tHome = await getTranslations("tenantProfile");
@@ -205,6 +207,8 @@ export default async function TenantHomePage() {
       }
     : null;
 
+  const handoverSnapshots = tenancy ? await loadHandoverSnapshots(supabase, tenancy.id) : [];
+
   return (
     <div className="flex flex-col gap-4">
       {self && (
@@ -356,6 +360,7 @@ export default async function TenantHomePage() {
           note: d.note,
         }))}
       />
+      {tenancy && <HandoverSection tenancyId={tenancy.id} snapshots={handoverSnapshots} canTake={false} />}
       {modules.has("inventory") && (
         <TenantInventorySection
           items={(inventoryRows ?? []).map((i) => ({
