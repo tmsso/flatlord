@@ -4,7 +4,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 
 **How to read this file.** Phases list only what is still open. Every open item carries a **Done means** line — that is the verification bar a session must meet before calling it shipped (real dev-project click-through, not "tests pass"). Shipped items move to `docs/DELIVERY-LOG.md`; do not accumulate status prose here.
 
-## Status at a glance (2026-10-23, after the long batch)
+## Status at a glance (2026-11-06, after the long batch)
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -26,7 +26,10 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - [x] ~~Migrate prod `0035`–`0036`, merge #85 → #86~~ — done 2026-10-22 (migrate-prod run `39824691967`, then merged).
 - [ ] **Sign-in email on prod (B-54)**: custom SMTP via Resend configured by the owner 2026-10-22 (domain `tmsso.com` verified in Resend). Redirect URL `https://flatlord.tmsso.com/**` added 2026-10-22. Still open: Site URL switch confirmed, and one real login link sent to an invited non-team inbox (B-54's "done means").
 - [ ] **Confirm D-40** (field-change approvals stay reachable with the requests module off) — built default.
-- [ ] **Merge the 2026-10-23 chain** #99 → #100 → #101 → docs (B-41, B-52, B-03): run `migrate-prod.yml --ref feat/b03-proxy-claims` (`0037`, additive) first, then the merge script from the hand-off. **Optional** afterwards: the access-token hook (Authentication → Hooks → Customize Access Token → `public.custom_access_token_hook`) only removes the remaining `profiles` query — the Auth round trip is already gone without it. Order: dev first → re-run the B-03 check (claim present, owner + tenant log in) → prod (after `0037` is there); rollback = toggle off. Both projects already sign with ES256: **don't touch JWT Keys, never revoke the legacy secret** (D-47).
+- [x] ~~Merge the 2026-10-23 chain~~ — done 2026-11-06 by the session on the owner's approval (`migrate-prod` `0037`, then #99 → #102), after the #104 security patch.
+- [ ] **Optional Auth hooks** (each: dev first, then prod; rollback = toggle off). (a) **Before User Created** → `public.before_user_created_hook` (B-49, `0038` on both): check an uninvited Google sign-in lands on `/login?error=not_invited`. (b) **Customize Access Token** → `public.custom_access_token_hook` (B-03, `0037`): re-run the B-03 check, expect `user_role`. Both projects already sign with ES256: **don't touch JWT Keys, never revoke the legacy secret** (D-47).
+- [ ] **Turn on Dependabot alerts + security updates** (GitHub → Settings → Code security) — the CI audit gate only runs on pushes.
+- [ ] **Confirm D-48** (B-55: a reading in a billed month is redated to the first open date) — built default.
 - [ ] **Confirm D-46** (meter replacement can't be dated in a billed month; earliest open date + physical date in audit) — built default, B-52.
 - [ ] **Confirm D-44 / D-45** (offboarding wizard state in `audit_log`, final-statement and pro-rata rules, tenant lockout; "settle from deposit" also records the payment) — built defaults, B-43.
 - [x] ~~Tenant email live~~ — 2026-10-22: sender kept; the owner pointed the real tenant's `contact_email` on prod at their own alias until the acceptance run (read-only check matched).
@@ -37,7 +40,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - [x] ~~Decide D-31 and confirm D-24~~ — 2026-10-12: D-31 **convertible** (B-38 now P1), D-24 **confirmed**.
 - [x] ~~Read-only forgery check for `0027`'s hole~~ — done 2026-10-12 by the owner: the full query returned **0 rows** (the hole was never used).
 - [x] ~~Restore drill (issue #40)~~ — done 2026-10-12 by a session on the owner's request: `backup-2026-10-12` restored into a throwaway container, exact row parity on all 30 `public`+`drizzle` tables, `private` schema functions present (see `docs/backup-restore.md`).
-- [ ] **`CRON_SECRET`** — set in Vercel prod by the owner 2026-10-14. Left open until scheduled runs are proven healthy (B-50): the likely 504 cause (overdue alert re-firing daily) is fixed and live (PR #84, 2026-10-15); once `0036` is on prod, `cron_runs` + the health check's `cron-last-run` job record every scheduled run. Tenant-addressed email still needs the domain (next item).
+- [x] ~~**`CRON_SECRET`**~~ — set 2026-10-14; B-50 proven 2026-11-06 (daily `ok` runs). Original note: left open until scheduled runs are proven healthy (B-50): the likely 504 cause (overdue alert re-firing daily) is fixed and live (PR #84, 2026-10-15); once `0036` is on prod, `cron_runs` + the health check's `cron-last-run` job record every scheduled run. Tenant-addressed email still needs the domain (next item).
 - [x] ~~Buy a domain~~ — `tmsso.com` (Cloudflare), verified in Resend 2026-10-22; app live at `https://flatlord.tmsso.com` (B-01, see delivery log). `flatlord.vercel.app` keeps working.
 - [ ] **Phase 1 real acceptance run**: one real statement walked photo → verification → statement → email/WhatsApp → payment, total identical to the sheet. Confirm-first, real person involved.
 - [ ] **Retire the Google Sheet** to read-only after that run.
