@@ -76,11 +76,19 @@ describe("RLS: handover_snapshots (0039)", () => {
     await expect(asUser(strangerUserId, (tx) => tx`insert into handover_snapshots (tenancy_id, kind, taken_by) values (${tenancyAId}, 'move_out', ${strangerPersonId})`)).rejects.toThrow(/row-level security/);
     await expect(asUser(tenantUserId, (tx) => tx`insert into handover_snapshots (tenancy_id, kind, taken_by) values (${tenancyAId}, 'move_out', ${tenantPersonId})`)).rejects.toThrow(/row-level security/);
   });
-  it("a snapshot is immutable: owner update and delete touch nothing", async () => {
-    const upd = await asUser(ownerUserId, (tx) => tx`update handover_snapshots set note = 'changed' where id = ${snapshotAId}`);
-    expect(upd.count).toBe(0);
-    const del = await asUser(ownerUserId, (tx) => tx`delete from handover_snapshots where id = ${snapshotAId}`);
-    expect(del.count).toBe(0);
+  it("a snapshot is immutable: owner update and delete never change a row", async () => {
+    // Without UPDATE/DELETE grants a clean database refuses outright
+    // (permission denied); dev's permissive default ACL lets the statement
+    // run, and the missing RLS policy then matches no row. Either is fine.
+    for (const stmt of [
+      (tx: postgres.TransactionSql) => tx`update handover_snapshots set note = 'changed' where id = ${snapshotAId}`,
+      (tx: postgres.TransactionSql) => tx`delete from handover_snapshots where id = ${snapshotAId}`,
+    ]) {
+      const outcome = await asUser(ownerUserId, async (tx) => (await stmt(tx)).count).catch((e: Error) => e.message);
+      expect(outcome === 0 || /permission denied/.test(String(outcome))).toBe(true);
+    }
+    const [row] = await adminSql`select note from handover_snapshots where id = ${snapshotAId}`;
+    expect(row.note).toBeNull();
   });
   it("kind is limited to move_in / move_out", async () => {
     await expect(adminSql`insert into handover_snapshots (tenancy_id, kind, taken_by) values (${tenancyAId}, 'other', ${ownerPersonId})`).rejects.toThrow(/handover_snapshots_kind_check/);
