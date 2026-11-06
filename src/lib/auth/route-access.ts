@@ -42,7 +42,8 @@ const TENANT_PREFIXES = ["/home"];
 // /api/statements/[id]/pdf serves the owner's statement page and the
 // tenant's statement history alike. /_next covers framework-internal
 // requests (dev HMR, data fetches) that the matcher doesn't exclude.
-const SHARED_PREFIXES = ["/api/statements", "/_next"];
+// /api/handover-snapshots/[id]/pdf likewise (B-13, D-49: the tenant reads their own).
+const SHARED_PREFIXES = ["/api/statements", "/api/handover-snapshots", "/_next"];
 
 function matches(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

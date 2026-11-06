@@ -22,12 +22,14 @@ const RecordOffboardingStepSchema = z.discriminatedUnion("resolution", [
     resolution: z.literal("reopened"),
     note: z.null().optional(),
   }),
-  // Handover protocol, manual-note version (B-13 builds the real snapshot).
+  // Handover protocol (B-13): done = a move-out snapshot was taken; the
+  // note is optional and the snapshot id is kept in the audit row.
   z.object({
     tenancyId: z.string().uuid(),
     step: z.literal("handover"),
     resolution: z.literal("done"),
-    note: z.string().trim().min(1),
+    note: z.string().trim().optional(),
+    snapshotId: z.string().uuid(),
   }),
 ]);
 
@@ -48,7 +50,12 @@ export async function recordOffboardingStep(input: z.infer<typeof RecordOffboard
     entityId: parsed.tenancyId,
     actorId: personId,
     action: OFFBOARDING_STEP,
-    after: { step: parsed.step, resolution: parsed.resolution, note: parsed.note ?? null },
+    after: {
+      step: parsed.step,
+      resolution: parsed.resolution,
+      note: parsed.note || null,
+      ...("snapshotId" in parsed ? { snapshotId: parsed.snapshotId } : {}),
+    },
   });
   if (auditError) throw new Error(auditError.message);
 }

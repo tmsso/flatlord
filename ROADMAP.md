@@ -10,7 +10,7 @@ Sequencing authority for **open** work. Companions: `CLAUDE.md` (domain rules, r
 |---|---|---|
 | 0 | Foundation | Shipped 2026-07 |
 | 1 | Billing core, meter flow, backup | Shipped, prod-live (32 historical statements golden-verified). Real prod acceptance run still pending — admin action |
-| 2 | Documents, contract, inventory | Shipped. Scanned-contract OCR → Phase 5; move-in/out snapshots → `BACKLOG.md` B-13 |
+| 2 | Documents, contract, inventory | Shipped. Scanned-contract OCR → Phase 5; move-in/out snapshots shipped 2026-11-06 (B-13) |
 | 3 | Requests, notices, editability, notifications | Shipped |
 | 4a | Automation core | Code complete. `CRON_SECRET` set 2026-10-14; overdue-alert storm fixed 2026-10-15 (PR #84); scheduled-run health tracked by B-50 |
 | 4b | Reporting & owner tools | In progress — PR #33 (cumulative ledger + timeline); module switches (B-45, PR #80); onboarding wizard (B-42, PRs #88–#91); offboarding wizard (B-43, PR #97, 2026-10-22); remainder open |
@@ -29,7 +29,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - [x] ~~Merge the 2026-10-23 chain~~ — done 2026-11-06 by the session on the owner's approval (`migrate-prod` `0037`, then #99 → #102), after the #104 security patch.
 - [ ] **Optional Auth hooks** (each: dev first, then prod; rollback = toggle off). (a) **Before User Created** → `public.before_user_created_hook` (B-49, `0038` on both): check an uninvited Google sign-in lands on `/login?error=not_invited`. (b) **Customize Access Token** → `public.custom_access_token_hook` (B-03, `0037`): re-run the B-03 check, expect `user_role`. Both projects already sign with ES256: **don't touch JWT Keys, never revoke the legacy secret** (D-47).
 - [ ] **Turn on Dependabot alerts + security updates** (GitHub → Settings → Code security) — the CI audit gate only runs on pushes.
-- [ ] **Confirm D-48** (B-55: a reading in a billed month is redated to the first open date) — built default.
+- [ ] **Confirm D-48** (B-55: a reading in a billed month is redated to the first open date) and **D-49** (B-13: handover snapshots immutable, tenant can read, photos referenced not embedded) — built defaults.
 - [ ] **Confirm D-46** (meter replacement can't be dated in a billed month; earliest open date + physical date in audit) — built default, B-52.
 - [ ] **Confirm D-44 / D-45** (offboarding wizard state in `audit_log`, final-statement and pro-rata rules, tenant lockout; "settle from deposit" also records the payment) — built defaults, B-43.
 - [x] ~~Tenant email live~~ — 2026-10-22: sender kept; the owner pointed the real tenant's `contact_email` on prod at their own alias until the acceptance run (read-only check matched).
@@ -59,7 +59,7 @@ The "do not start a phase before its predecessor is accepted" rule was suppresse
 - **Taxation module** — superseded and widened by `BACKLOG.md` **B-44** (owner request 2026-10-12): taxation basis, cost-deduction method, rate, period aggregates and year-end projection, Hungarian defaults. Ships behind the module switch (B-45, off by default).
 - ~~Module switches (B-45)~~ — built in PR #80 (`0033`, D-37), merged + prod-migrated 2026-10-14; loose ends in B-48.
 - ~~Onboarding wizard (B-42)~~ — `/onboarding`, PRs #88–#91 (2026-10-15), dev-verified; prod use depends on B-54 (sign-in email).
-- ~~Offboarding wizard (B-43)~~ — `/offboarding`, PR #97 (2026-10-22), dev-verified; D-44/D-45 to confirm. Move-in/out photo snapshots (B-13) still open — the wizard's handover step is a note for now.
+- ~~Offboarding wizard (B-43)~~ — `/offboarding`, PR #97 (2026-10-22), dev-verified; D-44/D-45 to confirm. Its handover step takes a move-out snapshot since B-13 (2026-11-06).
 - ~~Nav wayfinding~~ — icons + active state shipped in PR #34; per-section accent colours dropped (D-08).
 - ~~Avatars~~ — moved back to `IDEAS.md` (cost/benefit).
 

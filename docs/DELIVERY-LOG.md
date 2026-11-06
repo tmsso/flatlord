@@ -191,4 +191,4 @@ Goal (owner: "defaults", owner-only deployments and merges approved for the batc
 - **B-50:** closed on evidence (daily `ok` runs, see BACKLOG).
 - **New backlog:** B-57 (dashboard counts readings by current month, misses redated ones).
 - **Not verified:** both Auth hooks end to end (not enabled in either dashboard); the real Auth error text for a refused Google sign-up (assumed to contain "invitation").
-
+- **B-13 — handover snapshots:** `0039` (`migrate-prod` before merge), D-49. Dev 13/13 on a local prod build (move-in via tenancy page, immutable after item edit, owner + tenant PDF 200, foreign PDF 404, hu tenant view, offboarding step via move-out snapshot with id in audit); RLS 7/7 against dev. `fresh-owner.ts` cleanup now also removes inventory items + handover snapshots.

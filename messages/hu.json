@@ -1036,10 +1036,10 @@
     "desc_handover": "Kulcsok visszaadása, leltár ellenőrzése, a lakás állapota. Egyelőre megjegyzésként; a fotós jegyzőkönyv később jön.",
     "inventoryCount": "{count, plural, =0 {Nincs aktív leltártétel.} other {# aktív leltártétel —}}",
     "openTenancy": "ellenőrizd a bérlet oldalán",
-    "handoverLabel": "Átadás-átvételi megjegyzés",
+    "handoverLabel": "Átadás-átvételi megjegyzés (nem kötelező)",
     "handoverPlaceholder": "Kulcsok visszaadva, tételek ellenőrizve, mérőórák lefotózva, állapot…",
-    "handoverRecord": "Átadás rögzítése",
-    "handoverUpdate": "Megjegyzés frissítése",
+    "handoverRecord": "Kiköltözési pillanatkép készítése",
+    "handoverUpdate": "Új pillanatkép készítése",
     "step_access": "Bérlet lezárása",
     "desc_access": "A bérletet lezártnak jelöli és visszavonja a fel nem használt meghívókat; a bérlő többé nem tud belépni. Semmi nem törlődik.",
     "endBlocked": "Előbb zárj le vagy hagyj ki minden fenti lépést.",
@@ -1056,5 +1056,21 @@
     "undoSkip": "Kihagyás visszavonása",
     "settleFromDeposit": "{amount} elszámolása a kaucióból",
     "depositAppliedNote": "Kaució beszámítva kiköltözéskor"
+  },
+  "handover": {
+    "title": "Átadás-átvételi jegyzőkönyv",
+    "description": "A pillanatkép rögzíti a leltárt (állapot, tulajdon, fotók) és a mérőállásokat beköltözéskor vagy kiköltözéskor. Utólag nem módosítható; a PDF kétnyelvű.",
+    "empty": "Még nincs pillanatkép.",
+    "kind": {
+      "move_in": "Beköltözés",
+      "move_out": "Kiköltözés"
+    },
+    "kindLabel": "Típus",
+    "noteLabel": "Megjegyzés (nem kötelező)",
+    "take": "Pillanatkép készítése",
+    "taken": "Pillanatkép mentve",
+    "counts": "{items} tétel · {meters} mérő",
+    "downloadPdf": "PDF letöltése",
+    "errorGeneric": "Nem sikerült menteni a pillanatképet"
   }
 }

@@ -19,6 +19,7 @@ import type { ActionResult } from "@/lib/action-result";
 import type { OffboardingData } from "@/server/offboarding/load-offboarding";
 import { startOffboarding } from "@/server/offboarding/start-offboarding";
 import { recordOffboardingStep } from "@/server/offboarding/record-offboarding-step";
+import { takeHandoverSnapshot } from "@/server/handover/take-handover-snapshot";
 import { addProRataCredit } from "@/server/offboarding/add-pro-rata-credit";
 import { endTenancy } from "@/server/offboarding/end-tenancy";
 import { settleFromDeposit } from "@/server/offboarding/settle-from-deposit";
@@ -234,7 +235,13 @@ export function OffboardingChecklist({ data, today }: { data: OffboardingData; t
               inventoryCount={data.activeInventoryItems}
               tenancyId={data.tenancy.id}
               disabled={isPending || ended}
-              onSubmit={(note) => run(() => recordOffboardingStep({ tenancyId: data.tenancy.id, step: "handover", resolution: "done", note }))}
+              onSubmit={(note) =>
+                run(async () => {
+                  // B-13: the handover step is a real move-out snapshot now.
+                  const { snapshotId } = await takeHandoverSnapshot({ tenancyId: data.tenancy.id, kind: "move_out", note: note || undefined });
+                  return recordOffboardingStep({ tenancyId: data.tenancy.id, step: "handover", resolution: "done", note: note || undefined, snapshotId });
+                })
+              }
             />,
           )}
 
@@ -375,7 +382,7 @@ function HandoverForm({
       className="flex flex-col gap-2 text-sm"
       onSubmit={(e) => {
         e.preventDefault();
-        if (text.trim()) onSubmit(text.trim());
+        onSubmit(text.trim());
       }}
     >
       <span>
@@ -392,8 +399,8 @@ function HandoverForm({
       <Label htmlFor="handoverNote">{t("handoverLabel")}</Label>
       <Textarea id="handoverNote" value={text} onChange={(e) => setText(e.target.value)} placeholder={t("handoverPlaceholder")} />
       <div>
-        <Button type="submit" size="sm" disabled={disabled || !text.trim() || text.trim() === note}>
-          {note ? t("handoverUpdate") : t("handoverRecord")}
+        <Button type="submit" size="sm" disabled={disabled}>
+          {note != null ? t("handoverUpdate") : t("handoverRecord")}
         </Button>
       </div>
     </form>

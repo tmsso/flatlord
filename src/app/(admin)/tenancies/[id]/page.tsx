@@ -21,6 +21,8 @@ import { DepositSection } from "@/components/deposit-section";
 import { Button } from "@/components/ui/button";
 import { AttachmentsSection } from "@/components/attachments-section";
 import { DeclarationGenerator } from "@/components/declaration-generator";
+import { HandoverSection } from "@/components/handover-section";
+import { loadHandoverSnapshots } from "@/server/handover/load-handover-snapshots";
 
 type PersonRef = { given_name: string; family_name: string };
 type PropertyRef = { name: string };
@@ -127,6 +129,8 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
   const contractUrlByPath = new Map((contractSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
   const attachmentUrlByPath = new Map((attachmentSignedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
+  const handoverSnapshots = await loadHandoverSnapshots(supabase, id);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
@@ -194,6 +198,7 @@ export default async function TenancyDetailPage({ params }: { params: Promise<{ 
         termStart={tenancy.term_start}
         today={new Date().toISOString().slice(0, 10)}
       />
+      <HandoverSection tenancyId={id} snapshots={handoverSnapshots} canTake />
       <ContractsSection
         tenancyId={id}
         contracts={(contractRows ?? []).map((c) => ({

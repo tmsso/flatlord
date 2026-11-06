@@ -274,6 +274,13 @@
       "when": 1793923578334,
       "tag": "0038_b49-before-user-created-hook",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793924694712,
+      "tag": "0039_b13-handover-snapshots",
+      "breakpoints": true
     }
   ]
 }
