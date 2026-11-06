@@ -179,3 +179,16 @@ Goal (owner: "defaults on all"): the three NEXT-BATCH items, ordered small → o
 - **New backlog:** B-55 (readings dated in a billed month are never billed; includes the window before a future-dated replacement's `installed_at`, observed on dev).
 - **Known limitation:** `replaceMeter` has no upper bound on the date (a far-future date is accepted).
 - **Not verified:** the `user_role` claim end to end (hook not yet enabled in either dashboard); anything on prod (chain unmerged at hand-off).
+
+## Long batch 2026-11-06 — security patch, chain merged, B-55 / B-49
+
+Goal (owner: "defaults", owner-only deployments and merges approved for the batch; start gated to 00:40): patch the Next.js advisories, land the waiting chain, then the NEXT-BATCH items. `gh pr merge` worked this session.
+
+- **#104 — security patch:** next 16.2.10 → 16.4.5 (server-action DoS, proxy-bypass class, SSRF, RCE advisories), zod 4.6.7, shadcn → devDependencies, pnpm overrides for transitive floors, CI audit gate. `pnpm audit --prod` 111 → 0. e2e smoke 6/6 on dev (local prod build). Merged first; the chain was dry-run on top of it.
+- **Chain #99 → #102** (B-41, B-52, B-03, docs): `migrate-prod` `0037` (run `42133008724`) → retarget + merge in order → branches deleted after. Prod deploy `c54a4be` READY.
+- **#105 — B-55:** redate-at-entry (D-48), date-window meter lists. Dev 10/10: tenant submit with the month drafted → stored on the 1st of next month + audit row + notice; owner finds it under `/meters`, verifies in the UI; next month's draft bills 40 kWh.
+- **#106 — B-49:** before-user-created hook (`0038`), `migrate-prod` run `42135087902` before merge. DB tests 7/7. **#107:** catalog "not invited" message on `/login`.
+- **B-50:** closed on evidence (daily `ok` runs, see BACKLOG).
+- **New backlog:** B-57 (dashboard counts readings by current month, misses redated ones).
+- **Not verified:** both Auth hooks end to end (not enabled in either dashboard); the real Auth error text for a refused Google sign-up (assumed to contain "invitation").
+
