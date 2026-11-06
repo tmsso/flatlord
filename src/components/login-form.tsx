@@ -54,8 +54,13 @@ export function LoginForm() {
       return;
     }
     const description = params.get("error_description");
-    if (description) queueMicrotask(() => setHashError(description.replace(/\+/g, " ")));
-  }, []);
+    // B-49: the before-user-created hook refuses uninvited sign-ups (e.g.
+    // Google) with an English message — show the catalog text instead.
+    if (description) {
+      const text = description.replace(/\+/g, " ");
+      queueMicrotask(() => setHashError(/invitation/i.test(text) ? t("notInvited") : text));
+    }
+  }, [t]);
 
   function handleGoogle() {
     const supabase = createClient();
